@@ -22,7 +22,7 @@ import type {
   QuestionnaireMedical,
   QuestionnaireResponse,
 } from "@/types";
-import { historiqueApi, exportsApi, questionnairesApi } from "./simulations/index";
+import { historiqueApi, exportsApi, questionnairesApi, souscriptionsApi } from "./simulations/index";
 
 /**
  * API Simulations - Compatibilité ascendante
@@ -132,4 +132,9 @@ export const simulationApi = {
     return exportsApi.previewBIA(id.toString());
   },
 };
+
+// Export des APIs modulaires pour compatibilité
+export { historiqueApi, exportsApi, questionnairesApi, souscriptionsApi };
+export type { QuestionnaireMedicalWithId, BaremeSurprime } from "./simulations/index";
+export type { Souscription, SouscriptionStatut, SouscriptionCreateData, SouscriptionUpdateData, SouscriptionFilters } from "./simulations/index";
 
