@@ -1,0 +1,76 @@
+"use client";
+
+import { useEffect } from "react";
+import { useSafeRouter } from "@/lib/hooks/useSafeRouter";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useSimulationStore } from "@/lib/store/simulationStore";
+import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
+import { PRODUIT_LABELS } from "@/types";
+import { format } from "date-fns";
+import { ArrowRight } from "lucide-react";
+
+export function RecentSimulations() {
+  const router = useSafeRouter();
+  const { simulations, fetchSimulations, isLoading } = useSimulationStore();
+
+  useEffect(() => {
+    fetchSimulations({ page: 1 });
+  }, [fetchSimulations]);
+
+  const recentSimulations = simulations.slice(0, 5);
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Simulations Récentes</CardTitle>
+          <Button variant="outline" onClick={() => router.push("/simulations")}>
+            Voir tout
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="text-center py-8 text-gray-500">Chargement...</div>
+        ) : recentSimulations.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">Aucune simulation</div>
+        ) : (
+          <div className="space-y-4">
+            {recentSimulations.map((simulation) => (
+              <div
+                key={simulation.id}
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                onClick={() => router.push(`/simulations/${simulation.id}`)}
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {simulation.prenom} {simulation.nom}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {PRODUIT_LABELS[simulation.produit]} • {simulation.reference}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Badge className={STATUT_COLORS[simulation.statut]}>
+                    {STATUT_LABELS[simulation.statut]}
+                  </Badge>
+                  <span className="text-sm text-gray-500">
+                    {format(new Date(simulation.created_at), "dd MMM yyyy")}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
