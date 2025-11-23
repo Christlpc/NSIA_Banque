@@ -8,7 +8,7 @@ import { useSimulationStore } from "@/lib/store/simulationStore";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
 import { PRODUIT_LABELS } from "@/types";
 import { format } from "date-fns";
-import { Clock } from "lucide-react";
+import { Clock, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function RecentActivity() {
