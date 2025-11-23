@@ -34,7 +34,7 @@ export function SimulationTable() {
   const { simulations, totalCount, filters, setFilters, fetchSimulations, isLoading } =
     useSimulationStore();
 
-  const columns = useMemo<ColumnDef<Simulation>[]>(
+  const columns = useMemo(
     () => [
       columnHelper.accessor("reference", {
         header: "Référence",
@@ -101,7 +101,7 @@ export function SimulationTable() {
           );
         },
       }),
-    ],
+    ] as ColumnDef<Simulation>[],
     [router]
   );
 
