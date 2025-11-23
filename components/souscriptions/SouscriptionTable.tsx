@@ -182,7 +182,7 @@ export function SouscriptionTable() {
           );
         },
       }),
-    ],
+    ] as ColumnDef<Souscription>[],
     [router]
   );
 
