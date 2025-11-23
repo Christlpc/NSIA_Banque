@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "NSIA Vie Assurances - Plateforme Banques",
   description: "Gestion des simulations et souscriptions d'assurance",
+  icons: {
+    icon: "/nsia.png",
+    shortcut: "/nsia.png",
+    apple: "/nsia.png",
+  },
 };
 
 export default function RootLayout({

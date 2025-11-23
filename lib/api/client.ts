@@ -53,6 +53,23 @@ apiClient.interceptors.response.use(
       }
     }
 
+    // Détection des erreurs CORS
+    if (
+      !error.response &&
+      error.request &&
+      (error.message?.includes("CORS") ||
+        error.message?.includes("Network Error") ||
+        error.code === "ERR_NETWORK" ||
+        error.code === "ERR_FAILED")
+    ) {
+      const frontendOrigin = typeof window !== "undefined" ? window.location.origin : "l'application";
+      toast.error(
+        `Erreur CORS: Le serveur backend n'autorise pas les requêtes depuis ${frontendOrigin}. Veuillez contacter l'administrateur pour configurer CORS.`,
+        { duration: 8000 }
+      );
+      return Promise.reject(error);
+    }
+
     // Gestion des erreurs
     if (error.response) {
       const status = error.response.status;
