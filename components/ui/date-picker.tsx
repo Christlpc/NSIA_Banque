@@ -74,15 +74,7 @@ export function DatePickerInput({
         calendarClassName="!font-sans shadow-xl"
         wrapperClassName="w-full"
         showPopperArrow={false}
-        popperClassName="!z-50"
-        popperModifiers={[
-          {
-            name: "offset",
-            options: {
-              offset: [0, 8],
-            },
-          },
-        ]}
+        popperClassName="!z-50 !mt-2"
       />
       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
         <Calendar className={cn(

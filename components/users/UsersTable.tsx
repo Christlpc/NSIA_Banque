@@ -48,7 +48,7 @@ export function UsersTable() {
   const [selectedUser, setSelectedUser] = useState<(User & { is_active?: boolean }) | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const columns = useMemo<ColumnDef<User & { is_active?: boolean }>[]>(
+  const columns = useMemo(
     () => [
       columnHelper.accessor(
         (row) => `${row.prenom} ${row.nom}`,
@@ -162,7 +162,7 @@ export function UsersTable() {
           );
         },
       }),
-    ],
+    ] as ColumnDef<User & { is_active?: boolean }>[],
     []
   );
 

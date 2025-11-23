@@ -30,7 +30,8 @@ export const historiqueApi = {
     if (filters?.date_debut) params.append("date_debut", filters.date_debut);
     if (filters?.date_fin) params.append("date_fin", filters.date_fin);
     if (filters?.page) params.append("page", filters.page.toString());
-    if (filters?.page_size) params.append("page_size", filters.page_size.toString());
+    // page_size optionnel - non dans SimulationFilters mais peut être ajouté dynamiquement
+    if ((filters as any)?.page_size) params.append("page_size", (filters as any).page_size.toString());
 
     const response = await apiClient.get<PaginatedResponse<Simulation>>(
       `/api/v1/simulations/historique/?${params.toString()}`

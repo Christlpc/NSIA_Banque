@@ -66,7 +66,7 @@ export const mockBanqueApi = {
     // Vérifier si le code existe déjà (si modifié)
     if (data.code && data.code !== existingBanque.code) {
       const codeExists = banquesList.some(
-        (b) => b.id !== id && b.code.toLowerCase() === data.code.toLowerCase()
+        (b) => b.id !== id && b.code.toLowerCase() === data.code!.toLowerCase()
       );
       if (codeExists) {
         throw new Error("Une banque avec ce code existe déjà");

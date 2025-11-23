@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { User, UserRole } from "@/types";
-import type { UserCreateData, UserUpdateData, UserFilters, PaginatedResponse } from "@/lib/api/users";
+import type { UserCreateData, UserUpdateData, UserFilters } from "@/lib/api/users";
+import type { PaginatedResponse } from "@/types";
 import { userApi } from "@/lib/api/users";
 import { useNotificationStore } from "@/lib/store/notificationStore";
 import toast from "react-hot-toast";
@@ -180,9 +181,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
 
   deleteUser: async (id: number) => {
     set({ isLoading: true, error: null });
+    // Optimistic update - sauvegarder l'utilisateur avant suppression
+    const deletedUser = get().users.find((u) => u.id === id);
     try {
-      // Optimistic update
-      const deletedUser = get().users.find((u) => u.id === id);
       set((state) => ({
         users: state.users.filter((u) => u.id !== id),
         totalCount: state.totalCount - 1,

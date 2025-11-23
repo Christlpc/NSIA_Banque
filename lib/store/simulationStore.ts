@@ -15,7 +15,7 @@ interface SimulationStore {
   createSimulation: (product: string, data: SimulationCreateData) => Promise<Simulation>;
   updateSimulation: (id: number, data: Partial<SimulationCreateData>) => Promise<void>;
   deleteSimulation: (id: number) => Promise<void>;
-  calculatePrime: (id: number) => Promise<void>;
+  calculatePrime: (id: number) => Promise<void>; // @deprecated - Ne plus utiliser
   validateSimulation: (id: number) => Promise<void>;
   convertSimulation: (id: number) => Promise<void>;
   setFilters: (filters: Partial<SimulationFilters>) => void;
@@ -207,10 +207,9 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }));
 
     try {
-      const result = await simulationApi.calculatePrime(id);
+      await simulationApi.calculatePrime(id);
       await get().fetchSimulation(id);
       set({ isLoading: false, error: null });
-      return result;
     } catch (error: any) {
       // Rollback on error
       set({
