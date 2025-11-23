@@ -17,7 +17,7 @@ export type UserRole =
   | "support";
 
 export interface LoginCredentials {
-  email: string;
+  username: string;
   password: string;
 }
 

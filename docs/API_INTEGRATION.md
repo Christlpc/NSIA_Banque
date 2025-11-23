@@ -47,7 +47,7 @@ import { authApi } from "@/lib/api/auth";
 
 // Connexion
 const response = await authApi.login({
-  email: "user@example.com",
+  username: "user@example.com", // ou nom d'utilisateur
   password: "password",
 });
 

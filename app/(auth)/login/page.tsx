@@ -13,7 +13,7 @@ import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
 const loginSchema = z.object({
-  email: z.string().email("Email invalide"),
+  username: z.string().min(1, "Le nom d'utilisateur ou l'email est requis"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 });
 
@@ -57,28 +57,28 @@ export default function LoginPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Email Field */}
+        {/* Username Field */}
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Adresse email
+          <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+            Nom d'utilisateur ou email
           </Label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Mail className="h-5 w-5 text-gray-400" />
             </div>
             <Input
-              id="email"
-              type="email"
-              placeholder="votre.email@exemple.com"
+              id="username"
+              type="text"
+              placeholder="nom.utilisateur ou email@exemple.com"
               className="pl-10 h-12"
-              {...register("email")}
+              {...register("username")}
               disabled={isLoading}
             />
           </div>
-          {errors.email && (
+          {errors.username && (
             <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
               <span>•</span>
-              {errors.email.message}
+              {errors.username.message}
             </p>
           )}
         </div>

@@ -7,10 +7,11 @@ export const mockAuthApi = {
     await delay(800); // Simuler un délai réseau
 
     // Trouver un utilisateur mock ou utiliser le premier
-    const user = mockUsers.find((u) => u.email === credentials.email) || mockUsers[1];
+    // Le username peut être soit l'email soit un nom d'utilisateur
+    const user = mockUsers.find((u) => u.email === credentials.username) || mockUsers[1];
 
-    // Simuler une erreur si email/password incorrect
-    if (credentials.email === "error@test.com") {
+    // Simuler une erreur si username/password incorrect
+    if (credentials.username === "error@test.com") {
       throw new Error("Identifiants incorrects");
     }
 
