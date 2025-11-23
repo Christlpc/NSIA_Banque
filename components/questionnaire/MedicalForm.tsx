@@ -152,9 +152,9 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
         router.push(`/simulations/${simulationId}`);
       } catch (newApiError: any) {
         // Fallback sur l'ancienne API si nécessaire
-        await simulationApi.submitQuestionnaire(simulationId, questionnaireData);
-        toast.success("Questionnaire soumis avec succès");
-        router.push(`/simulations/${simulationId}`);
+      await simulationApi.submitQuestionnaire(simulationId, questionnaireData);
+      toast.success("Questionnaire soumis avec succès");
+      router.push(`/simulations/${simulationId}`);
       }
     } catch (error: any) {
       toast.error(error?.message || "Erreur lors de la soumission");
