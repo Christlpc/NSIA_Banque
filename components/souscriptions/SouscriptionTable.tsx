@@ -89,14 +89,18 @@ export function SouscriptionTable() {
     }
   };
 
-  const columns = useMemo<ColumnDef<Souscription>[]>(
+  const columns = useMemo(
     () => [
-      columnHelper.accessor("reference", {
-        header: "Référence",
-        cell: (info) => (
-          <span className="font-mono text-sm">{info.getValue() || `SUB-${info.row.original.id.slice(0, 8)}`}</span>
-        ),
-      }),
+      columnHelper.accessor(
+        (row) => `SUB-${row.id.slice(0, 8).toUpperCase()}`,
+        {
+          id: "reference",
+          header: "Référence",
+          cell: (info) => (
+            <span className="font-mono text-sm">{info.getValue()}</span>
+          ),
+        }
+      ),
       columnHelper.accessor("nom", {
         header: "Nom",
         cell: (info) => (
