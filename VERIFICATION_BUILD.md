@@ -49,7 +49,7 @@
 - **Mode Mock** : ✅ **DÉSACTIVÉ par défaut**
   - `USE_MOCK_DATA = false` (sauf si `NEXT_PUBLIC_USE_MOCK=true`)
 - **API URL** : ✅ Configurée
-  - `API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nsia.cg"`
+  - `API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://nsia-bancassurance.onrender.com"`
 - **Fichiers .env** : ✅ Ignorés par Git (`.gitignore`)
 
 ### 5. ✅ Linting
@@ -156,7 +156,7 @@ NEXT_PUBLIC_API_URL=https://nsia-bancassurance.onrender.com
 
 3. **Console.log** : Supprimés automatiquement en production via `next.config.js`
 
-4. **API** : Le projet utilise l'API réelle par défaut (`https://api.nsia.cg`)
+4. **API** : Le projet utilise l'API réelle par défaut (`https://nsia-bancassurance.onrender.com`)
 
 ---
 

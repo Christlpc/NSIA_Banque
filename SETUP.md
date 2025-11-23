@@ -3,7 +3,7 @@
 ## Prérequis
 
 - Node.js 18+ et npm/yarn
-- Accès à l'API backend NSIA (https://api.nsia.cg)
+- Accès à l'API backend NSIA (https://nsia-bancassurance.onrender.com)
 
 ## Installation
 
@@ -18,7 +18,7 @@ npm install
 Créez un fichier `.env.local` à la racine du projet :
 
 ```env
-NEXT_PUBLIC_API_URL=https://api.nsia.cg
+NEXT_PUBLIC_API_URL=https://nsia-bancassurance.onrender.com
 NODE_ENV=development
 ```
 

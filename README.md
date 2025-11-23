@@ -91,7 +91,7 @@ BROUILLON → CALCULÉE → VALIDÉE → CONVERTIE (Contrat)
 
 ## 🌐 API
 
-Base URL: `https://api.nsia.cg`
+Base URL: `https://nsia-bancassurance.onrender.com`
 
 Voir la documentation API pour les endpoints détaillés.
 

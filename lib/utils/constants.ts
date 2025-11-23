@@ -1,4 +1,4 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.nsia.cg";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://nsia-bancassurance.onrender.com";
 
 export const ROLES = {
   SUPER_ADMIN_NSIA: "super_admin_nsia",
