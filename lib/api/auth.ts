@@ -8,7 +8,7 @@ export const authApi = {
     if (USE_MOCK_DATA) {
       return mockAuthApi.login(credentials);
     }
-    const response = await apiClient.post<AuthResponse>("/api/auth/login/", credentials);
+    const response = await apiClient.post<AuthResponse>("/api/v1/token/", credentials);
     return response.data;
   },
 
@@ -16,7 +16,7 @@ export const authApi = {
     if (USE_MOCK_DATA) {
       return mockAuthApi.refreshToken(refresh);
     }
-    const response = await apiClient.post<{ access: string }>("/api/auth/refresh/", {
+    const response = await apiClient.post<{ access: string }>("/api/v1/token/refresh/", {
       refresh,
     });
     return response.data;
@@ -26,7 +26,7 @@ export const authApi = {
     if (USE_MOCK_DATA) {
       return mockAuthApi.logout();
     }
-    await apiClient.post("/api/auth/logout/");
+    await apiClient.post("/api/v1/auth/logout/");
   },
 };
 

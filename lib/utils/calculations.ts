@@ -101,3 +101,4 @@ export function getCategorieRisque(scoreTotal: number): "faible" | "moyen" | "el
 
 
 
+
