@@ -14,11 +14,17 @@ export function cleanPayload<T extends Record<string, any>>(payload: T): Partial
     // Ne pas inclure les valeurs undefined, null, ou les strings vides pour les champs optionnels
     if (value !== undefined && value !== null && value !== "") {
       // Si c'est un objet, le nettoyer récursivement
-      if (typeof value === "object" && !Array.isArray(value) && !(value instanceof Date)) {
-        const cleanedValue = cleanPayload(value);
-        // Ne garder que si l'objet a au moins une propriété
-        if (Object.keys(cleanedValue).length > 0) {
-          cleaned[key] = cleanedValue as T[Extract<keyof T, string>];
+      if (typeof value === "object" && !Array.isArray(value)) {
+        // Vérifier si c'est une Date en utilisant Object.prototype.toString
+        const isDate = Object.prototype.toString.call(value) === "[object Date]";
+        if (isDate) {
+          cleaned[key] = value as T[Extract<keyof T, string>];
+        } else {
+          const cleanedValue = cleanPayload(value as Record<string, any>);
+          // Ne garder que si l'objet a au moins une propriété
+          if (Object.keys(cleanedValue).length > 0) {
+            cleaned[key] = cleanedValue as T[Extract<keyof T, string>];
+          }
         }
       } else {
         cleaned[key] = value;
@@ -40,10 +46,16 @@ export function cleanPayloadKeepNull<T extends Record<string, any>>(payload: T):
     const value = payload[key];
     // Ne pas inclure les valeurs undefined ou les strings vides
     if (value !== undefined && value !== "") {
-      if (typeof value === "object" && !Array.isArray(value) && !(value instanceof Date) && value !== null) {
-        const cleanedValue = cleanPayloadKeepNull(value);
-        if (Object.keys(cleanedValue).length > 0) {
-          cleaned[key] = cleanedValue as T[Extract<keyof T, string>];
+      if (typeof value === "object" && !Array.isArray(value) && value !== null) {
+        // Vérifier si c'est une Date en utilisant Object.prototype.toString
+        const isDate = Object.prototype.toString.call(value) === "[object Date]";
+        if (isDate) {
+          cleaned[key] = value as T[Extract<keyof T, string>];
+        } else {
+          const cleanedValue = cleanPayloadKeepNull(value as Record<string, any>);
+          if (Object.keys(cleanedValue).length > 0) {
+            cleaned[key] = cleanedValue as T[Extract<keyof T, string>];
+          }
         }
       } else {
         cleaned[key] = value;
