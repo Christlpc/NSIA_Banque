@@ -1,6 +1,7 @@
 import { apiClient } from "../client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockSimulationApi } from "@/lib/mock/simulations";
+import { cleanPayload } from "@/lib/utils/payload";
 import type { QuestionnaireMedical, QuestionnaireResponse } from "@/types";
 
 /**
@@ -77,9 +78,11 @@ export const questionnairesApi = {
         score_total: response.score_total,
       };
     }
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as QuestionnaireMedical & { simulation?: string };
     const response = await apiClient.post<QuestionnaireMedicalWithId>(
       "/api/v1/simulations/questionnaires-medicaux/",
-      data
+      cleanedData
     );
     return response.data;
   },
@@ -109,9 +112,11 @@ export const questionnairesApi = {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour updateQuestionnaire");
     }
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as Partial<QuestionnaireMedical>;
     const response = await apiClient.patch<QuestionnaireMedicalWithId>(
       `/api/v1/simulations/questionnaires-medicaux/${id}/`,
-      data
+      cleanedData
     );
     return response.data;
   },

@@ -1,6 +1,7 @@
 import { apiClient } from "../client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockSimulationApi } from "@/lib/mock/simulations";
+import { cleanPayload } from "@/lib/utils/payload";
 import type {
   Simulation,
   SimulationCreateData,
@@ -60,7 +61,9 @@ export const historiqueApi = {
       // Utiliser le mock existant avec un produit par défaut
       return mockSimulationApi.createSimulation("emprunteur", data);
     }
-    const response = await apiClient.post<Simulation>("/api/v1/simulations/historique/", data);
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as SimulationCreateData;
+    const response = await apiClient.post<Simulation>("/api/v1/simulations/historique/", cleanedData);
     return response.data;
   },
 
@@ -75,9 +78,11 @@ export const historiqueApi = {
     if (USE_MOCK_DATA) {
       return mockSimulationApi.updateSimulation(Number(id), data);
     }
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as Partial<SimulationCreateData>;
     const response = await apiClient.patch<Simulation>(
       `/api/v1/simulations/historique/${id}/`,
-      data
+      cleanedData
     );
     return response.data;
   },

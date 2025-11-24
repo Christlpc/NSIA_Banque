@@ -1,6 +1,7 @@
 import { apiClient } from "./client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockBanqueApi } from "@/lib/mock/banques";
+import { cleanPayload } from "@/lib/utils/payload";
 import type { Banque, PaginatedResponse } from "@/types";
 
 export interface BanqueCreateData {
@@ -52,7 +53,9 @@ export const banqueApi = {
     if (USE_MOCK_DATA) {
       return mockBanqueApi.updateBanque(id, data);
     }
-    const response = await apiClient.patch<Banque>(`/api/v1/banques/${id}/`, data);
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as BanqueUpdateData;
+    const response = await apiClient.patch<Banque>(`/api/v1/banques/${id}/`, cleanedData);
     return response.data;
   },
 

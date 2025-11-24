@@ -1,5 +1,6 @@
 import { apiClient } from "../client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
+import { cleanPayload } from "@/lib/utils/payload";
 import type { PaginatedResponse } from "@/types";
 
 /**
@@ -126,7 +127,9 @@ export const souscriptionsApi = {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour createSouscription");
     }
-    const response = await apiClient.post<Souscription>("/api/v1/simulations/souscriptions/", data);
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as SouscriptionCreateData;
+    const response = await apiClient.post<Souscription>("/api/v1/simulations/souscriptions/", cleanedData);
     return response.data;
   },
 
@@ -155,9 +158,11 @@ export const souscriptionsApi = {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour updateSouscription");
     }
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as SouscriptionUpdateData;
     const response = await apiClient.patch<Souscription>(
       `/api/v1/simulations/souscriptions/${id}/`,
-      data
+      cleanedData
     );
     return response.data;
   },

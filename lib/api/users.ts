@@ -1,6 +1,7 @@
 import { apiClient } from "./client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockUserApi } from "@/lib/mock/users";
+import { cleanPayload } from "@/lib/utils/payload";
 import type { User, UserRole, PaginatedResponse } from "@/types";
 
 export interface UserCreateData {
@@ -62,7 +63,9 @@ export const userApi = {
     if (USE_MOCK_DATA) {
       return mockUserApi.updateUser(id, data);
     }
-    const response = await apiClient.patch<User>(`/api/v1/utilisateurs/${id}/`, data);
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as UserUpdateData;
+    const response = await apiClient.patch<User>(`/api/v1/utilisateurs/${id}/`, cleanedData);
     return response.data;
   },
 

@@ -1,6 +1,7 @@
 import { apiClient } from "./client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockProfileApi } from "@/lib/mock/profile";
+import { cleanPayload } from "@/lib/utils/payload";
 import type { User } from "@/types";
 import { AxiosError } from "axios";
 
@@ -91,7 +92,9 @@ export const profileApi = {
     if (USE_MOCK_DATA) {
       return mockProfileApi.updateProfile(data);
     }
-    const response = await apiClient.patch<User>("/api/v1/profile/", data);
+    // Nettoyer le payload pour enlever les valeurs undefined
+    const cleanedData = cleanPayload(data) as ProfileUpdateData;
+    const response = await apiClient.patch<User>("/api/v1/profile/", cleanedData);
     return response.data;
   },
 
