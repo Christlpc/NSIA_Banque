@@ -120,6 +120,13 @@ export function UserForm({ user, open, onOpenChange }: UserFormProps) {
   }, [user, reset]);
 
   const onSubmit = async (data: UserFormData) => {
+    // Validation supplémentaire du champ banque
+    if (!data.banque || data.banque < 1) {
+      toast.error("Veuillez sélectionner une banque");
+      setValue("banque", undefined as any, { shouldValidate: true });
+      return;
+    }
+
     try {
       if (isEditing && user) {
         const updateData: UserUpdateData = {
@@ -310,7 +317,14 @@ export function UserForm({ user, open, onOpenChange }: UserFormProps) {
               </Label>
               <Select
                 value={selectedBanque ? String(selectedBanque) : ""}
-                onValueChange={(value) => setValue("banque", parseInt(value))}
+                onValueChange={(value) => {
+                  const banqueId = parseInt(value, 10);
+                  if (!isNaN(banqueId) && banqueId > 0) {
+                    setValue("banque", banqueId, { shouldValidate: true });
+                  } else {
+                    setValue("banque", undefined as any, { shouldValidate: true });
+                  }
+                }}
               >
                 <SelectTrigger
                   className={cn(
@@ -321,11 +335,17 @@ export function UserForm({ user, open, onOpenChange }: UserFormProps) {
                   <SelectValue placeholder="Sélectionner une banque" />
                 </SelectTrigger>
                 <SelectContent>
-                  {banques.map((banque) => (
-                    <SelectItem key={banque.id} value={String(banque.id)}>
-                      {banque.nom}
+                  {banques.length === 0 ? (
+                    <SelectItem value="" disabled>
+                      Aucune banque disponible
                     </SelectItem>
-                  ))}
+                  ) : (
+                    banques.map((banque) => (
+                      <SelectItem key={banque.id} value={String(banque.id)}>
+                        {banque.nom}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {errors.banque && (
