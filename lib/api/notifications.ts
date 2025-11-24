@@ -4,7 +4,7 @@ import { mockNotificationApi } from "@/lib/mock/notifications";
 import type { SystemNotification, NotificationFilters, NotificationStats } from "@/types/notifications";
 import { AxiosError } from "axios";
 
-// Helper pour gérer les erreurs 404 et basculer vers les mocks
+// Helper pour gérer les erreurs 404 et basculer vers les mocks (uniquement en développement)
 const handleApiError = async <T>(
   apiCall: () => Promise<T>,
   mockCall: () => Promise<T>
@@ -16,10 +16,14 @@ const handleApiError = async <T>(
   try {
     return await apiCall();
   } catch (error) {
-    // Si l'endpoint n'existe pas (404), utiliser les mocks
+    // Si l'endpoint n'existe pas (404), utiliser les mocks uniquement en développement
     if (error instanceof AxiosError && error.response?.status === 404) {
-      console.warn("Endpoint non disponible, utilisation des données mockées");
-      return mockCall();
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Endpoint non disponible, utilisation des données mockées (développement uniquement)");
+        return mockCall();
+      }
+      // En production, propager l'erreur
+      throw new Error("Endpoint non disponible");
     }
     throw error;
   }

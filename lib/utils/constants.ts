@@ -1,3 +1,5 @@
+import type { ProduitType } from "@/types";
+
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://nsia-bancassurance.onrender.com";
 
 export const ROLES = {
@@ -49,6 +51,16 @@ export const RISK_CATEGORY_COLORS: Record<string, string> = {
   eleve: "bg-orange-100 text-orange-800",
   tres_eleve: "bg-red-100 text-red-800",
 };
+
+// Tous les produits disponibles
+export const ALL_PRODUITS: ProduitType[] = [
+  "emprunteur",
+  "confort_retraite",
+  "confort_etudes",
+  "elikia_scolaire",
+  "mobateli",
+  "epargne_plus",
+];
 
 
 

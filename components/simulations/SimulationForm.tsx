@@ -13,6 +13,7 @@ import { DatePickerInput } from "@/components/ui/date-picker";
 import { useSimulationStore } from "@/lib/store/simulationStore";
 import { PRODUIT_LABELS, ProduitType } from "@/types";
 import { useAuthStore } from "@/lib/store/authStore";
+import { ALL_PRODUITS } from "@/lib/utils/constants";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 
@@ -46,7 +47,10 @@ export function SimulationForm() {
     resolver: zodResolver(simulationSchema),
   });
 
-  const availableProducts = user?.banque?.produits_disponibles || [];
+  // Utiliser les produits de la banque si disponibles, sinon tous les produits
+  const availableProducts = user?.banque?.produits_disponibles?.length 
+    ? user.banque.produits_disponibles 
+    : ALL_PRODUITS;
 
   const onSubmit = async (data: SimulationFormData) => {
     if (!selectedProduct) {
@@ -71,24 +75,35 @@ export function SimulationForm() {
           <CardTitle>1. Sélection du Produit</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availableProducts.map((product) => (
-              <button
-                key={product}
-                type="button"
-                onClick={() => setSelectedProduct(product)}
-                className={`p-4 border-2 rounded-lg text-left transition-colors ${
-                  selectedProduct === product
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <div className="font-medium">{PRODUIT_LABELS[product]}</div>
-              </button>
-            ))}
-          </div>
-          {!selectedProduct && (
-            <p className="text-sm text-red-600">Veuillez sélectionner un produit</p>
+          {availableProducts.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600 mb-2">Aucun produit disponible</p>
+              <p className="text-sm text-gray-500">
+                Veuillez contacter l'administrateur pour configurer les produits de votre banque.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {availableProducts.map((product) => (
+                  <button
+                    key={product}
+                    type="button"
+                    onClick={() => setSelectedProduct(product)}
+                    className={`p-4 border-2 rounded-lg text-left transition-colors ${
+                      selectedProduct === product
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="font-medium">{PRODUIT_LABELS[product]}</div>
+                  </button>
+                ))}
+              </div>
+              {!selectedProduct && (
+                <p className="text-sm text-red-600">Veuillez sélectionner un produit</p>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

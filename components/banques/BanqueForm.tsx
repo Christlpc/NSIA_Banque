@@ -18,6 +18,7 @@ import { useBanqueStore } from "@/lib/store/banqueStore";
 import { Input } from "@/components/ui/input";
 import { DatePickerInput } from "@/components/ui/date-picker";
 import { PRODUIT_LABELS, type ProduitType, type Banque } from "@/types";
+import { ALL_PRODUITS } from "@/lib/utils/constants";
 import { cn } from "@/lib/utils/cn";
 import toast from "react-hot-toast";
 
@@ -46,14 +47,6 @@ interface BanqueFormProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const ALL_PRODUITS: ProduitType[] = [
-  "emprunteur",
-  "confort_retraite",
-  "confort_etudes",
-  "elikia_scolaire",
-  "mobateli",
-  "epargne_plus",
-];
 
 export function BanqueForm({ banque, open, onOpenChange }: BanqueFormProps) {
   const { updateBanque, createBanque, fetchBanques } = useBanqueStore();
