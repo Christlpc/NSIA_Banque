@@ -2,6 +2,28 @@ import { apiClient } from "./client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockProfileApi } from "@/lib/mock/profile";
 import type { User } from "@/types";
+import { AxiosError } from "axios";
+
+// Helper pour gérer les erreurs 404 et basculer vers les mocks
+const handleApiError = async <T>(
+  apiCall: () => Promise<T>,
+  mockCall: () => Promise<T>
+): Promise<T> => {
+  if (USE_MOCK_DATA) {
+    return mockCall();
+  }
+  
+  try {
+    return await apiCall();
+  } catch (error) {
+    // Si l'endpoint n'existe pas (404), utiliser les mocks
+    if (error instanceof AxiosError && error.response?.status === 404) {
+      console.warn("Endpoint non disponible, utilisation des données mockées");
+      return mockCall();
+    }
+    throw error;
+  }
+};
 
 export interface ProfileUpdateData {
   nom?: string;
@@ -77,42 +99,52 @@ export const profileApi = {
   },
 
   getNotificationPreferences: async (): Promise<NotificationPreferences> => {
-    if (USE_MOCK_DATA) {
-      return mockProfileApi.getNotificationPreferences();
-    }
-    const response = await apiClient.get<NotificationPreferences>("/api/v1/profile/notifications/");
-    return response.data;
+    return handleApiError(
+      async () => {
+        const response = await apiClient.get<NotificationPreferences>("/api/v1/profile/notifications/");
+        return response.data;
+      },
+      () => mockProfileApi.getNotificationPreferences()
+    );
   },
 
   updateNotificationPreferences: async (data: NotificationPreferences): Promise<NotificationPreferences> => {
-    if (USE_MOCK_DATA) {
-      return mockProfileApi.updateNotificationPreferences(data);
-    }
-    const response = await apiClient.patch<NotificationPreferences>("/api/v1/profile/notifications/", data);
-    return response.data;
+    return handleApiError(
+      async () => {
+        const response = await apiClient.patch<NotificationPreferences>("/api/v1/profile/notifications/", data);
+        return response.data;
+      },
+      () => mockProfileApi.updateNotificationPreferences(data)
+    );
   },
 
   getLoginHistory: async (): Promise<LoginHistory[]> => {
-    if (USE_MOCK_DATA) {
-      return mockProfileApi.getLoginHistory();
-    }
-    const response = await apiClient.get<LoginHistory[]>("/api/v1/profile/login-history/");
-    return response.data;
+    return handleApiError(
+      async () => {
+        const response = await apiClient.get<LoginHistory[]>("/api/v1/profile/login-history/");
+        return response.data;
+      },
+      () => mockProfileApi.getLoginHistory()
+    );
   },
 
   getActiveSessions: async (): Promise<ActiveSession[]> => {
-    if (USE_MOCK_DATA) {
-      return mockProfileApi.getActiveSessions();
-    }
-    const response = await apiClient.get<ActiveSession[]>("/api/v1/profile/sessions/");
-    return response.data;
+    return handleApiError(
+      async () => {
+        const response = await apiClient.get<ActiveSession[]>("/api/v1/profile/sessions/");
+        return response.data;
+      },
+      () => mockProfileApi.getActiveSessions()
+    );
   },
 
   revokeSession: async (sessionId: string): Promise<void> => {
-    if (USE_MOCK_DATA) {
-      return mockProfileApi.revokeSession(sessionId);
-    }
-    await apiClient.delete(`/api/v1/profile/sessions/${sessionId}/`);
+    return handleApiError(
+      async () => {
+        await apiClient.delete(`/api/v1/profile/sessions/${sessionId}/`);
+      },
+      () => mockProfileApi.revokeSession(sessionId)
+    );
   },
 };
 
