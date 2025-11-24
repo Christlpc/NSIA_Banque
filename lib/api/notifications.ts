@@ -1,94 +1,43 @@
-import { apiClient } from "./client";
-import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockNotificationApi } from "@/lib/mock/notifications";
 import type { SystemNotification, NotificationFilters, NotificationStats } from "@/types/notifications";
-import { AxiosError } from "axios";
 
-// Helper pour gérer les erreurs 404 et basculer vers les mocks (uniquement en développement)
-const handleApiError = async <T>(
-  apiCall: () => Promise<T>,
-  mockCall: () => Promise<T>
-): Promise<T> => {
-  if (USE_MOCK_DATA) {
-    return mockCall();
-  }
-  
-  try {
-    return await apiCall();
-  } catch (error) {
-    // Si l'endpoint n'existe pas (404), utiliser les mocks uniquement en développement
-    if (error instanceof AxiosError && error.response?.status === 404) {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn("Endpoint non disponible, utilisation des données mockées (développement uniquement)");
-        return mockCall();
-      }
-      // En production, propager l'erreur
-      throw new Error("Endpoint non disponible");
-    }
-    throw error;
-  }
-};
-
+// API de notifications désactivée - l'endpoint n'est pas encore développé côté backend
+// Utilisation uniquement des mocks pour l'instant
 export const notificationApi = {
   getNotifications: async (filters?: NotificationFilters): Promise<SystemNotification[]> => {
-    return handleApiError(
-      async () => {
-        const params = new URLSearchParams();
-        if (filters?.type) params.append("type", filters.type);
-        if (filters?.read !== undefined) params.append("read", filters.read.toString());
-        if (filters?.priority) params.append("priority", filters.priority);
-        
-        const response = await apiClient.get<SystemNotification[]>(`/api/v1/notifications/?${params.toString()}`);
-        return response.data;
-      },
-      () => mockNotificationApi.getNotifications(filters)
-    );
+    // Désactivé : l'API n'est pas encore disponible
+    // return await apiClient.get<SystemNotification[]>(`/api/v1/notifications/?${params.toString()}`);
+    return mockNotificationApi.getNotifications(filters);
   },
 
   getNotificationStats: async (): Promise<NotificationStats> => {
-    return handleApiError(
-      async () => {
-        const response = await apiClient.get<NotificationStats>("/api/v1/notifications/stats/");
-        return response.data;
-      },
-      () => mockNotificationApi.getNotificationStats()
-    );
+    // Désactivé : l'API n'est pas encore disponible
+    // return await apiClient.get<NotificationStats>("/api/v1/notifications/stats/");
+    return mockNotificationApi.getNotificationStats();
   },
 
   markAsRead: async (id: string): Promise<void> => {
-    return handleApiError(
-      async () => {
-        await apiClient.patch(`/api/v1/notifications/${id}/read/`);
-      },
-      () => mockNotificationApi.markAsRead(id)
-    );
+    // Désactivé : l'API n'est pas encore disponible
+    // await apiClient.patch(`/api/v1/notifications/${id}/read/`);
+    return mockNotificationApi.markAsRead(id);
   },
 
   markAllAsRead: async (): Promise<void> => {
-    return handleApiError(
-      async () => {
-        await apiClient.post("/api/v1/notifications/mark-all-read/");
-      },
-      () => mockNotificationApi.markAllAsRead()
-    );
+    // Désactivé : l'API n'est pas encore disponible
+    // await apiClient.post("/api/v1/notifications/mark-all-read/");
+    return mockNotificationApi.markAllAsRead();
   },
 
   deleteNotification: async (id: string): Promise<void> => {
-    return handleApiError(
-      async () => {
-        await apiClient.delete(`/api/v1/notifications/${id}/`);
-      },
-      () => mockNotificationApi.deleteNotification(id)
-    );
+    // Désactivé : l'API n'est pas encore disponible
+    // await apiClient.delete(`/api/v1/notifications/${id}/`);
+    return mockNotificationApi.deleteNotification(id);
   },
 
   deleteAllRead: async (): Promise<void> => {
-    return handleApiError(
-      async () => {
-        await apiClient.delete("/api/v1/notifications/delete-read/");
-      },
-      () => mockNotificationApi.deleteAllRead()
-    );
+    // Désactivé : l'API n'est pas encore disponible
+    // await apiClient.delete("/api/v1/notifications/delete-read/");
+    return mockNotificationApi.deleteAllRead();
   },
 };
 

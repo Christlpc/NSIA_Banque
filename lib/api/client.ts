@@ -78,8 +78,34 @@ apiClient.interceptors.response.use(
       switch (status) {
         case 400:
           if (data) {
-            const errors = Object.values(data).flat() as string[];
-            toast.error(errors[0] || "Erreur de validation");
+            // Gérer différents formats de réponse d'erreur
+            let errorMessage = "Erreur de validation";
+            
+            if (data.detail) {
+              errorMessage = data.detail;
+            } else if (data.message) {
+              errorMessage = data.message;
+            } else if (data.error?.message) {
+              errorMessage = data.error.message;
+            } else {
+              // Essayer d'extraire les erreurs de validation
+              const errors = Object.values(data).flat() as string[];
+              if (errors.length > 0) {
+                errorMessage = errors[0];
+              }
+            }
+            
+            // Logger les détails pour le débogage
+            console.error("Erreur 400:", {
+              url: originalRequest.url,
+              method: originalRequest.method,
+              data: originalRequest.data,
+              response: data,
+            });
+            
+            toast.error(errorMessage);
+          } else {
+            toast.error("Erreur de validation");
           }
           break;
         case 403:
