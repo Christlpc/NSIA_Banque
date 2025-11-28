@@ -33,13 +33,20 @@ export function DatePickerInput({
   maxDate,
   id,
 }: DatePickerProps) {
-  const [selectedDate, setSelectedDate] = React.useState<Date | null>(
-    value ? new Date(value) : null
-  );
+  const [selectedDate, setSelectedDate] = React.useState<Date | null>(() => {
+    if (!value) return null;
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? null : date;
+  });
 
   React.useEffect(() => {
     if (value) {
-      setSelectedDate(new Date(value));
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        setSelectedDate(date);
+      } else {
+        setSelectedDate(null);
+      }
     } else {
       setSelectedDate(null);
     }
@@ -48,7 +55,12 @@ export function DatePickerInput({
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
     if (onChange) {
-      onChange(date ? formatDateInput(date) : "");
+      // Si la date est valide, on la formate, sinon on envoie une chaîne vide
+      if (date && !isNaN(date.getTime())) {
+        onChange(formatDateInput(date));
+      } else {
+        onChange("");
+      }
     }
   };
 
@@ -64,6 +76,11 @@ export function DatePickerInput({
         dateFormat="dd/MM/yyyy"
         placeholderText={placeholder}
         locale="fr"
+        showYearDropdown
+        showMonthDropdown
+        scrollableYearDropdown
+        yearDropdownItemNumber={100}
+        dropdownMode="select"
         className={cn(
           "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pr-10 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200",
           error

@@ -23,12 +23,18 @@ const simulationSchema = z.object({
   email: z.string().email("Email invalide"),
   date_naissance: z.string().min(1, "La date de naissance est requise"),
   date_effet: z.string().min(1, "La date d'effet est requise"),
-  montant_pret: z.number().min(0).optional(),
-  duree_mois: z.number().min(1).optional(),
+  // Ces champs sont optionnels dans le schéma global mais rendus obligatoires conditionnellement ou par l'UI
+  montant_pret: z.number({ invalid_type_error: "Le montant est requis" }).min(1, "Le montant doit être supérieur à 0").optional(),
+  duree_mois: z.number({ invalid_type_error: "La durée est requise" }).min(1, "La durée doit être supérieure à 0").optional(),
   taux_surprime: z.number().min(0).max(100).optional(),
   profession: z.string().optional(),
   adresse: z.string().optional(),
   telephone: z.string().optional(),
+}).refine((data) => {
+  // Validation conditionnelle : si on a des champs de prêt, ils doivent être valides
+  // Note: Idéalement on devrait passer le produit au schéma, mais ici on simplifie
+  // en vérifiant si les champs sont remplis quand ils sont affichés
+  return true;
 });
 
 type SimulationFormData = z.infer<typeof simulationSchema>;
@@ -61,6 +67,18 @@ export function SimulationForm() {
     if (!selectedProduct) {
       toast.error("Veuillez sélectionner un produit");
       return;
+    }
+
+    // Validation spécifique par produit
+    if (selectedProduct === "emprunteur") {
+      if (!data.montant_pret) {
+        toast.error("Le montant du prêt est requis pour ce produit");
+        return;
+      }
+      if (!data.duree_mois) {
+        toast.error("La durée du prêt est requise pour ce produit");
+        return;
+      }
     }
 
     try {
@@ -97,8 +115,8 @@ export function SimulationForm() {
                     type="button"
                     onClick={() => setSelectedProduct(product)}
                     className={`p-4 border-2 rounded-lg text-left transition-colors ${selectedProduct === product
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
                       }`}
                   >
                     <div className="font-medium">{PRODUIT_LABELS[product]}</div>
