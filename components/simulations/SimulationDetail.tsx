@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { SimulationActions } from "@/components/simulations/SimulationActions";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
 import { PRODUIT_LABELS, type Simulation } from "@/types";
+import { formatDateFull, formatDateTime } from "@/lib/utils/date";
 import { format } from "date-fns";
 
 interface SimulationDetailProps {
@@ -51,7 +52,7 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
             <div>
               <p className="text-sm text-gray-500">Date de naissance</p>
               <p className="font-medium">
-                {format(new Date(simulation.date_naissance), "dd MMMM yyyy")}
+                {formatDateFull(simulation.date_naissance)}
               </p>
             </div>
             {simulation.telephone && (

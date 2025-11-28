@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSimulationStore } from "@/lib/store/simulationStore";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
 import { PRODUIT_LABELS } from "@/types";
-import { format } from "date-fns";
+import { formatDateShort } from "@/lib/utils/date";
 import { Clock, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -51,7 +51,7 @@ export function RecentActivity() {
             recentSimulations.map((simulation) => {
               const isAccepted = simulation.statut === "validee" || simulation.statut === "convertie";
               const statusPercentage = isAccepted ? "60%" : "40%";
-              
+
               return (
                 <div
                   key={simulation.id}
@@ -73,17 +73,17 @@ export function RecentActivity() {
                         {/* Badge "Fichiers" supprimé - données non disponibles */}
                       </div>
                     </div>
-                    <Badge 
+                    <Badge
                       className={`${STATUT_COLORS[simulation.statut]} text-xs font-medium shadow-sm`}
                     >
                       {STATUT_LABELS[simulation.statut]}
                     </Badge>
                   </div>
-                  
+
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                     <div className="flex items-center gap-2 text-xs text-gray-500">
                       <Clock className="h-3 w-3" />
-                      <span>{format(new Date(simulation.updated_at), "dd MMM yyyy")}</span>
+                      <span>{formatDateShort(simulation.updated_at)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`text-xs font-semibold ${isAccepted ? "text-green-600" : "text-yellow-600"}`}>

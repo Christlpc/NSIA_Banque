@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { souscriptionsApi, type Souscription, type SouscriptionFilters } from "@/lib/api/simulations";
-import { format } from "date-fns";
+import { formatDateShort } from "@/lib/utils/date";
 import { ChevronLeft, ChevronRight, Eye, MoreVertical, Check, X } from "lucide-react";
 import {
   DropdownMenu,
@@ -125,12 +125,12 @@ export function SouscriptionTable() {
         header: "Date d'effet",
         cell: (info) => {
           const date = info.getValue();
-          return date ? format(new Date(date), "dd MMM yyyy") : "-";
+          return date ? formatDateShort(date) : "-";
         },
       }),
       columnHelper.accessor("created_at", {
         header: "Créée le",
-        cell: (info) => format(new Date(info.getValue()), "dd MMM yyyy"),
+        cell: (info) => formatDateShort(info.getValue()),
       }),
       columnHelper.display({
         id: "actions",

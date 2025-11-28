@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useSafeRouter } from "@/lib/hooks/useSafeRouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDateShort } from "@/lib/utils/date";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSimulationStore } from "@/lib/store/simulationStore";
@@ -62,7 +63,7 @@ export function RecentSimulations() {
                     {STATUT_LABELS[simulation.statut]}
                   </Badge>
                   <span className="text-sm text-gray-500">
-                    {format(new Date(simulation.created_at), "dd MMM yyyy")}
+                    {formatDateShort(simulation.created_at)}
                   </span>
                 </div>
               </div>
