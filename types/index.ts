@@ -91,13 +91,17 @@ export interface Simulation {
 export interface SimulationCreateData {
   nom: string;
   prenom: string;
+  email?: string;
   date_naissance: string;
+  date_effet?: string;
   montant_pret?: number;
   duree_mois?: number;
   taux_interet?: number;
+  taux_surprime?: number;
   profession?: string;
   adresse?: string;
   telephone?: string;
+  sauvegarder?: boolean;
 }
 
 export interface SimulationFilters {
