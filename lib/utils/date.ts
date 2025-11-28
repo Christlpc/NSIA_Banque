@@ -2,11 +2,20 @@ import { format, formatDistanceToNow, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 
 /**
+ * Vérifie si une date est valide
+ */
+function isValidDate(date: Date): boolean {
+  return date instanceof Date && !isNaN(date.getTime());
+}
+
+/**
  * Formate une date au format français complet
  * Exemple: "15 janvier 2020"
  */
-export function formatDateFull(date: string | Date): string {
+export function formatDateFull(date: string | Date | null | undefined): string {
+  if (!date) return "";
   const dateObj = typeof date === "string" ? parseISO(date) : date;
+  if (!isValidDate(dateObj)) return "";
   return format(dateObj, "d MMMM yyyy", { locale: fr });
 }
 
@@ -14,8 +23,10 @@ export function formatDateFull(date: string | Date): string {
  * Formate une date au format court français
  * Exemple: "15 jan 2020"
  */
-export function formatDateShort(date: string | Date): string {
+export function formatDateShort(date: string | Date | null | undefined): string {
+  if (!date) return "";
   const dateObj = typeof date === "string" ? parseISO(date) : date;
+  if (!isValidDate(dateObj)) return "";
   return format(dateObj, "d MMM yyyy", { locale: fr });
 }
 
@@ -23,8 +34,10 @@ export function formatDateShort(date: string | Date): string {
  * Formate une date avec l'heure
  * Exemple: "15 janvier 2020 à 14:30"
  */
-export function formatDateTime(date: string | Date): string {
+export function formatDateTime(date: string | Date | null | undefined): string {
+  if (!date) return "";
   const dateObj = typeof date === "string" ? parseISO(date) : date;
+  if (!isValidDate(dateObj)) return "";
   return format(dateObj, "d MMMM yyyy 'à' HH:mm", { locale: fr });
 }
 
@@ -32,8 +45,10 @@ export function formatDateTime(date: string | Date): string {
  * Formate une date au format ISO pour les inputs HTML
  * Exemple: "2020-01-15"
  */
-export function formatDateInput(date: string | Date): string {
+export function formatDateInput(date: string | Date | null | undefined): string {
+  if (!date) return "";
   const dateObj = typeof date === "string" ? parseISO(date) : date;
+  if (!isValidDate(dateObj)) return "";
   return format(dateObj, "yyyy-MM-dd");
 }
 
@@ -41,8 +56,10 @@ export function formatDateInput(date: string | Date): string {
  * Formate une date relative (il y a X jours)
  * Exemple: "il y a 3 jours"
  */
-export function formatDateRelative(date: string | Date): string {
+export function formatDateRelative(date: string | Date | null | undefined): string {
+  if (!date) return "";
   const dateObj = typeof date === "string" ? parseISO(date) : date;
+  if (!isValidDate(dateObj)) return "";
   return formatDistanceToNow(dateObj, { addSuffix: true, locale: fr });
 }
 
@@ -50,8 +67,10 @@ export function formatDateRelative(date: string | Date): string {
  * Formate une date pour l'affichage dans les cartes (mois et année)
  * Exemple: "janvier 2020"
  */
-export function formatDateMonthYear(date: string | Date): string {
+export function formatDateMonthYear(date: string | Date | null | undefined): string {
+  if (!date) return "";
   const dateObj = typeof date === "string" ? parseISO(date) : date;
+  if (!isValidDate(dateObj)) return "";
   return format(dateObj, "MMMM yyyy", { locale: fr });
 }
 
@@ -59,8 +78,10 @@ export function formatDateMonthYear(date: string | Date): string {
  * Formate une date pour l'affichage dans les graphiques (mois court)
  * Exemple: "Jan", "Fév", "Mar"
  */
-export function formatDateMonthShort(date: string | Date): string {
+export function formatDateMonthShort(date: string | Date | null | undefined): string {
+  if (!date) return "";
   const dateObj = typeof date === "string" ? parseISO(date) : date;
+  if (!isValidDate(dateObj)) return "";
   return format(dateObj, "MMM", { locale: fr });
 }
 

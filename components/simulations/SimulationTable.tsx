@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSimulationStore } from "@/lib/store/simulationStore";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
 import { PRODUIT_LABELS, type Simulation } from "@/types";
-import { format } from "date-fns";
+import { formatDateShort } from "@/lib/utils/date";
 import { ChevronLeft, ChevronRight, Eye, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
@@ -74,8 +74,7 @@ export function SimulationTable() {
       }),
       columnHelper.accessor("created_at", {
         header: "Date",
-        cell: (info) =>
-          format(new Date(info.getValue()), "dd MMM yyyy"),
+        cell: (info) => formatDateShort(info.getValue()),
       }),
       columnHelper.display({
         id: "actions",
