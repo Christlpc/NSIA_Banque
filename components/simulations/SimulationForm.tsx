@@ -20,10 +20,12 @@ import { Loader2 } from "lucide-react";
 const simulationSchema = z.object({
   nom: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   prenom: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+  email: z.string().email("Email invalide"),
   date_naissance: z.string().min(1, "La date de naissance est requise"),
+  date_effet: z.string().min(1, "La date d'effet est requise"),
   montant_pret: z.number().min(0).optional(),
   duree_mois: z.number().min(1).optional(),
-  taux_interet: z.number().min(0).max(100).optional(),
+  taux_surprime: z.number().min(0).max(100).optional(),
   profession: z.string().optional(),
   adresse: z.string().optional(),
   telephone: z.string().optional(),
@@ -45,11 +47,14 @@ export function SimulationForm() {
     setValue,
   } = useForm<SimulationFormData>({
     resolver: zodResolver(simulationSchema),
+    defaultValues: {
+      taux_surprime: 0,
+    }
   });
 
   // Utiliser les produits de la banque si disponibles, sinon tous les produits
-  const availableProducts = user?.banque?.produits_disponibles?.length 
-    ? user.banque.produits_disponibles 
+  const availableProducts = user?.banque?.produits_disponibles?.length
+    ? user.banque.produits_disponibles
     : ALL_PRODUITS;
 
   const onSubmit = async (data: SimulationFormData) => {
@@ -59,7 +64,8 @@ export function SimulationForm() {
     }
 
     try {
-      await createSimulation(selectedProduct, data);
+      // On s'assure que sauvegarder est à true
+      await createSimulation(selectedProduct, { ...data, sauvegarder: true });
       toast.success("Simulation créée avec succès");
       router.push("/simulations");
     } catch (error: any) {
@@ -90,11 +96,10 @@ export function SimulationForm() {
                     key={product}
                     type="button"
                     onClick={() => setSelectedProduct(product)}
-                    className={`p-4 border-2 rounded-lg text-left transition-colors ${
-                      selectedProduct === product
+                    className={`p-4 border-2 rounded-lg text-left transition-colors ${selectedProduct === product
                         ? "border-blue-500 bg-blue-50"
                         : "border-gray-200 hover:border-gray-300"
-                    }`}
+                      }`}
                   >
                     <div className="font-medium">{PRODUIT_LABELS[product]}</div>
                   </button>
@@ -132,19 +137,43 @@ export function SimulationForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date_naissance">Date de Naissance *</Label>
-            <DatePickerInput
-              id="date_naissance"
-              value={watch("date_naissance") || undefined}
-              onChange={(value) => setValue("date_naissance", value)}
-              placeholder="Sélectionner la date de naissance"
-              disabled={isLoading}
-              error={!!errors.date_naissance}
-              maxDate={new Date()}
-            />
-            {errors.date_naissance && (
-              <p className="text-sm text-red-600">{errors.date_naissance.message}</p>
+            <Label htmlFor="email">Email *</Label>
+            <Input id="email" type="email" {...register("email")} disabled={isLoading} />
+            {errors.email && (
+              <p className="text-sm text-red-600">{errors.email.message}</p>
             )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="date_naissance">Date de Naissance *</Label>
+              <DatePickerInput
+                id="date_naissance"
+                value={watch("date_naissance") || undefined}
+                onChange={(value) => setValue("date_naissance", value)}
+                placeholder="Sélectionner la date de naissance"
+                disabled={isLoading}
+                error={!!errors.date_naissance}
+                maxDate={new Date()}
+              />
+              {errors.date_naissance && (
+                <p className="text-sm text-red-600">{errors.date_naissance.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="date_effet">Date d'Effet *</Label>
+              <DatePickerInput
+                id="date_effet"
+                value={watch("date_effet") || undefined}
+                onChange={(value) => setValue("date_effet", value)}
+                placeholder="Sélectionner la date d'effet"
+                disabled={isLoading}
+                error={!!errors.date_effet}
+              />
+              {errors.date_effet && (
+                <p className="text-sm text-red-600">{errors.date_effet.message}</p>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -192,12 +221,12 @@ export function SimulationForm() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="taux_interet">Taux d'Intérêt (%)</Label>
+                <Label htmlFor="taux_surprime">Taux de Surprime (%)</Label>
                 <Input
-                  id="taux_interet"
+                  id="taux_surprime"
                   type="number"
                   step="0.01"
-                  {...register("taux_interet", { valueAsNumber: true })}
+                  {...register("taux_surprime", { valueAsNumber: true })}
                   disabled={isLoading}
                 />
               </div>

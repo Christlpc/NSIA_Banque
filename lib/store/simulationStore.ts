@@ -96,8 +96,38 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }));
 
     try {
-      const simulation = await simulationApi.createSimulation(product, data);
-      
+      let response;
+      const { produitsApi } = await import("@/lib/api/simulations/produits");
+
+      // Appel de l'API spécifique selon le produit
+      switch (product) {
+        case "emprunteur":
+          response = await produitsApi.simulateEmprunteur(data as any);
+          break;
+        case "elikia":
+          response = await produitsApi.simulateElikia(data as any);
+          break;
+        case "etudes":
+          response = await produitsApi.simulateEtudes(data as any);
+          break;
+        case "mobateli":
+          response = await produitsApi.simulateMobateli(data as any);
+          break;
+        case "retraite":
+          response = await produitsApi.simulateRetraite(data as any);
+          break;
+        default:
+          throw new Error(`Produit non supporté: ${product}`);
+      }
+
+      // La réponse contient { simulation, resultats, message }
+      // Si sauvegarder=true, simulation est présent
+      const simulation = response.simulation;
+
+      if (!simulation) {
+        throw new Error("La simulation n'a pas été sauvegardée");
+      }
+
       // Replace optimistic with real data
       set((state) => ({
         simulations: state.simulations.map((s) =>
@@ -117,7 +147,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         action_label: "Voir la simulation",
         metadata: { simulation_id: simulation.id },
       });
-      
+
       return simulation;
     } catch (error: any) {
       // Rollback on error
@@ -135,7 +165,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     // Optimistic update
     const previousSimulations = get().simulations;
     const previousSimulation = get().currentSimulation;
-    
+
     set((state) => ({
       simulations: state.simulations.map((s) =>
         s.id === id ? { ...s, ...data, updated_at: new Date().toISOString() } : s
@@ -167,7 +197,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     // Optimistic update
     const deletedSimulation = get().simulations.find((s) => s.id === id);
     const previousSimulations = get().simulations;
-    
+
     set((state) => ({
       simulations: state.simulations.filter((s) => s.id !== id),
       totalCount: state.totalCount - 1,
@@ -194,7 +224,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
   calculatePrime: async (id: number) => {
     // Optimistic update
     const previousSimulation = get().currentSimulation;
-    
+
     set((state) => ({
       simulations: state.simulations.map((s) =>
         s.id === id ? { ...s, statut: "calculee" as const, updated_at: new Date().toISOString() } : s
@@ -224,7 +254,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
   validateSimulation: async (id: number) => {
     // Optimistic update
     const previousSimulation = get().currentSimulation;
-    
+
     set((state) => ({
       simulations: state.simulations.map((s) =>
         s.id === id ? { ...s, statut: "validee" as const, updated_at: new Date().toISOString() } : s
@@ -240,7 +270,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
       await simulationApi.validateSimulation(id);
       await get().fetchSimulation(id);
       set({ isLoading: false, error: null });
-      
+
       // Notification
       const sim = get().currentSimulation;
       if (sim) {
@@ -268,7 +298,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
   convertSimulation: async (id: number) => {
     // Optimistic update
     const previousSimulation = get().currentSimulation;
-    
+
     set((state) => ({
       simulations: state.simulations.map((s) =>
         s.id === id ? { ...s, statut: "convertie" as const, updated_at: new Date().toISOString() } : s
@@ -284,7 +314,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
       await simulationApi.convertSimulation(id);
       await get().fetchSimulation(id);
       set({ isLoading: false, error: null });
-      
+
       // Notification
       const sim = get().currentSimulation;
       if (sim) {
