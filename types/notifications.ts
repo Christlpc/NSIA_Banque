@@ -15,7 +15,7 @@ export interface SystemNotification {
   action_url?: string;
   action_label?: string;
   metadata?: {
-    simulation_id?: number;
+    simulation_id?: string;
     user_id?: number;
     banque_id?: number;
     [key: string]: any;

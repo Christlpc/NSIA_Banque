@@ -62,7 +62,7 @@ export const PRODUIT_LABELS: Record<ProduitType, string> = {
 export type SimulationStatut = "brouillon" | "calculee" | "validee" | "convertie";
 
 export interface Simulation {
-  id: number;
+  id: string;
   reference: string;
   produit: ProduitType;
   statut: SimulationStatut;

@@ -41,8 +41,8 @@ export const simulationApi = {
   /**
    * @deprecated Utiliser historiqueApi.getSimulation() à la place
    */
-  getSimulation: async (id: number): Promise<Simulation> => {
-    return historiqueApi.getSimulation(id.toString());
+  getSimulation: async (id: string): Promise<Simulation> => {
+    return historiqueApi.getSimulation(id);
   },
 
   /**
@@ -60,24 +60,24 @@ export const simulationApi = {
   /**
    * @deprecated Utiliser historiqueApi.updateSimulation() à la place
    */
-  updateSimulation: async (id: number, data: Partial<SimulationCreateData>): Promise<Simulation> => {
-    return historiqueApi.updateSimulation(id.toString(), data);
+  updateSimulation: async (id: string, data: Partial<SimulationCreateData>): Promise<Simulation> => {
+    return historiqueApi.updateSimulation(id, data);
   },
 
   /**
    * @deprecated Utiliser historiqueApi.deleteSimulation() à la place
    */
-  deleteSimulation: async (id: number): Promise<void> => {
-    return historiqueApi.deleteSimulation(id.toString());
+  deleteSimulation: async (id: string): Promise<void> => {
+    return historiqueApi.deleteSimulation(id);
   },
 
   /**
    * @deprecated Cette méthode n'existe plus dans l'API réelle
    * Utiliser les endpoints de simulation par produit qui calculent automatiquement
    */
-  calculatePrime: async (id: number): Promise<CalculResponse> => {
+  calculatePrime: async (id: string): Promise<CalculResponse> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.calculatePrime(id);
+      return mockSimulationApi.calculatePrime(Number(id));
     }
     // Cette méthode n'existe plus dans la nouvelle API
     // Le calcul se fait automatiquement lors de la création via produitsApi
@@ -90,46 +90,46 @@ export const simulationApi = {
    * @deprecated Utiliser questionnairesApi.createQuestionnaire() à la place
    */
   submitQuestionnaire: async (
-    id: number,
+    id: string,
     questionnaire: QuestionnaireMedical
   ): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.submitQuestionnaire(id, questionnaire);
+      return mockSimulationApi.submitQuestionnaire(Number(id), questionnaire);
     }
     // Créer le questionnaire et l'appliquer à la simulation
     const created = await questionnairesApi.createQuestionnaire({
       ...questionnaire,
-      simulation: id.toString(),
+      simulation: id,
     });
-    return questionnairesApi.appliquerASimulation(created.id, id.toString());
+    return questionnairesApi.appliquerASimulation(created.id, id);
   },
 
   /**
    * @deprecated Utiliser historiqueApi.validateSimulation() à la place
    */
-  validateSimulation: async (id: number): Promise<Simulation> => {
-    return historiqueApi.validateSimulation(id.toString());
+  validateSimulation: async (id: string): Promise<Simulation> => {
+    return historiqueApi.validateSimulation(id);
   },
 
   /**
    * @deprecated Utiliser historiqueApi.souscrireSimulation() à la place
    */
-  convertSimulation: async (id: number): Promise<Simulation> => {
-    return historiqueApi.souscrireSimulation(id.toString());
+  convertSimulation: async (id: string): Promise<Simulation> => {
+    return historiqueApi.souscrireSimulation(id);
   },
 
   /**
    * @deprecated Utiliser exportsApi.exportBIA() à la place
    */
-  exportBIA: async (id: number): Promise<Blob> => {
-    return exportsApi.exportBIA(id.toString());
+  exportBIA: async (id: string): Promise<Blob> => {
+    return exportsApi.exportBIA(id);
   },
 
   /**
    * @deprecated Utiliser exportsApi.previewBIA() à la place
    */
-  previewBIA: async (id: number): Promise<string> => {
-    return exportsApi.previewBIA(id.toString());
+  previewBIA: async (id: string): Promise<string> => {
+    return exportsApi.previewBIA(id);
   },
 };
 

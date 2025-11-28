@@ -11,13 +11,13 @@ interface SimulationStore {
   isLoading: boolean;
   error: string | null;
   fetchSimulations: (params?: SimulationFilters) => Promise<void>;
-  fetchSimulation: (id: number) => Promise<void>;
+  fetchSimulation: (id: string) => Promise<void>;
   createSimulation: (product: string, data: SimulationCreateData) => Promise<Simulation>;
-  updateSimulation: (id: number, data: Partial<SimulationCreateData>) => Promise<void>;
-  deleteSimulation: (id: number) => Promise<void>;
-  calculatePrime: (id: number) => Promise<void>; // @deprecated - Ne plus utiliser
-  validateSimulation: (id: number) => Promise<void>;
-  convertSimulation: (id: number) => Promise<void>;
+  updateSimulation: (id: string, data: Partial<SimulationCreateData>) => Promise<void>;
+  deleteSimulation: (id: string) => Promise<void>;
+  calculatePrime: (id: string) => Promise<void>; // @deprecated - Ne plus utiliser
+  validateSimulation: (id: string) => Promise<void>;
+  convertSimulation: (id: string) => Promise<void>;
   setFilters: (filters: Partial<SimulationFilters>) => void;
   setCurrentSimulation: (simulation: Simulation | null) => void;
   reset: () => void;
@@ -55,7 +55,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }
   },
 
-  fetchSimulation: async (id: number) => {
+  fetchSimulation: async (id: string) => {
     set({ isLoading: true, error: null });
     try {
       const simulation = await simulationApi.getSimulation(id);
@@ -74,7 +74,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
 
   createSimulation: async (product: string, data: SimulationCreateData) => {
     // Optimistic update
-    const tempId = Date.now();
+    const tempId = Date.now().toString();
     const optimisticSimulation: Simulation = {
       id: tempId,
       reference: `SIM-TEMP-${tempId}`,
@@ -161,7 +161,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }
   },
 
-  updateSimulation: async (id: number, data: Partial<SimulationCreateData>) => {
+  updateSimulation: async (id: string, data: Partial<SimulationCreateData>) => {
     // Optimistic update
     const previousSimulations = get().simulations;
     const previousSimulation = get().currentSimulation;
@@ -193,7 +193,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }
   },
 
-  deleteSimulation: async (id: number) => {
+  deleteSimulation: async (id: string) => {
     // Optimistic update
     const deletedSimulation = get().simulations.find((s) => s.id === id);
     const previousSimulations = get().simulations;
@@ -221,7 +221,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }
   },
 
-  calculatePrime: async (id: number) => {
+  calculatePrime: async (id: string) => {
     // Optimistic update
     const previousSimulation = get().currentSimulation;
 
@@ -251,7 +251,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }
   },
 
-  validateSimulation: async (id: number) => {
+  validateSimulation: async (id: string) => {
     // Optimistic update
     const previousSimulation = get().currentSimulation;
 
@@ -295,7 +295,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }
   },
 
-  convertSimulation: async (id: number) => {
+  convertSimulation: async (id: string) => {
     // Optimistic update
     const previousSimulation = get().currentSimulation;
 
