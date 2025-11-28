@@ -26,6 +26,9 @@ const simulationSchema = z.object({
   // Ces champs sont optionnels dans le schéma global mais rendus obligatoires conditionnellement ou par l'UI
   montant_pret: z.number({ invalid_type_error: "Le montant est requis" }).min(1, "Le montant doit être supérieur à 0").optional(),
   duree_mois: z.number({ invalid_type_error: "La durée est requise" }).min(1, "La durée doit être supérieure à 0").optional(),
+  rente_annuelle: z.number({ invalid_type_error: "La rente annuelle est requise" }).min(1, "La rente doit être supérieure à 0").optional(),
+  age_parent: z.number({ invalid_type_error: "L'âge du parent est requis" }).min(18, "L'âge doit être supérieur à 18").optional(),
+  duree_rente: z.number({ invalid_type_error: "La durée de la rente est requise" }).min(1, "La durée doit être supérieure à 0").optional(),
   taux_surprime: z.number().min(0).max(100).optional(),
   profession: z.string().optional(),
   adresse: z.string().optional(),
@@ -77,6 +80,19 @@ export function SimulationForm() {
       }
       if (!data.duree_mois) {
         toast.error("La durée du prêt est requise pour ce produit");
+        return;
+      }
+    } else if (selectedProduct === "elikia_scolaire") {
+      if (!data.rente_annuelle) {
+        toast.error("La rente annuelle est requise pour ce produit");
+        return;
+      }
+      if (!data.age_parent) {
+        toast.error("L'âge du parent est requis pour ce produit");
+        return;
+      }
+      if (!data.duree_rente) {
+        toast.error("La durée de la rente est requise pour ce produit");
         return;
       }
     }

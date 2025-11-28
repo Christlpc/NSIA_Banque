@@ -98,6 +98,7 @@ export interface SimulationCreateData {
   duree_mois?: number;
   taux_interet?: number;
   taux_surprime?: number;
+  rente_annuelle?: number;
   profession?: string;
   adresse?: string;
   telephone?: string;
