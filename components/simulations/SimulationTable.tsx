@@ -43,7 +43,7 @@ export function SimulationTable() {
         ),
       }),
       columnHelper.accessor(
-        (row) => `${row.prenom} ${row.nom}`,
+        (row) => `${row.prenom || ""} ${row.nom || ""}`.trim() || "Client inconnu",
         {
           id: "client",
           header: "Client",
@@ -52,13 +52,15 @@ export function SimulationTable() {
       ),
       columnHelper.accessor("produit", {
         header: "Produit",
-        cell: (info) => PRODUIT_LABELS[info.getValue()],
+        cell: (info) => PRODUIT_LABELS[info.getValue()] || info.getValue(),
       }),
       columnHelper.accessor("prime_totale", {
         header: "Prime Totale",
         cell: (info) => {
           const value = info.getValue();
-          return value ? `${parseFloat(value).toLocaleString("fr-FR")} FCFA` : "-";
+          if (!value) return "-";
+          const numValue = parseFloat(value);
+          return isNaN(numValue) ? value : `${numValue.toLocaleString("fr-FR")} FCFA`;
         },
       }),
       columnHelper.accessor("statut", {
@@ -66,8 +68,8 @@ export function SimulationTable() {
         cell: (info) => {
           const statut = info.getValue();
           return (
-            <Badge className={STATUT_COLORS[statut]}>
-              {STATUT_LABELS[statut]}
+            <Badge className={STATUT_COLORS[statut] || "bg-gray-100 text-gray-800"}>
+              {STATUT_LABELS[statut] || statut}
             </Badge>
           );
         },
@@ -84,13 +86,20 @@ export function SimulationTable() {
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                  onClick={() => router.push(`/simulations/${simulation.id}`)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/simulations/${simulation.id}`);
+                  }}
                 >
                   <Eye className="mr-2 h-4 w-4" />
                   Voir les détails

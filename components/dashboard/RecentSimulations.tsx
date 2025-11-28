@@ -50,10 +50,10 @@ export function RecentSimulations() {
                   <div className="flex items-center gap-3">
                     <div>
                       <p className="font-medium text-gray-900">
-                        {simulation.prenom} {simulation.nom}
+                        {`${simulation.prenom || ""} ${simulation.nom || ""}`.trim() || "Client inconnu"}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {PRODUIT_LABELS[simulation.produit]} • {simulation.reference}
+                        {PRODUIT_LABELS[simulation.produit] || simulation.produit} • {simulation.reference}
                       </p>
                     </div>
                   </div>
