@@ -12,7 +12,7 @@ export default function QuestionnairePage() {
   const params = useParams();
   const router = useSafeRouter();
   const { currentSimulation, fetchSimulation, isLoading } = useSimulationStore();
-  const id = parseInt(params.id as string);
+  const id = params.id as string;
 
   useEffect(() => {
     if (id) {

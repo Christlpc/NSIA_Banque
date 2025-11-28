@@ -51,7 +51,7 @@ export const mockSimulationApi = {
     };
   },
 
-  getSimulation: async (id: number): Promise<Simulation> => {
+  getSimulation: async (id: string): Promise<Simulation> => {
     await delay(300);
     const simulation = mockSimulations.find((s) => s.id === id);
     if (!simulation) {
@@ -63,7 +63,7 @@ export const mockSimulationApi = {
   createSimulation: async (product: string, data: SimulationCreateData): Promise<Simulation> => {
     await delay(600);
     const newSimulation: Simulation = {
-      id: mockSimulations.length + 1,
+      id: (mockSimulations.length + 1).toString(),
       reference: `SIM-${String(mockSimulations.length + 1).padStart(6, "0")}`,
       produit: product as any,
       statut: "brouillon",
@@ -77,7 +77,7 @@ export const mockSimulationApi = {
     return newSimulation;
   },
 
-  updateSimulation: async (id: number, data: Partial<SimulationCreateData>): Promise<Simulation> => {
+  updateSimulation: async (id: string, data: Partial<SimulationCreateData>): Promise<Simulation> => {
     await delay(400);
     const index = mockSimulations.findIndex((s) => s.id === id);
     if (index === -1) {
@@ -91,7 +91,7 @@ export const mockSimulationApi = {
     return mockSimulations[index];
   },
 
-  deleteSimulation: async (id: number): Promise<void> => {
+  deleteSimulation: async (id: string): Promise<void> => {
     await delay(300);
     const index = mockSimulations.findIndex((s) => s.id === id);
     if (index !== -1) {
@@ -99,7 +99,7 @@ export const mockSimulationApi = {
     }
   },
 
-  calculatePrime: async (id: number): Promise<CalculResponse> => {
+  calculatePrime: async (id: string): Promise<CalculResponse> => {
     await delay(800);
     const simulation = mockSimulations.find((s) => s.id === id);
     if (!simulation) {
@@ -129,7 +129,7 @@ export const mockSimulationApi = {
   },
 
   submitQuestionnaire: async (
-    id: number,
+    id: string,
     questionnaire: QuestionnaireMedical
   ): Promise<QuestionnaireResponse> => {
     await delay(600);
@@ -195,7 +195,7 @@ export const mockSimulationApi = {
     };
   },
 
-  validateSimulation: async (id: number): Promise<Simulation> => {
+  validateSimulation: async (id: string): Promise<Simulation> => {
     await delay(400);
     const simulation = mockSimulations.find((s) => s.id === id);
     if (!simulation) {
@@ -206,7 +206,7 @@ export const mockSimulationApi = {
     return simulation;
   },
 
-  convertSimulation: async (id: number): Promise<Simulation> => {
+  convertSimulation: async (id: string): Promise<Simulation> => {
     await delay(500);
     const simulation = mockSimulations.find((s) => s.id === id);
     if (!simulation) {
@@ -217,13 +217,13 @@ export const mockSimulationApi = {
     return simulation;
   },
 
-  exportBIA: async (id: number): Promise<Blob> => {
+  exportBIA: async (id: string): Promise<Blob> => {
     await delay(1000);
     // Retourner un blob PDF mock (vide pour l'instant)
     return new Blob(["Mock PDF content"], { type: "application/pdf" });
   },
 
-  previewBIA: async (id: number): Promise<string> => {
+  previewBIA: async (id: string): Promise<string> => {
     await delay(800);
     // Retourner une URL mock pour le preview
     return "data:application/pdf;base64,JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PAovVHlwZSAvQ2F0YWxvZwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmoKPDwKL1R5cGUgL1BhZ2VzCi9LaWRzIFszIDAgUl0KL0NvdW50IDEKL01lZGlhQm94IFswIDAgNjEyIDc5Ml0KPj4KZW5kb2JqCjMgMCBvYmoKPDwKL1R5cGUgL1BhZ2UKL1BhcmVudCAyIDAgUgovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA0IDAgUgo+Pgo+PgovQ29udGVudHMgNSAwIFIKPj4KZW5kb2JqCjQgMCBvYmoKPDwKL1R5cGUgL0ZvbnQKL1N1YnR5cGUgL1R5cGUxCi9CYXNlRm9udCAvSGVsdmV0aWNhCj4+CmV5ZG9iago1IDAgb2JqCjw8Ci9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCi9GMSAxMiBUZgoxMDAgNzAwIFRkCihNb2NrIFBERiBQcmV2aWV3KSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMDc3IDAwMDAwIG4gCjAwMDAwMDAwMzMgMDAwMDAgbgowMDAwMDAwMTIxIDAwMDAwIG4gCjAwMDAwMDAxNzYgMDAwMDAgbgp0cmFpbGVyCjw8Ci9TaXplIDYKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjI0NQolJUVPRgo=";

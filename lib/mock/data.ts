@@ -234,7 +234,7 @@ export const mockBanques: Banque[] = [
 
 // Mock Simulations
 const generateMockSimulation = (
-  id: number,
+  id: string,
   produit: ProduitType,
   statut: "brouillon" | "calculee" | "validee" | "convertie",
   banqueId: number
@@ -295,33 +295,33 @@ const generateMockSimulation = (
 export const mockSimulations: Simulation[] = [
   // Simulations Ecobank
   ...Array.from({ length: 5 }, (_, i) =>
-    generateMockSimulation(i + 1, "emprunteur", "brouillon", 2)
+    generateMockSimulation((i + 1).toString(), "emprunteur", "brouillon", 2)
   ),
   ...Array.from({ length: 3 }, (_, i) =>
-    generateMockSimulation(i + 6, "emprunteur", "calculee", 2)
+    generateMockSimulation((i + 6).toString(), "emprunteur", "calculee", 2)
   ),
   ...Array.from({ length: 2 }, (_, i) =>
-    generateMockSimulation(i + 9, "confort_retraite", "validee", 2)
+    generateMockSimulation((i + 9).toString(), "confort_retraite", "validee", 2)
   ),
   ...Array.from({ length: 1 }, (_, i) =>
-    generateMockSimulation(i + 11, "emprunteur", "convertie", 2)
+    generateMockSimulation((i + 11).toString(), "emprunteur", "convertie", 2)
   ),
   // Simulations BGFI
   ...Array.from({ length: 4 }, (_, i) =>
-    generateMockSimulation(i + 12, "epargne_plus", "brouillon", 4)
+    generateMockSimulation((i + 12).toString(), "epargne_plus", "brouillon", 4)
   ),
   ...Array.from({ length: 3 }, (_, i) =>
-    generateMockSimulation(i + 16, "emprunteur", "calculee", 4)
+    generateMockSimulation((i + 16).toString(), "emprunteur", "calculee", 4)
   ),
   ...Array.from({ length: 2 }, (_, i) =>
-    generateMockSimulation(i + 19, "confort_etudes", "validee", 4)
+    generateMockSimulation((i + 19).toString(), "confort_etudes", "validee", 4)
   ),
   // Simulations BCI
   ...Array.from({ length: 3 }, (_, i) =>
-    generateMockSimulation(i + 21, "elikia_scolaire", "brouillon", 5)
+    generateMockSimulation((i + 21).toString(), "elikia_scolaire", "brouillon", 5)
   ),
   ...Array.from({ length: 2 }, (_, i) =>
-    generateMockSimulation(i + 24, "mobateli", "calculee", 5)
+    generateMockSimulation((i + 24).toString(), "mobateli", "calculee", 5)
   ),
 ];
 

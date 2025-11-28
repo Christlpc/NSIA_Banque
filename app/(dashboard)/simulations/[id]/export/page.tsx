@@ -16,7 +16,7 @@ export default function ExportPage() {
   const { currentSimulation, fetchSimulation, isLoading } = useSimulationStore();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
-  const id = parseInt(params.id as string);
+  const id = params.id as string;
 
   useEffect(() => {
     if (id) {

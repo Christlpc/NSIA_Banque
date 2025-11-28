@@ -43,7 +43,7 @@ const questionnaireSchema = z.object({
 type QuestionnaireFormData = z.infer<typeof questionnaireSchema>;
 
 interface MedicalFormProps {
-  simulationId: number;
+  simulationId: string;
 }
 
 export function MedicalForm({ simulationId }: MedicalFormProps) {
@@ -142,19 +142,19 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
       try {
         const created = await questionnairesApi.createQuestionnaire({
           ...questionnaireData,
-          simulation: simulationId.toString(),
+          simulation: simulationId,
         });
-        
+
         // Appliquer le questionnaire à la simulation
-        await questionnairesApi.appliquerASimulation(created.id, simulationId.toString());
-        
+        await questionnairesApi.appliquerASimulation(created.id, simulationId);
+
         toast.success("Questionnaire soumis avec succès");
         router.push(`/simulations/${simulationId}`);
       } catch (newApiError: any) {
         // Fallback sur l'ancienne API si nécessaire
-      await simulationApi.submitQuestionnaire(simulationId, questionnaireData);
-      toast.success("Questionnaire soumis avec succès");
-      router.push(`/simulations/${simulationId}`);
+        await simulationApi.submitQuestionnaire(simulationId, questionnaireData);
+        toast.success("Questionnaire soumis avec succès");
+        router.push(`/simulations/${simulationId}`);
       }
     } catch (error: any) {
       toast.error(error?.message || "Erreur lors de la soumission");

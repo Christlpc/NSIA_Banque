@@ -77,7 +77,7 @@ export const simulationApi = {
    */
   calculatePrime: async (id: string): Promise<CalculResponse> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.calculatePrime(Number(id));
+      return mockSimulationApi.calculatePrime(id);
     }
     // Cette méthode n'existe plus dans la nouvelle API
     // Le calcul se fait automatiquement lors de la création via produitsApi
@@ -94,7 +94,7 @@ export const simulationApi = {
     questionnaire: QuestionnaireMedical
   ): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.submitQuestionnaire(Number(id), questionnaire);
+      return mockSimulationApi.submitQuestionnaire(id, questionnaire);
     }
     // Créer le questionnaire et l'appliquer à la simulation
     const created = await questionnairesApi.createQuestionnaire({

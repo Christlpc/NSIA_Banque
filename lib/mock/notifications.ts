@@ -18,7 +18,7 @@ const initializeNotifications = () => {
       created_at: new Date(now.getTime() - 5 * 60 * 1000).toISOString(),
       action_url: "/simulations/1",
       action_label: "Voir la simulation",
-      metadata: { simulation_id: 1 },
+      metadata: { simulation_id: "1" },
     },
     {
       id: "2",
@@ -30,7 +30,7 @@ const initializeNotifications = () => {
       created_at: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(),
       action_url: "/simulations/1234",
       action_label: "Voir la simulation",
-      metadata: { simulation_id: 1234 },
+      metadata: { simulation_id: "1234" },
     },
     {
       id: "3",
@@ -77,32 +77,32 @@ if (notifications.length === 0) {
 export const mockNotificationApi = {
   getNotifications: async (filters?: NotificationFilters): Promise<SystemNotification[]> => {
     await delay(300);
-    
+
     let filtered = [...notifications];
-    
+
     if (filters?.type) {
       filtered = filtered.filter((n) => n.type === filters.type);
     }
-    
+
     if (filters?.read !== undefined) {
       filtered = filtered.filter((n) => n.read === filters.read);
     }
-    
+
     if (filters?.priority) {
       filtered = filtered.filter((n) => n.priority === filters.priority);
     }
-    
+
     // Trier par date (plus récentes en premier)
-    return filtered.sort((a, b) => 
+    return filtered.sort((a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   },
 
   getNotificationStats: async (): Promise<NotificationStats> => {
     await delay(200);
-    
+
     const unread = notifications.filter((n) => !n.read).length;
-    
+
     const by_type: Record<string, number> = {
       simulation: 0,
       user: 0,
@@ -110,19 +110,19 @@ export const mockNotificationApi = {
       system: 0,
       alert: 0,
     };
-    
+
     const by_priority: Record<string, number> = {
       low: 0,
       medium: 0,
       high: 0,
       urgent: 0,
     };
-    
+
     notifications.forEach((n) => {
       by_type[n.type] = (by_type[n.type] || 0) + 1;
       by_priority[n.priority] = (by_priority[n.priority] || 0) + 1;
     });
-    
+
     return {
       total: notifications.length,
       unread,

@@ -52,7 +52,7 @@ export const exportsApi = {
    */
   exportBIA: async (simulationId: string): Promise<Blob> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.exportBIA(Number(simulationId));
+      return mockSimulationApi.exportBIA(simulationId);
     }
     const response = await apiClient.get(
       `/api/v1/simulations/simulations/${simulationId}/export-bia/`,
@@ -70,7 +70,7 @@ export const exportsApi = {
    */
   previewBIA: async (simulationId: string): Promise<string> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.previewBIA(Number(simulationId));
+      return mockSimulationApi.previewBIA(simulationId);
     }
     const response = await apiClient.get(
       `/api/v1/simulations/simulations/${simulationId}/preview-bia/`,

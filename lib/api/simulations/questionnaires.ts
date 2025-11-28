@@ -67,7 +67,7 @@ export const questionnairesApi = {
     if (USE_MOCK_DATA) {
       // Utiliser le mock existant
       const response = await mockSimulationApi.submitQuestionnaire(
-        data.simulation ? Number(data.simulation) : 1,
+        data.simulation ? data.simulation : "1",
         data
       );
       return {
@@ -164,7 +164,7 @@ export const questionnairesApi = {
         autre_maladie: false,
       };
       return await mockSimulationApi.submitQuestionnaire(
-        Number(simulationId),
+        simulationId,
         defaultQuestionnaire
       );
     }

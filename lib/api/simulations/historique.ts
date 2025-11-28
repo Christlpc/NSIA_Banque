@@ -46,7 +46,7 @@ export const historiqueApi = {
    */
   getSimulation: async (id: string): Promise<Simulation> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.getSimulation(Number(id));
+      return mockSimulationApi.getSimulation(id);
     }
     const response = await apiClient.get<Simulation>(`/api/v1/simulations/historique/${id}/`);
     return response.data;
@@ -76,7 +76,7 @@ export const historiqueApi = {
     data: Partial<SimulationCreateData>
   ): Promise<Simulation> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.updateSimulation(Number(id), data);
+      return mockSimulationApi.updateSimulation(id, data);
     }
     // Nettoyer le payload pour enlever les valeurs undefined
     const cleanedData = cleanPayload(data) as Partial<SimulationCreateData>;
@@ -93,7 +93,7 @@ export const historiqueApi = {
    */
   deleteSimulation: async (id: string): Promise<void> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.deleteSimulation(Number(id));
+      return mockSimulationApi.deleteSimulation(id);
     }
     await apiClient.delete(`/api/v1/simulations/historique/${id}/`);
   },
@@ -104,7 +104,7 @@ export const historiqueApi = {
    */
   validateSimulation: async (id: string): Promise<Simulation> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.validateSimulation(Number(id));
+      return mockSimulationApi.validateSimulation(id);
     }
     const response = await apiClient.post<Simulation>(
       `/api/v1/simulations/historique/${id}/valider/`,
@@ -133,7 +133,7 @@ export const historiqueApi = {
     }
   ): Promise<Simulation> => {
     if (USE_MOCK_DATA) {
-      return mockSimulationApi.convertSimulation(Number(id));
+      return mockSimulationApi.convertSimulation(id);
     }
     const response = await apiClient.post<Simulation>(
       `/api/v1/simulations/historique/${id}/souscrire/`,
