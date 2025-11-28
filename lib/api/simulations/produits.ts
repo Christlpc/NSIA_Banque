@@ -51,8 +51,16 @@ export interface MobateliSimulationData {
 }
 
 export interface RetraiteSimulationData {
-  // À compléter selon la documentation API réelle
-  [key: string]: any;
+  prime_periodique_commerciale: number;
+  capital_deces: number;
+  duree: number;
+  periodicite: string;
+  age: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  sauvegarder: boolean;
 }
 
 // Types pour les réponses de simulation par produit

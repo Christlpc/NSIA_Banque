@@ -99,6 +99,26 @@ export interface SimulationCreateData {
   taux_interet?: number;
   taux_surprime?: number;
   rente_annuelle?: number;
+  // Elikia Scolaire & Etudes
+  age_parent?: number;
+  duree_rente?: number;
+
+  // Confort Etudes
+  age_enfant?: number;
+  montant_rente?: number;
+  duree_paiement?: number;
+  duree_service?: number;
+
+  // Mobateli
+  capital_dtc_iad?: number;
+  age?: number;
+
+  // Confort Retraite
+  prime_periodique_commerciale?: number;
+  capital_deces?: number;
+  duree?: number;
+  periodicite?: string;
+
   profession?: string;
   adresse?: string;
   telephone?: string;

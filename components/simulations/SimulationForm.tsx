@@ -29,6 +29,23 @@ const simulationSchema = z.object({
   rente_annuelle: z.number({ invalid_type_error: "La rente annuelle est requise" }).min(1, "La rente doit être supérieure à 0").optional(),
   age_parent: z.number({ invalid_type_error: "L'âge du parent est requis" }).min(18, "L'âge doit être supérieur à 18").optional(),
   duree_rente: z.number({ invalid_type_error: "La durée de la rente est requise" }).min(1, "La durée doit être supérieure à 0").optional(),
+
+  // Confort Etudes
+  age_enfant: z.number({ invalid_type_error: "L'âge de l'enfant est requis" }).min(0, "L'âge doit être positif").optional(),
+  montant_rente: z.number({ invalid_type_error: "Le montant de la rente est requis" }).min(1, "Le montant doit être supérieur à 0").optional(),
+  duree_paiement: z.number({ invalid_type_error: "La durée de paiement est requise" }).min(1, "La durée doit être supérieure à 0").optional(),
+  duree_service: z.number({ invalid_type_error: "La durée de service est requise" }).min(1, "La durée doit être supérieure à 0").optional(),
+
+  // Mobateli
+  capital_dtc_iad: z.number({ invalid_type_error: "Le capital est requis" }).min(1, "Le capital doit être supérieur à 0").optional(),
+  age: z.number({ invalid_type_error: "L'âge est requis" }).min(18, "L'âge doit être supérieur à 18").optional(),
+
+  // Confort Retraite
+  prime_periodique_commerciale: z.number({ invalid_type_error: "La prime périodique est requise" }).min(1, "La prime doit être supérieure à 0").optional(),
+  capital_deces: z.number({ invalid_type_error: "Le capital décès est requis" }).min(0, "Le capital doit être positif").optional(),
+  duree: z.number({ invalid_type_error: "La durée est requise" }).min(1, "La durée doit être supérieure à 0").optional(),
+  periodicite: z.string().optional(),
+
   taux_surprime: z.number().min(0).max(100).optional(),
   profession: z.string().optional(),
   adresse: z.string().optional(),
@@ -93,6 +110,57 @@ export function SimulationForm() {
       }
       if (!data.duree_rente) {
         toast.error("La durée de la rente est requise pour ce produit");
+        return;
+      }
+    } else if (selectedProduct === "confort_etudes") {
+      if (!data.age_parent) {
+        toast.error("L'âge du parent est requis");
+        return;
+      }
+      if (data.age_enfant === undefined) {
+        toast.error("L'âge de l'enfant est requis");
+        return;
+      }
+      if (!data.montant_rente) {
+        toast.error("Le montant de la rente est requis");
+        return;
+      }
+      if (!data.duree_paiement) {
+        toast.error("La durée de paiement est requise");
+        return;
+      }
+      if (!data.duree_service) {
+        toast.error("La durée de service est requise");
+        return;
+      }
+    } else if (selectedProduct === "mobateli") {
+      if (!data.capital_dtc_iad) {
+        toast.error("Le capital est requis");
+        return;
+      }
+      if (!data.age) {
+        toast.error("L'âge est requis");
+        return;
+      }
+    } else if (selectedProduct === "confort_retraite") {
+      if (!data.prime_periodique_commerciale) {
+        toast.error("La prime périodique est requise");
+        return;
+      }
+      if (data.capital_deces === undefined) {
+        toast.error("Le capital décès est requis");
+        return;
+      }
+      if (!data.duree) {
+        toast.error("La durée est requise");
+        return;
+      }
+      if (!data.age) {
+        toast.error("L'âge est requis");
+        return;
+      }
+      if (!data.periodicite) {
+        toast.error("La périodicité est requise");
         return;
       }
     }

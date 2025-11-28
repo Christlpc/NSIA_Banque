@@ -44,4 +44,86 @@ describe('Simulation Creation Tests', () => {
             expect(error).toBeDefined();
         }
     });
+
+    it('should accept valid elikia_scolaire payload structure', async () => {
+        const payload = {
+            rente_annuelle: 1000000,
+            age_parent: 40,
+            duree_rente: 5,
+            date_naissance: "1990-01-01",
+            date_effet: "2024-01-01",
+            taux_surprime: 0,
+            nom: "Test",
+            prenom: "User",
+            email: "test@example.com",
+            telephone: "123456789",
+            sauvegarder: true
+        };
+
+        try {
+            await produitsApi.simulateElikia(payload);
+        } catch (error: any) {
+            expect(error).toBeDefined();
+        }
+    });
+
+    it('should accept valid confort_etudes payload structure', async () => {
+        const payload = {
+            age_parent: 40,
+            age_enfant: 10,
+            montant_rente: 500000,
+            duree_paiement: 5,
+            duree_service: 5,
+            nom: "Test",
+            prenom: "User",
+            email: "test@example.com",
+            telephone: "123456789",
+            sauvegarder: true
+        };
+
+        try {
+            await produitsApi.simulateEtudes(payload);
+        } catch (error: any) {
+            expect(error).toBeDefined();
+        }
+    });
+
+    it('should accept valid mobateli payload structure', async () => {
+        const payload = {
+            capital_dtc_iad: 1000000,
+            age: 30,
+            nom: "Test",
+            prenom: "User",
+            email: "test@example.com",
+            telephone: "123456789",
+            sauvegarder: true
+        };
+
+        try {
+            await produitsApi.simulateMobateli(payload);
+        } catch (error: any) {
+            expect(error).toBeDefined();
+        }
+    });
+
+    it('should accept valid confort_retraite payload structure', async () => {
+        const payload = {
+            prime_periodique_commerciale: 50000,
+            capital_deces: 1000000,
+            duree: 20,
+            age: 30,
+            periodicite: "M",
+            nom: "Test",
+            prenom: "User",
+            email: "test@example.com",
+            telephone: "123456789",
+            sauvegarder: true
+        };
+
+        try {
+            await produitsApi.simulateRetraite(payload);
+        } catch (error: any) {
+            expect(error).toBeDefined();
+        }
+    });
 });
