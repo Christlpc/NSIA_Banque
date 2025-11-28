@@ -337,6 +337,199 @@ export function SimulationForm() {
         </Card>
       )}
 
+      {/* Détails Elikia Scolaire */}
+      {selectedProduct === "elikia_scolaire" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>3. Détails Elikia Scolaire</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="rente_annuelle">Rente Annuelle (FCFA)</Label>
+                <Input
+                  id="rente_annuelle"
+                  type="number"
+                  {...register("rente_annuelle", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="age_parent">Âge du Parent</Label>
+                <Input
+                  id="age_parent"
+                  type="number"
+                  {...register("age_parent", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duree_rente">Durée de la Rente (ans)</Label>
+                <Input
+                  id="duree_rente"
+                  type="number"
+                  {...register("duree_rente", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Détails Confort Études */}
+      {selectedProduct === "confort_etudes" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>3. Détails Confort Études</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="age_parent">Âge du Parent</Label>
+                <Input
+                  id="age_parent"
+                  type="number"
+                  {...register("age_parent", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="age_enfant">Âge de l'Enfant</Label>
+                <Input
+                  id="age_enfant"
+                  type="number"
+                  {...register("age_enfant", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="montant_rente">Montant de la Rente (FCFA)</Label>
+                <Input
+                  id="montant_rente"
+                  type="number"
+                  {...register("montant_rente", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duree_paiement">Durée de Paiement (ans)</Label>
+                <Input
+                  id="duree_paiement"
+                  type="number"
+                  {...register("duree_paiement", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duree_service">Durée de Service (ans)</Label>
+                <Input
+                  id="duree_service"
+                  type="number"
+                  {...register("duree_service", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Détails Mobateli */}
+      {selectedProduct === "mobateli" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>3. Détails Mobateli</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="capital_dtc_iad">Capital DTC/IAD (FCFA)</Label>
+                <Input
+                  id="capital_dtc_iad"
+                  type="number"
+                  {...register("capital_dtc_iad", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="age">Âge</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  {...register("age", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Détails Confort Retraite */}
+      {selectedProduct === "confort_retraite" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>3. Détails Confort Retraite</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="prime_periodique_commerciale">Prime Périodique (FCFA)</Label>
+                <Input
+                  id="prime_periodique_commerciale"
+                  type="number"
+                  {...register("prime_periodique_commerciale", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="capital_deces">Capital Décès (FCFA)</Label>
+                <Input
+                  id="capital_deces"
+                  type="number"
+                  {...register("capital_deces", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duree">Durée (ans)</Label>
+                <Input
+                  id="duree"
+                  type="number"
+                  {...register("duree", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="age">Âge</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  {...register("age", { valueAsNumber: true })}
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="periodicite">Périodicité</Label>
+                <select
+                  id="periodicite"
+                  {...register("periodicite")}
+                  disabled={isLoading}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Sélectionner</option>
+                  <option value="M">Mensuelle</option>
+                  <option value="T">Trimestrielle</option>
+                  <option value="S">Semestrielle</option>
+                  <option value="A">Annuelle</option>
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Actions */}
       <div className="flex justify-end gap-4">
         <Button
