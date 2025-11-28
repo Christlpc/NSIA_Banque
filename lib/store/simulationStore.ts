@@ -104,16 +104,16 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         case "emprunteur":
           response = await produitsApi.simulateEmprunteur(data as any);
           break;
-        case "elikia":
+        case "elikia_scolaire":
           response = await produitsApi.simulateElikia(data as any);
           break;
-        case "etudes":
+        case "confort_etudes":
           response = await produitsApi.simulateEtudes(data as any);
           break;
         case "mobateli":
           response = await produitsApi.simulateMobateli(data as any);
           break;
-        case "retraite":
+        case "confort_retraite":
           response = await produitsApi.simulateRetraite(data as any);
           break;
         default:
