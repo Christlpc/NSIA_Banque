@@ -66,7 +66,7 @@ export const mockSimulationApi = {
     const newSimulation: Simulation = {
       id: newId,
       reference: `SIM-${newId}`,
-      produit: data.produit as any, // Cast for mock purposes
+      produit: product as any, // Cast for mock purposes
       statut: "brouillon",
       ...data,
       // Map create data to client fields
