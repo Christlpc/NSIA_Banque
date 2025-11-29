@@ -43,7 +43,11 @@ export function SimulationTable() {
         ),
       }),
       columnHelper.accessor(
-        (row) => `${row.prenom || ""} ${row.nom || ""}`.trim() || "Client inconnu",
+        (row: any) => {
+          const nom = row.nom || row.last_name || row.client?.nom || row.client?.last_name || "";
+          const prenom = row.prenom || row.first_name || row.client?.prenom || row.client?.first_name || "";
+          return `${prenom} ${nom}`.trim() || "Client inconnu";
+        },
         {
           id: "client",
           header: "Client",

@@ -50,7 +50,12 @@ export function RecentSimulations() {
                   <div className="flex items-center gap-3">
                     <div>
                       <p className="font-medium text-gray-900">
-                        {`${simulation.prenom || ""} ${simulation.nom || ""}`.trim() || "Client inconnu"}
+                        {(() => {
+                          const r = simulation as any;
+                          const nom = r.nom || r.last_name || r.client?.nom || r.client?.last_name || "";
+                          const prenom = r.prenom || r.first_name || r.client?.prenom || r.client?.first_name || "";
+                          return `${prenom} ${nom}`.trim() || "Client inconnu";
+                        })()}
                       </p>
                       <p className="text-sm text-gray-500">
                         {PRODUIT_LABELS[simulation.produit] || simulation.produit} • {simulation.reference}

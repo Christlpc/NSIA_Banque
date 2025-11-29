@@ -8,7 +8,6 @@ import { SimulationActions } from "@/components/simulations/SimulationActions";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
 import { PRODUIT_LABELS, type Simulation } from "@/types";
 import { formatDateFull, formatDateTime } from "@/lib/utils/date";
-import { format } from "date-fns";
 
 interface SimulationDetailProps {
   simulation: Simulation;
@@ -204,13 +203,13 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
             <div>
               <p className="text-sm text-gray-500">Date de création</p>
               <p className="font-medium">
-                {format(new Date(simulation.created_at), "dd MMMM yyyy à HH:mm")}
+                {formatDateTime(simulation.created_at)}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Dernière modification</p>
               <p className="font-medium">
-                {format(new Date(simulation.updated_at), "dd MMMM yyyy à HH:mm")}
+                {formatDateTime(simulation.updated_at)}
               </p>
             </div>
           </div>
