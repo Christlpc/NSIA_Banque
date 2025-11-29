@@ -66,15 +66,22 @@ export interface Simulation {
   reference: string;
   produit: ProduitType;
   statut: SimulationStatut;
-  nom: string;
-  prenom: string;
-  date_naissance: string;
+  // Client fields
+  nom_client: string;
+  prenom_client: string;
+  email_client: string;
+  telephone_client: string;
+  adresse_postale?: string;
+  profession?: string;
+  employeur?: string;
+  numero_compte?: string;
+  situation_matrimoniale?: string;
+  date_naissance: string; // Kept as is, assuming it maps correctly or needs check
+
+  // Financial fields
   montant_pret?: number;
   duree_mois?: number;
   taux_interet?: number;
-  profession?: string;
-  adresse?: string;
-  telephone?: string;
   prime_base?: string;
   surprime_taux?: string;
   surprime_montant?: string;
@@ -82,10 +89,19 @@ export interface Simulation {
   taux_surprime?: number;
   categorie_risque?: string;
   score_total?: number;
-  created_at: string;
-  updated_at: string;
+
+  // System fields
+  created_at: string; // Maps to date_creation
+  updated_at: string; // Maps to date_modification
   created_by: number;
   banque: number;
+
+  // Backward compatibility (optional, for smooth transition if needed)
+  nom?: string;
+  prenom?: string;
+  email?: string;
+  telephone?: string;
+  adresse?: string;
 }
 
 export interface SimulationCreateData {

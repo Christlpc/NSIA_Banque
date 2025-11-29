@@ -81,6 +81,12 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
       produit: product as any,
       statut: "brouillon",
       ...data,
+      // Map create data to client fields for optimistic update
+      nom_client: data.nom,
+      prenom_client: data.prenom,
+      email_client: data.email || "",
+      telephone_client: data.telephone || "",
+      adresse_postale: data.adresse,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       created_by: 1,

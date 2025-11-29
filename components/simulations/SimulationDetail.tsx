@@ -49,12 +49,7 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
             <div>
               <p className="text-sm text-gray-500">Nom complet</p>
               <p className="font-medium">
-                {(() => {
-                  const s = simulation as any;
-                  const nom = s.nom || s.last_name || s.client?.nom || s.client?.last_name || "";
-                  const prenom = s.prenom || s.first_name || s.client?.prenom || s.client?.first_name || "";
-                  return `${prenom} ${nom}`.trim() || "Client inconnu";
-                })()}
+                {simulation.prenom_client} {simulation.nom_client}
               </p>
             </div>
             <div>
@@ -63,10 +58,16 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
                 {formatDateFull(simulation.date_naissance)}
               </p>
             </div>
-            {simulation.telephone && (
+            {simulation.telephone_client && (
               <div>
                 <p className="text-sm text-gray-500">Téléphone</p>
-                <p className="font-medium">{simulation.telephone}</p>
+                <p className="font-medium">{simulation.telephone_client}</p>
+              </div>
+            )}
+            {simulation.email_client && (
+              <div>
+                <p className="text-sm text-gray-500">Email</p>
+                <p className="font-medium">{simulation.email_client}</p>
               </div>
             )}
             {simulation.profession && (
@@ -75,10 +76,22 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
                 <p className="font-medium">{simulation.profession}</p>
               </div>
             )}
-            {simulation.adresse && (
+            {simulation.adresse_postale && (
               <div className="md:col-span-2">
-                <p className="text-sm text-gray-500">Adresse</p>
-                <p className="font-medium">{simulation.adresse}</p>
+                <p className="text-sm text-gray-500">Adresse postale</p>
+                <p className="font-medium">{simulation.adresse_postale}</p>
+              </div>
+            )}
+            {simulation.employeur && (
+              <div>
+                <p className="text-sm text-gray-500">Employeur</p>
+                <p className="font-medium">{simulation.employeur}</p>
+              </div>
+            )}
+            {simulation.situation_matrimoniale && (
+              <div>
+                <p className="text-sm text-gray-500">Situation matrimoniale</p>
+                <p className="font-medium">{simulation.situation_matrimoniale}</p>
               </div>
             )}
           </div>
@@ -228,4 +241,3 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
     </div>
   );
 }
-

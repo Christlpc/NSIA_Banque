@@ -243,6 +243,7 @@ const generateMockSimulation = (
   const prenoms = ["Jean", "Marie", "Pierre", "Sophie", "Paul", "Claire"];
   const nom = noms[Math.floor(Math.random() * noms.length)];
   const prenom = prenoms[Math.floor(Math.random() * prenoms.length)];
+  const email = `${prenom.toLowerCase()}.${nom.toLowerCase()}@example.com`;
 
   const baseDate = new Date();
   baseDate.setDate(baseDate.getDate() - Math.floor(Math.random() * 90));
@@ -252,14 +253,27 @@ const generateMockSimulation = (
     reference: `SIM-${String(id).padStart(6, "0")}`,
     produit,
     statut,
-    nom,
-    prenom,
-    date_naissance: "1985-05-15",
-    montant_pret: produit === "emprunteur" ? 5000000 + Math.random() * 10000000 : undefined,
-    duree_mois: produit === "emprunteur" ? 12 + Math.floor(Math.random() * 48) : undefined,
-    taux_interet: produit === "emprunteur" ? 5 + Math.random() * 10 : undefined,
-    profession: "Commerçant",
-    adresse: "Brazzaville, République du Congo",
+    // Client fields
+    nom_client: nom,
+    prenom_client: prenom,
+    email_client: email,
+    telephone_client: "0102030405",
+    adresse_postale: "Abidjan, Cocody",
+    profession: "Employé",
+    employeur: "NSIA Banque",
+    numero_compte: "123456789012",
+    situation_matrimoniale: "Célibataire",
+    date_naissance: "1990-01-01",
+
+    // Legacy fields for compatibility if needed
+    nom: nom,
+    prenom: prenom,
+    // date_naissance: "1990-01-01", // Already defined above
+    montant_pret: produit === "emprunteur" ? 10000000 : undefined,
+    duree_mois: produit === "emprunteur" ? 60 : undefined,
+    taux_interet: produit === "emprunteur" ? 7.5 : undefined,
+    // profession: "Employé", // Already defined above
+    adresse: "Abidjan, Cocody",
     telephone: "+242 06 123 45 67",
     created_at: baseDate.toISOString(),
     updated_at: baseDate.toISOString(),

@@ -30,8 +30,8 @@ export const mockSimulationApi = {
       const search = filters.search.toLowerCase();
       filtered = filtered.filter(
         (s) =>
-          s.nom.toLowerCase().includes(search) ||
-          s.prenom.toLowerCase().includes(search) ||
+          (s.nom_client || "").toLowerCase().includes(search) ||
+          (s.prenom_client || "").toLowerCase().includes(search) ||
           s.reference.toLowerCase().includes(search)
       );
     }
@@ -62,16 +62,23 @@ export const mockSimulationApi = {
 
   createSimulation: async (product: string, data: SimulationCreateData): Promise<Simulation> => {
     await delay(600);
+    const newId = (mockSimulations.length + 1).toString();
     const newSimulation: Simulation = {
-      id: (mockSimulations.length + 1).toString(),
-      reference: `SIM-${String(mockSimulations.length + 1).padStart(6, "0")}`,
-      produit: product as any,
+      id: newId,
+      reference: `SIM-${newId}`,
+      produit: data.produit as any, // Cast for mock purposes
       statut: "brouillon",
       ...data,
+      // Map create data to client fields
+      nom_client: data.nom,
+      prenom_client: data.prenom,
+      email_client: data.email || "",
+      telephone_client: data.telephone || "",
+      adresse_postale: data.adresse,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       created_by: 1,
-      banque: 2,
+      banque: 1,
     };
     mockSimulations.push(newSimulation);
     return newSimulation;
