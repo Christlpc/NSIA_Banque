@@ -8,6 +8,7 @@ import { SimulationActions } from "@/components/simulations/SimulationActions";
 import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
 import { PRODUIT_LABELS, type Simulation } from "@/types";
 import { formatDateFull, formatDateTime } from "@/lib/utils/date";
+import { FileText, User as UserIcon } from "lucide-react";
 
 interface SimulationDetailProps {
   simulation: Simulation;
@@ -38,14 +39,22 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
       {/* Informations client */}
       <Card>
         <CardHeader>
-          <CardTitle>Informations Client</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <UserIcon className="h-5 w-5" />
+            Informations Client
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-500">Nom complet</p>
               <p className="font-medium">
-                {simulation.prenom} {simulation.nom}
+                {(() => {
+                  const s = simulation as any;
+                  const nom = s.nom || s.last_name || s.client?.nom || s.client?.last_name || "";
+                  const prenom = s.prenom || s.first_name || s.client?.prenom || s.client?.first_name || "";
+                  return `${prenom} ${nom}`.trim() || "Client inconnu";
+                })()}
               </p>
             </div>
             <div>
@@ -182,9 +191,10 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
             {simulation.statut === "calculee" && (
               <div className="mt-4">
                 <Button
-                  variant="outline"
+                  className="w-full sm:w-auto"
                   onClick={() => router.push(`/simulations/${simulation.id}/questionnaire`)}
                 >
+                  <FileText className="mr-2 h-4 w-4" />
                   Compléter le questionnaire médical
                 </Button>
               </div>
