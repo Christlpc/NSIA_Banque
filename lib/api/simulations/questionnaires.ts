@@ -2,7 +2,7 @@ import { apiClient } from "../client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockSimulationApi } from "@/lib/mock/simulations";
 import { cleanPayload } from "@/lib/utils/payload";
-import type { QuestionnaireMedical, QuestionnaireResponse } from "@/types";
+import type { QuestionnaireMedical, QuestionnaireResponse, PaginatedResponse } from "@/types";
 
 /**
  * Questionnaire médical avec ID (retourné par l'API)
@@ -51,10 +51,19 @@ export const questionnairesApi = {
     if (filters?.page) params.append("page", filters.page.toString());
     if (filters?.page_size) params.append("page_size", filters.page_size.toString());
 
-    const response = await apiClient.get<QuestionnaireMedicalWithId[]>(
+    const response = await apiClient.get<PaginatedResponse<QuestionnaireMedicalWithId> | QuestionnaireMedicalWithId[]>(
       `/api/v1/simulations/questionnaires-medicaux/?${params.toString()}`
     );
-    return response.data;
+
+    if ('results' in response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
+
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    return [];
   },
 
   /**
