@@ -4,18 +4,7 @@ import { mockSimulationApi } from "@/lib/mock/simulations";
 import { cleanPayload } from "@/lib/utils/payload";
 import type { QuestionnaireMedical, QuestionnaireResponse, PaginatedResponse } from "@/types";
 
-/**
- * Questionnaire médical avec ID (retourné par l'API)
- */
-export interface QuestionnaireMedicalWithId extends QuestionnaireMedical {
-  id: string;
-  simulation?: string; // UUID de la simulation
-  created_at?: string;
-  updated_at?: string;
-  taux_surprime?: number;
-  categorie_risque?: "faible" | "moyen" | "eleve" | "tres_eleve";
-  score_total?: number;
-}
+// QuestionnaireMedicalWithId removed in favor of QuestionnaireResponse
 
 /**
  * Barème de surprime
@@ -41,17 +30,17 @@ export const questionnairesApi = {
     simulation?: string;
     page?: number;
     page_size?: number;
-  }): Promise<QuestionnaireMedicalWithId[]> => {
+  }): Promise<QuestionnaireResponse[]> => {
     if (USE_MOCK_DATA) {
       // Mock implementation
       return [];
     }
     const params = new URLSearchParams();
-    if (filters?.simulation) params.append("simulation", filters.simulation);
+    if (filters?.simulation) params.append("search", filters.simulation); // Use search for simulation ID
     if (filters?.page) params.append("page", filters.page.toString());
     if (filters?.page_size) params.append("page_size", filters.page_size.toString());
 
-    const response = await apiClient.get<PaginatedResponse<QuestionnaireMedicalWithId> | QuestionnaireMedicalWithId[]>(
+    const response = await apiClient.get<PaginatedResponse<QuestionnaireResponse> | QuestionnaireResponse[]>(
       `/api/v1/simulations/questionnaires-medicaux/?${params.toString()}`
     );
 
@@ -72,7 +61,7 @@ export const questionnairesApi = {
    */
   createQuestionnaire: async (
     data: QuestionnaireMedical & { simulation?: string }
-  ): Promise<QuestionnaireMedicalWithId> => {
+  ): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
       // Utiliser le mock existant
       const response = await mockSimulationApi.submitQuestionnaire(
@@ -81,7 +70,8 @@ export const questionnairesApi = {
       );
       return {
         ...data,
-        id: "mock-id",
+        id: 123, // Mock ID as number
+        simulation: data.simulation || "mock-simulation-id",
         taux_surprime: response.taux_surprime,
         categorie_risque: response.categorie_risque,
         score_total: response.score_total,
@@ -89,7 +79,7 @@ export const questionnairesApi = {
     }
     // Nettoyer le payload pour enlever les valeurs undefined
     const cleanedData = cleanPayload(data) as QuestionnaireMedical & { simulation?: string };
-    const response = await apiClient.post<QuestionnaireMedicalWithId>(
+    const response = await apiClient.post<QuestionnaireResponse>(
       "/api/v1/simulations/questionnaires-medicaux/",
       cleanedData
     );
@@ -100,11 +90,11 @@ export const questionnairesApi = {
    * Récupère un questionnaire médical par son ID
    * GET /api/v1/simulations/questionnaires-medicaux/{id}/
    */
-  getQuestionnaire: async (id: string): Promise<QuestionnaireMedicalWithId> => {
+  getQuestionnaire: async (id: number): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour getQuestionnaire");
     }
-    const response = await apiClient.get<QuestionnaireMedicalWithId>(
+    const response = await apiClient.get<QuestionnaireResponse>(
       `/api/v1/simulations/questionnaires-medicaux/${id}/`
     );
     return response.data;
@@ -115,15 +105,15 @@ export const questionnairesApi = {
    * PATCH /api/v1/simulations/questionnaires-medicaux/{id}/
    */
   updateQuestionnaire: async (
-    id: string,
+    id: number,
     data: Partial<QuestionnaireMedical>
-  ): Promise<QuestionnaireMedicalWithId> => {
+  ): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour updateQuestionnaire");
     }
     // Nettoyer le payload pour enlever les valeurs undefined
     const cleanedData = cleanPayload(data) as Partial<QuestionnaireMedical>;
-    const response = await apiClient.patch<QuestionnaireMedicalWithId>(
+    const response = await apiClient.patch<QuestionnaireResponse>(
       `/api/v1/simulations/questionnaires-medicaux/${id}/`,
       cleanedData
     );
@@ -134,7 +124,7 @@ export const questionnairesApi = {
    * Supprime un questionnaire médical
    * DELETE /api/v1/simulations/questionnaires-medicaux/{id}/
    */
-  deleteQuestionnaire: async (id: string): Promise<void> => {
+  deleteQuestionnaire: async (id: number): Promise<void> => {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour deleteQuestionnaire");
     }
@@ -146,7 +136,7 @@ export const questionnairesApi = {
    * POST /api/v1/simulations/questionnaires-medicaux/{id}/appliquer-a-simulation/
    */
   appliquerASimulation: async (
-    id: string,
+    id: number,
     simulationId: string
   ): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
@@ -188,7 +178,7 @@ export const questionnairesApi = {
    * Recalcule la surprime d'un questionnaire médical
    * POST /api/v1/simulations/questionnaires-medicaux/{id}/recalculer-surprime/
    */
-  recalculerSurprime: async (id: string): Promise<QuestionnaireResponse> => {
+  recalculerSurprime: async (id: number): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour recalculerSurprime");
     }

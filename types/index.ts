@@ -218,11 +218,15 @@ export interface QuestionnaireMedical {
   commentaire_medical?: string;
 }
 
-export interface QuestionnaireResponse {
+export interface QuestionnaireResponse extends QuestionnaireMedical {
+  id: number;
+  simulation: string;
+  date_remplissage?: string;
+  date_modification?: string;
   taux_surprime: number; // 0-20%
   categorie_risque: "faible" | "moyen" | "eleve" | "tres_eleve";
   score_total: number;
-  details_scoring: {
+  details_scoring?: {
     imc_score: number;
     tabac_score: number;
     alcool_score: number;

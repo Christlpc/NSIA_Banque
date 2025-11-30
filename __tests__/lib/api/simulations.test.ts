@@ -121,7 +121,7 @@ describe("Simulations API", () => {
   describe("questionnairesApi", () => {
     it("should create a questionnaire", async () => {
       const mockQuestionnaire = {
-        id: "123",
+        id: 123,
         taille_cm: 175,
         poids_kg: 70,
         fumeur: false,

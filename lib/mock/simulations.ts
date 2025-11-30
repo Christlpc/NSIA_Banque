@@ -210,6 +210,10 @@ export const mockSimulationApi = {
     simulation.updated_at = new Date().toISOString();
 
     return {
+      id: 123, // Mock ID as number
+      simulation: simulationId,
+      date_remplissage: new Date().toISOString(),
+      date_modification: new Date().toISOString(),
       taux_surprime: tauxSurprime,
       categorie_risque: categorieRisque,
       score_total: score,
@@ -219,6 +223,7 @@ export const mockSimulationApi = {
         alcool_score: questionnaire.consomme_alcool ? 2 : 0,
         antecedents_score: antecedents.filter(Boolean).length,
       },
+      ...questionnaire,
     };
   },
 

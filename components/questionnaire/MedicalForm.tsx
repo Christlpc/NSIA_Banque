@@ -134,7 +134,7 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
           simulation: simulationId,
         });
 
-        let questionnaireId: string;
+        let questionnaireId: number;
 
         if (existingQuestionnaires && existingQuestionnaires.length > 0) {
           // Mise à jour du questionnaire existant
