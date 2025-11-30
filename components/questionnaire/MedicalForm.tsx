@@ -140,21 +140,42 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
 
       // Utiliser la nouvelle API questionnaires
       try {
-        const created = await questionnairesApi.createQuestionnaire({
-          ...questionnaireData,
+        // 1. Vérifier si un questionnaire existe déjà pour cette simulation
+        const existingQuestionnaires = await questionnairesApi.getQuestionnaires({
           simulation: simulationId,
         });
 
-        // Appliquer le questionnaire à la simulation
-        await questionnairesApi.appliquerASimulation(created.id, simulationId);
+        let questionnaireId: string;
+
+        if (existingQuestionnaires && existingQuestionnaires.length > 0) {
+          // Mise à jour du questionnaire existant
+          const existing = existingQuestionnaires[0];
+          await questionnairesApi.updateQuestionnaire(existing.id, questionnaireData);
+          questionnaireId = existing.id;
+        } else {
+          // Création d'un nouveau questionnaire
+          const created = await questionnairesApi.createQuestionnaire({
+            ...questionnaireData,
+            simulation: simulationId,
+          });
+          questionnaireId = created.id;
+        }
+
+        // Appliquer le questionnaire à la simulation (recalcul)
+        await questionnairesApi.appliquerASimulation(questionnaireId, simulationId);
 
         toast.success("Questionnaire soumis avec succès");
         router.push(`/simulations/${simulationId}`);
       } catch (newApiError: any) {
+        console.error("Erreur API questionnaires:", newApiError);
         // Fallback sur l'ancienne API si nécessaire
-        await simulationApi.submitQuestionnaire(simulationId, questionnaireData);
-        toast.success("Questionnaire soumis avec succès");
-        router.push(`/simulations/${simulationId}`);
+        try {
+          await simulationApi.submitQuestionnaire(simulationId, questionnaireData);
+          toast.success("Questionnaire soumis avec succès");
+          router.push(`/simulations/${simulationId}`);
+        } catch (fallbackError: any) {
+          toast.error(fallbackError?.message || "Erreur lors de la soumission");
+        }
       }
     } catch (error: any) {
       toast.error(error?.message || "Erreur lors de la soumission");
