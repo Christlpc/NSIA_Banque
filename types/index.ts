@@ -105,6 +105,38 @@ export interface Simulation {
   duree_service?: number;
   debut_service?: number;
   fin_service?: number;
+  prime_unique?: string;
+  prime_annuelle?: string;
+
+  // Elikia
+  rente_annuelle?: number;
+  duree_rente?: number;
+  prime_nette_annuelle?: number;
+  prime_mensuelle?: number;
+  capital_garanti?: number;
+  tranche_age?: string;
+
+  // Emprunteur
+  age_emprunteur?: number;
+  taux_applique?: number;
+  prime_nette?: number;
+  surprime?: number; // Montant surprime
+  frais_accessoires?: number;
+  net_a_debourser?: number;
+  date_effet?: string;
+
+  // Mobateli
+  capital_dtc_iad?: number;
+  age?: number;
+
+  // Retraite
+  prime_periodique_commerciale?: number;
+  capital_deces?: number;
+  duree?: number;
+  periodicite?: string;
+  periodicite_libelle?: string;
+  prime_deces?: number;
+  prime_epargne?: number;
 }
 
 export interface SimulationCreateData {

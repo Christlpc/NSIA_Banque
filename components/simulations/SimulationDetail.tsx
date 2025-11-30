@@ -98,10 +98,10 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
         </CardContent>
       </Card>
 
-      {/* Détails du produit */}
+      {/* Détails du Produit & Résultats */}
       <Card>
         <CardHeader>
-          <CardTitle>Détails du Produit</CardTitle>
+          <CardTitle>Détails du Produit & Résultats</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -109,6 +109,8 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
               <p className="text-sm text-gray-500">Produit</p>
               <p className="font-medium">{PRODUIT_LABELS[simulation.produit]}</p>
             </div>
+
+            {/* CHAMPS COMMUNS */}
             {simulation.montant_pret && (
               <div>
                 <p className="text-sm text-gray-500">Montant du prêt</p>
@@ -129,96 +131,249 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
                 <p className="font-medium">{simulation.taux_interet}%</p>
               </div>
             )}
-            {simulation.montant_rente_annuel && (
+
+            {/* ELIKIA SCOLAIRE */}
+            {simulation.produit === "elikia_scolaire" && (
+              <>
+                {simulation.rente_annuelle && (
+                  <div>
+                    <p className="text-sm text-gray-500">Rente annuelle</p>
+                    <p className="font-medium">{simulation.rente_annuelle.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.duree_rente && (
+                  <div>
+                    <p className="text-sm text-gray-500">Durée de la rente</p>
+                    <p className="font-medium">{simulation.duree_rente} ans</p>
+                  </div>
+                )}
+                {simulation.age_parent && (
+                  <div>
+                    <p className="text-sm text-gray-500">Âge du parent</p>
+                    <p className="font-medium">{simulation.age_parent} ans</p>
+                  </div>
+                )}
+                {simulation.tranche_age && (
+                  <div>
+                    <p className="text-sm text-gray-500">Tranche d'âge</p>
+                    <p className="font-medium">{simulation.tranche_age}</p>
+                  </div>
+                )}
+                {simulation.capital_garanti && (
+                  <div>
+                    <p className="text-sm text-gray-500">Capital garanti</p>
+                    <p className="font-medium text-green-600">{simulation.capital_garanti.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.prime_nette_annuelle && (
+                  <div>
+                    <p className="text-sm text-gray-500">Prime nette annuelle</p>
+                    <p className="font-medium">{simulation.prime_nette_annuelle.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* EMPRUNTEUR */}
+            {simulation.produit === "emprunteur" && (
+              <>
+                {simulation.age_emprunteur && (
+                  <div>
+                    <p className="text-sm text-gray-500">Âge emprunteur</p>
+                    <p className="font-medium">{simulation.age_emprunteur} ans</p>
+                  </div>
+                )}
+                {simulation.taux_applique && (
+                  <div>
+                    <p className="text-sm text-gray-500">Taux appliqué</p>
+                    <p className="font-medium">{simulation.taux_applique}%</p>
+                  </div>
+                )}
+                {simulation.prime_nette && (
+                  <div>
+                    <p className="text-sm text-gray-500">Prime nette</p>
+                    <p className="font-medium">{simulation.prime_nette.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.surprime && (
+                  <div>
+                    <p className="text-sm text-gray-500">Surprime</p>
+                    <p className="font-medium">{simulation.surprime.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.frais_accessoires && (
+                  <div>
+                    <p className="text-sm text-gray-500">Frais accessoires</p>
+                    <p className="font-medium">{simulation.frais_accessoires.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.net_a_debourser && (
+                  <div>
+                    <p className="text-sm text-gray-500">Net à débourser</p>
+                    <p className="font-medium text-blue-600 text-lg">{simulation.net_a_debourser.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* MOBATELI */}
+            {simulation.produit === "mobateli" && (
+              <>
+                {simulation.capital_dtc_iad && (
+                  <div>
+                    <p className="text-sm text-gray-500">Capital DTC/IAD</p>
+                    <p className="font-medium">{simulation.capital_dtc_iad.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.age && (
+                  <div>
+                    <p className="text-sm text-gray-500">Âge</p>
+                    <p className="font-medium">{simulation.age} ans</p>
+                  </div>
+                )}
+                {simulation.tranche_age && (
+                  <div>
+                    <p className="text-sm text-gray-500">Tranche d'âge</p>
+                    <p className="font-medium">{simulation.tranche_age}</p>
+                  </div>
+                )}
+                {simulation.prime_nette && (
+                  <div>
+                    <p className="text-sm text-gray-500">Prime nette</p>
+                    <p className="font-medium">{simulation.prime_nette.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* CONFORT RETRAITE */}
+            {simulation.produit === "confort_retraite" && (
+              <>
+                {simulation.prime_periodique_commerciale && (
+                  <div>
+                    <p className="text-sm text-gray-500">Prime périodique commerciale</p>
+                    <p className="font-medium">{simulation.prime_periodique_commerciale.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.capital_deces !== undefined && (
+                  <div>
+                    <p className="text-sm text-gray-500">Capital décès</p>
+                    <p className="font-medium">{simulation.capital_deces.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.duree && (
+                  <div>
+                    <p className="text-sm text-gray-500">Durée</p>
+                    <p className="font-medium">{simulation.duree} ans</p>
+                  </div>
+                )}
+                {simulation.periodicite_libelle && (
+                  <div>
+                    <p className="text-sm text-gray-500">Périodicité</p>
+                    <p className="font-medium">{simulation.periodicite_libelle}</p>
+                  </div>
+                )}
+                {simulation.capital_garanti && (
+                  <div>
+                    <p className="text-sm text-gray-500">Capital garanti</p>
+                    <p className="font-medium text-green-600">{simulation.capital_garanti.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.prime_epargne && (
+                  <div>
+                    <p className="text-sm text-gray-500">Prime épargne</p>
+                    <p className="font-medium">{simulation.prime_epargne.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.prime_deces && (
+                  <div>
+                    <p className="text-sm text-gray-500">Prime décès</p>
+                    <p className="font-medium">{simulation.prime_deces.toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* CONFORT ETUDES */}
+            {simulation.produit === "confort_etudes" && (
+              <>
+                {simulation.montant_rente_annuel && (
+                  <div>
+                    <p className="text-sm text-gray-500">Montant rente annuel</p>
+                    <p className="font-medium">
+                      {simulation.montant_rente_annuel.toLocaleString("fr-FR")} FCFA
+                    </p>
+                  </div>
+                )}
+                {simulation.age_parent !== undefined && (
+                  <div>
+                    <p className="text-sm text-gray-500">Âge du parent</p>
+                    <p className="font-medium">{simulation.age_parent} ans</p>
+                  </div>
+                )}
+                {simulation.age_enfant !== undefined && (
+                  <div>
+                    <p className="text-sm text-gray-500">Âge de l'enfant</p>
+                    <p className="font-medium">{simulation.age_enfant} ans</p>
+                  </div>
+                )}
+                {simulation.duree_paiement !== undefined && (
+                  <div>
+                    <p className="text-sm text-gray-500">Durée de paiement</p>
+                    <p className="font-medium">{simulation.duree_paiement} ans</p>
+                  </div>
+                )}
+                {simulation.duree_service !== undefined && (
+                  <div>
+                    <p className="text-sm text-gray-500">Durée de service</p>
+                    <p className="font-medium">{simulation.duree_service} ans</p>
+                  </div>
+                )}
+                {simulation.debut_service !== undefined && (
+                  <div>
+                    <p className="text-sm text-gray-500">Début de service</p>
+                    <p className="font-medium">À {simulation.debut_service} ans</p>
+                  </div>
+                )}
+                {simulation.fin_service !== undefined && (
+                  <div>
+                    <p className="text-sm text-gray-500">Fin de service</p>
+                    <p className="font-medium">À {simulation.fin_service} ans</p>
+                  </div>
+                )}
+                {simulation.prime_unique && (
+                  <div>
+                    <p className="text-sm text-gray-500">Prime unique</p>
+                    <p className="font-medium">{parseFloat(simulation.prime_unique).toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+                {simulation.prime_annuelle && (
+                  <div>
+                    <p className="text-sm text-gray-500">Prime annuelle</p>
+                    <p className="font-medium">{parseFloat(simulation.prime_annuelle).toLocaleString("fr-FR")} FCFA</p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* PRIMES GENERALES (si non affichées spécifiquement) */}
+            {simulation.prime_mensuelle && (
               <div>
-                <p className="text-sm text-gray-500">Montant rente annuel</p>
-                <p className="font-medium">
-                  {simulation.montant_rente_annuel.toLocaleString("fr-FR")} FCFA
+                <p className="text-sm text-gray-500">Prime mensuelle</p>
+                <p className="font-medium">{simulation.prime_mensuelle.toLocaleString("fr-FR")} FCFA</p>
+              </div>
+            )}
+            {simulation.prime_totale && (
+              <div>
+                <p className="text-sm text-gray-500">Prime totale</p>
+                <p className="font-medium text-xl text-blue-600">
+                  {parseFloat(simulation.prime_totale).toLocaleString("fr-FR")} FCFA
                 </p>
-              </div>
-            )}
-            {simulation.age_parent !== undefined && (
-              <div>
-                <p className="text-sm text-gray-500">Âge du parent</p>
-                <p className="font-medium">{simulation.age_parent} ans</p>
-              </div>
-            )}
-            {simulation.age_enfant !== undefined && (
-              <div>
-                <p className="text-sm text-gray-500">Âge de l'enfant</p>
-                <p className="font-medium">{simulation.age_enfant} ans</p>
-              </div>
-            )}
-            {simulation.duree_paiement !== undefined && (
-              <div>
-                <p className="text-sm text-gray-500">Durée de paiement</p>
-                <p className="font-medium">{simulation.duree_paiement} ans</p>
-              </div>
-            )}
-            {simulation.duree_service !== undefined && (
-              <div>
-                <p className="text-sm text-gray-500">Durée de service</p>
-                <p className="font-medium">{simulation.duree_service} ans</p>
-              </div>
-            )}
-            {simulation.debut_service !== undefined && (
-              <div>
-                <p className="text-sm text-gray-500">Début de service</p>
-                <p className="font-medium">À {simulation.debut_service} ans</p>
-              </div>
-            )}
-            {simulation.fin_service !== undefined && (
-              <div>
-                <p className="text-sm text-gray-500">Fin de service</p>
-                <p className="font-medium">À {simulation.fin_service} ans</p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
-
-      {/* Calculs de prime */}
-      {(simulation.prime_base || simulation.prime_totale) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Calcul de Prime</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {simulation.prime_base && (
-                <div>
-                  <p className="text-sm text-gray-500">Prime de base</p>
-                  <p className="font-medium text-lg">
-                    {parseFloat(simulation.prime_base).toLocaleString("fr-FR")} FCFA
-                  </p>
-                </div>
-              )}
-              {simulation.surprime_taux && (
-                <div>
-                  <p className="text-sm text-gray-500">Taux de surprime</p>
-                  <p className="font-medium">{simulation.surprime_taux}%</p>
-                </div>
-              )}
-              {simulation.surprime_montant && (
-                <div>
-                  <p className="text-sm text-gray-500">Montant de surprime</p>
-                  <p className="font-medium">
-                    {parseFloat(simulation.surprime_montant).toLocaleString("fr-FR")} FCFA
-                  </p>
-                </div>
-              )}
-              {simulation.prime_totale && (
-                <div>
-                  <p className="text-sm text-gray-500">Prime totale</p>
-                  <p className="font-medium text-xl text-blue-600">
-                    {parseFloat(simulation.prime_totale).toLocaleString("fr-FR")} FCFA
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Questionnaire médical */}
       {simulation.categorie_risque && (
