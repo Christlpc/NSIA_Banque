@@ -17,6 +17,16 @@ interface SimulationDetailProps {
 export function SimulationDetail({ simulation }: SimulationDetailProps) {
   const router = useSafeRouter();
 
+  // Merge nested data for display
+  const displaySimulation = {
+    ...simulation,
+    ...simulation.donnees_entree,
+    ...simulation.resultats_calcul,
+  };
+
+  // Use displaySimulation instead of simulation for the rest of the component
+  const s = displaySimulation;
+
   return (
     <div className="space-y-6">
       {/* En-tête avec statut */}
@@ -25,9 +35,9 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-3">
-                Simulation {simulation.reference}
-                <Badge className={STATUT_COLORS[simulation.statut]}>
-                  {STATUT_LABELS[simulation.statut]}
+                Simulation {s.reference}
+                <Badge className={STATUT_COLORS[s.statut]}>
+                  {STATUT_LABELS[s.statut]}
                 </Badge>
               </CardTitle>
             </div>
@@ -49,49 +59,49 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
             <div>
               <p className="text-sm text-gray-500">Nom complet</p>
               <p className="font-medium">
-                {simulation.prenom_client} {simulation.nom_client}
+                {s.prenom_client} {s.nom_client}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Date de naissance</p>
               <p className="font-medium">
-                {formatDateFull(simulation.date_naissance)}
+                {formatDateFull(s.date_naissance)}
               </p>
             </div>
-            {simulation.telephone_client && (
+            {s.telephone_client && (
               <div>
                 <p className="text-sm text-gray-500">Téléphone</p>
-                <p className="font-medium">{simulation.telephone_client}</p>
+                <p className="font-medium">{s.telephone_client}</p>
               </div>
             )}
-            {simulation.email_client && (
+            {s.email_client && (
               <div>
                 <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium">{simulation.email_client}</p>
+                <p className="font-medium">{s.email_client}</p>
               </div>
             )}
-            {simulation.profession && (
+            {s.profession && (
               <div>
                 <p className="text-sm text-gray-500">Profession</p>
-                <p className="font-medium">{simulation.profession}</p>
+                <p className="font-medium">{s.profession}</p>
               </div>
             )}
-            {simulation.adresse_postale && (
+            {s.adresse_postale && (
               <div className="md:col-span-2">
                 <p className="text-sm text-gray-500">Adresse postale</p>
-                <p className="font-medium">{simulation.adresse_postale}</p>
+                <p className="font-medium">{s.adresse_postale}</p>
               </div>
             )}
-            {simulation.employeur && (
+            {s.employeur && (
               <div>
                 <p className="text-sm text-gray-500">Employeur</p>
-                <p className="font-medium">{simulation.employeur}</p>
+                <p className="font-medium">{s.employeur}</p>
               </div>
             )}
-            {simulation.situation_matrimoniale && (
+            {s.situation_matrimoniale && (
               <div>
                 <p className="text-sm text-gray-500">Situation matrimoniale</p>
-                <p className="font-medium">{simulation.situation_matrimoniale}</p>
+                <p className="font-medium">{s.situation_matrimoniale}</p>
               </div>
             )}
           </div>
@@ -107,267 +117,267 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-500">Produit</p>
-              <p className="font-medium">{PRODUIT_LABELS[simulation.produit]}</p>
+              <p className="font-medium">{PRODUIT_LABELS[s.produit]}</p>
             </div>
 
             {/* CHAMPS COMMUNS */}
-            {simulation.montant_pret && (
+            {s.montant_pret && (
               <div>
                 <p className="text-sm text-gray-500">Montant du prêt</p>
                 <p className="font-medium">
-                  {simulation.montant_pret.toLocaleString("fr-FR")} FCFA
+                  {s.montant_pret.toLocaleString("fr-FR")} FCFA
                 </p>
               </div>
             )}
-            {simulation.duree_mois && (
+            {s.duree_mois && (
               <div>
                 <p className="text-sm text-gray-500">Durée</p>
-                <p className="font-medium">{simulation.duree_mois} mois</p>
+                <p className="font-medium">{s.duree_mois} mois</p>
               </div>
             )}
-            {simulation.taux_interet && (
+            {s.taux_interet && (
               <div>
                 <p className="text-sm text-gray-500">Taux d'intérêt</p>
-                <p className="font-medium">{simulation.taux_interet}%</p>
+                <p className="font-medium">{s.taux_interet}%</p>
               </div>
             )}
 
             {/* ELIKIA SCOLAIRE */}
-            {simulation.produit === "elikia_scolaire" && (
+            {s.produit === "elikia_scolaire" && (
               <>
-                {simulation.rente_annuelle && (
+                {s.rente_annuelle && (
                   <div>
                     <p className="text-sm text-gray-500">Rente annuelle</p>
-                    <p className="font-medium">{simulation.rente_annuelle.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.rente_annuelle.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.duree_rente && (
+                {s.duree_rente && (
                   <div>
                     <p className="text-sm text-gray-500">Durée de la rente</p>
-                    <p className="font-medium">{simulation.duree_rente} ans</p>
+                    <p className="font-medium">{s.duree_rente} ans</p>
                   </div>
                 )}
-                {simulation.age_parent && (
+                {s.age_parent && (
                   <div>
                     <p className="text-sm text-gray-500">Âge du parent</p>
-                    <p className="font-medium">{simulation.age_parent} ans</p>
+                    <p className="font-medium">{s.age_parent} ans</p>
                   </div>
                 )}
-                {simulation.tranche_age && (
+                {s.tranche_age && (
                   <div>
                     <p className="text-sm text-gray-500">Tranche d'âge</p>
-                    <p className="font-medium">{simulation.tranche_age}</p>
+                    <p className="font-medium">{s.tranche_age}</p>
                   </div>
                 )}
-                {simulation.capital_garanti && (
+                {s.capital_garanti && (
                   <div>
                     <p className="text-sm text-gray-500">Capital garanti</p>
-                    <p className="font-medium text-green-600">{simulation.capital_garanti.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium text-green-600">{s.capital_garanti.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.prime_nette_annuelle && (
+                {s.prime_nette_annuelle && (
                   <div>
                     <p className="text-sm text-gray-500">Prime nette annuelle</p>
-                    <p className="font-medium">{simulation.prime_nette_annuelle.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.prime_nette_annuelle.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
               </>
             )}
 
             {/* EMPRUNTEUR */}
-            {simulation.produit === "emprunteur" && (
+            {s.produit === "emprunteur" && (
               <>
-                {simulation.age_emprunteur && (
+                {s.age_emprunteur && (
                   <div>
                     <p className="text-sm text-gray-500">Âge emprunteur</p>
-                    <p className="font-medium">{simulation.age_emprunteur} ans</p>
+                    <p className="font-medium">{s.age_emprunteur} ans</p>
                   </div>
                 )}
-                {simulation.taux_applique && (
+                {s.taux_applique && (
                   <div>
                     <p className="text-sm text-gray-500">Taux appliqué</p>
-                    <p className="font-medium">{simulation.taux_applique}%</p>
+                    <p className="font-medium">{s.taux_applique}%</p>
                   </div>
                 )}
-                {simulation.prime_nette && (
+                {s.prime_nette && (
                   <div>
                     <p className="text-sm text-gray-500">Prime nette</p>
-                    <p className="font-medium">{simulation.prime_nette.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.prime_nette.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.surprime && (
+                {s.surprime && (
                   <div>
                     <p className="text-sm text-gray-500">Surprime</p>
-                    <p className="font-medium">{simulation.surprime.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.surprime.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.frais_accessoires && (
+                {s.frais_accessoires && (
                   <div>
                     <p className="text-sm text-gray-500">Frais accessoires</p>
-                    <p className="font-medium">{simulation.frais_accessoires.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.frais_accessoires.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.net_a_debourser && (
+                {s.net_a_debourser && (
                   <div>
                     <p className="text-sm text-gray-500">Net à débourser</p>
-                    <p className="font-medium text-blue-600 text-lg">{simulation.net_a_debourser.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium text-blue-600 text-lg">{s.net_a_debourser.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
               </>
             )}
 
             {/* MOBATELI */}
-            {simulation.produit === "mobateli" && (
+            {s.produit === "mobateli" && (
               <>
-                {simulation.capital_dtc_iad && (
+                {s.capital_dtc_iad && (
                   <div>
                     <p className="text-sm text-gray-500">Capital DTC/IAD</p>
-                    <p className="font-medium">{simulation.capital_dtc_iad.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.capital_dtc_iad.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.age && (
+                {s.age && (
                   <div>
                     <p className="text-sm text-gray-500">Âge</p>
-                    <p className="font-medium">{simulation.age} ans</p>
+                    <p className="font-medium">{s.age} ans</p>
                   </div>
                 )}
-                {simulation.tranche_age && (
+                {s.tranche_age && (
                   <div>
                     <p className="text-sm text-gray-500">Tranche d'âge</p>
-                    <p className="font-medium">{simulation.tranche_age}</p>
+                    <p className="font-medium">{s.tranche_age}</p>
                   </div>
                 )}
-                {simulation.prime_nette && (
+                {s.prime_nette && (
                   <div>
                     <p className="text-sm text-gray-500">Prime nette</p>
-                    <p className="font-medium">{simulation.prime_nette.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.prime_nette.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
               </>
             )}
 
             {/* CONFORT RETRAITE */}
-            {simulation.produit === "confort_retraite" && (
+            {s.produit === "confort_retraite" && (
               <>
-                {simulation.prime_periodique_commerciale && (
+                {s.prime_periodique_commerciale && (
                   <div>
                     <p className="text-sm text-gray-500">Prime périodique commerciale</p>
-                    <p className="font-medium">{simulation.prime_periodique_commerciale.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.prime_periodique_commerciale.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.capital_deces !== undefined && (
+                {s.capital_deces !== undefined && (
                   <div>
                     <p className="text-sm text-gray-500">Capital décès</p>
-                    <p className="font-medium">{simulation.capital_deces.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.capital_deces.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.duree && (
+                {s.duree && (
                   <div>
                     <p className="text-sm text-gray-500">Durée</p>
-                    <p className="font-medium">{simulation.duree} ans</p>
+                    <p className="font-medium">{s.duree} ans</p>
                   </div>
                 )}
-                {simulation.periodicite_libelle && (
+                {s.periodicite_libelle && (
                   <div>
                     <p className="text-sm text-gray-500">Périodicité</p>
-                    <p className="font-medium">{simulation.periodicite_libelle}</p>
+                    <p className="font-medium">{s.periodicite_libelle}</p>
                   </div>
                 )}
-                {simulation.capital_garanti && (
+                {s.capital_garanti && (
                   <div>
                     <p className="text-sm text-gray-500">Capital garanti</p>
-                    <p className="font-medium text-green-600">{simulation.capital_garanti.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium text-green-600">{s.capital_garanti.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.prime_epargne && (
+                {s.prime_epargne && (
                   <div>
                     <p className="text-sm text-gray-500">Prime épargne</p>
-                    <p className="font-medium">{simulation.prime_epargne.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.prime_epargne.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.prime_deces && (
+                {s.prime_deces && (
                   <div>
                     <p className="text-sm text-gray-500">Prime décès</p>
-                    <p className="font-medium">{simulation.prime_deces.toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{s.prime_deces.toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
               </>
             )}
 
             {/* CONFORT ETUDES */}
-            {simulation.produit === "confort_etudes" && (
+            {s.produit === "confort_etudes" && (
               <>
-                {simulation.montant_rente_annuel && (
+                {s.montant_rente_annuel && (
                   <div>
                     <p className="text-sm text-gray-500">Montant rente annuel</p>
                     <p className="font-medium">
-                      {simulation.montant_rente_annuel.toLocaleString("fr-FR")} FCFA
+                      {s.montant_rente_annuel.toLocaleString("fr-FR")} FCFA
                     </p>
                   </div>
                 )}
-                {simulation.age_parent !== undefined && (
+                {s.age_parent !== undefined && (
                   <div>
                     <p className="text-sm text-gray-500">Âge du parent</p>
-                    <p className="font-medium">{simulation.age_parent} ans</p>
+                    <p className="font-medium">{s.age_parent} ans</p>
                   </div>
                 )}
-                {simulation.age_enfant !== undefined && (
+                {s.age_enfant !== undefined && (
                   <div>
                     <p className="text-sm text-gray-500">Âge de l'enfant</p>
-                    <p className="font-medium">{simulation.age_enfant} ans</p>
+                    <p className="font-medium">{s.age_enfant} ans</p>
                   </div>
                 )}
-                {simulation.duree_paiement !== undefined && (
+                {s.duree_paiement !== undefined && (
                   <div>
                     <p className="text-sm text-gray-500">Durée de paiement</p>
-                    <p className="font-medium">{simulation.duree_paiement} ans</p>
+                    <p className="font-medium">{s.duree_paiement} ans</p>
                   </div>
                 )}
-                {simulation.duree_service !== undefined && (
+                {s.duree_service !== undefined && (
                   <div>
                     <p className="text-sm text-gray-500">Durée de service</p>
-                    <p className="font-medium">{simulation.duree_service} ans</p>
+                    <p className="font-medium">{s.duree_service} ans</p>
                   </div>
                 )}
-                {simulation.debut_service !== undefined && (
+                {s.debut_service !== undefined && (
                   <div>
                     <p className="text-sm text-gray-500">Début de service</p>
-                    <p className="font-medium">À {simulation.debut_service} ans</p>
+                    <p className="font-medium">À {s.debut_service} ans</p>
                   </div>
                 )}
-                {simulation.fin_service !== undefined && (
+                {s.fin_service !== undefined && (
                   <div>
                     <p className="text-sm text-gray-500">Fin de service</p>
-                    <p className="font-medium">À {simulation.fin_service} ans</p>
+                    <p className="font-medium">À {s.fin_service} ans</p>
                   </div>
                 )}
-                {simulation.prime_unique && (
+                {s.prime_unique && (
                   <div>
                     <p className="text-sm text-gray-500">Prime unique</p>
-                    <p className="font-medium">{parseFloat(simulation.prime_unique).toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{parseFloat(s.prime_unique).toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
-                {simulation.prime_annuelle && (
+                {s.prime_annuelle && (
                   <div>
                     <p className="text-sm text-gray-500">Prime annuelle</p>
-                    <p className="font-medium">{parseFloat(simulation.prime_annuelle).toLocaleString("fr-FR")} FCFA</p>
+                    <p className="font-medium">{parseFloat(s.prime_annuelle).toLocaleString("fr-FR")} FCFA</p>
                   </div>
                 )}
               </>
             )}
 
             {/* PRIMES GENERALES (si non affichées spécifiquement) */}
-            {simulation.prime_mensuelle && (
+            {s.prime_mensuelle && (
               <div>
                 <p className="text-sm text-gray-500">Prime mensuelle</p>
-                <p className="font-medium">{simulation.prime_mensuelle.toLocaleString("fr-FR")} FCFA</p>
+                <p className="font-medium">{s.prime_mensuelle.toLocaleString("fr-FR")} FCFA</p>
               </div>
             )}
-            {simulation.prime_totale && (
+            {s.prime_totale && (
               <div>
                 <p className="text-sm text-gray-500">Prime totale</p>
                 <p className="font-medium text-xl text-blue-600">
-                  {parseFloat(simulation.prime_totale).toLocaleString("fr-FR")} FCFA
+                  {parseFloat(s.prime_totale).toLocaleString("fr-FR")} FCFA
                 </p>
               </div>
             )}
@@ -376,7 +386,7 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
       </Card>
 
       {/* Questionnaire médical */}
-      {simulation.categorie_risque && (
+      {s.categorie_risque && (
         <Card>
           <CardHeader>
             <CardTitle>Questionnaire Médical</CardTitle>
@@ -385,26 +395,26 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-500">Catégorie de risque</p>
-                <p className="font-medium">{simulation.categorie_risque}</p>
+                <p className="font-medium">{s.categorie_risque}</p>
               </div>
-              {simulation.score_total !== undefined && (
+              {s.score_total !== undefined && (
                 <div>
                   <p className="text-sm text-gray-500">Score total</p>
-                  <p className="font-medium">{simulation.score_total} points</p>
+                  <p className="font-medium">{s.score_total} points</p>
                 </div>
               )}
-              {simulation.taux_surprime !== undefined && (
+              {s.taux_surprime !== undefined && (
                 <div>
                   <p className="text-sm text-gray-500">Taux de surprime appliqué</p>
-                  <p className="font-medium">{simulation.taux_surprime}%</p>
+                  <p className="font-medium">{s.taux_surprime}%</p>
                 </div>
               )}
             </div>
-            {simulation.statut === "calculee" && (
+            {s.statut === "calculee" && (
               <div className="mt-4">
                 <Button
                   className="w-full sm:w-auto"
-                  onClick={() => router.push(`/simulations/${simulation.id}/questionnaire`)}
+                  onClick={() => router.push(`/simulations/${s.id}/questionnaire`)}
                 >
                   <FileText className="mr-2 h-4 w-4" />
                   Compléter le questionnaire médical
@@ -425,7 +435,7 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
             <div>
               <p className="text-sm text-gray-500">Date de création</p>
               <p className="font-medium">
-                {formatDateTime(simulation.created_at)}
+                {formatDateTime(s.created_at)}
               </p>
             </div>
             <div>

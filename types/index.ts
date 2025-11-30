@@ -96,6 +96,10 @@ export interface Simulation {
   created_by: number;
   banque: number;
 
+  // API Response fields (Nested structure)
+  donnees_entree?: Record<string, any>;
+  resultats_calcul?: Record<string, any>;
+
   // Backward compatibility (optional, for smooth transition if needed)
   // Additional fields for Etudes and other products
   montant_rente_annuel?: number;
