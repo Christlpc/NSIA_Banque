@@ -1,8 +1,8 @@
 /**
  * Calcule l'IMC (Indice de Masse Corporelle)
  */
-export function calculateIMC(poids: number, taille: number): number {
-  const tailleEnMetres = taille / 100;
+export function calculateIMC(poids: number, taille_cm: number): number {
+  const tailleEnMetres = taille_cm / 100;
   return poids / (tailleEnMetres * tailleEnMetres);
 }
 

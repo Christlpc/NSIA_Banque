@@ -122,7 +122,7 @@ describe("Simulations API", () => {
     it("should create a questionnaire", async () => {
       const mockQuestionnaire = {
         id: "123",
-        taille: 175,
+        taille_cm: 175,
         poids: 70,
         fumeur: false,
       };
@@ -130,7 +130,7 @@ describe("Simulations API", () => {
       (apiClient.post as any).mockResolvedValue({ data: mockQuestionnaire });
 
       const data = {
-        taille: 175,
+        taille_cm: 175,
         poids: 70,
         fumeur: false,
         alcool: false,
