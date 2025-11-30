@@ -266,15 +266,13 @@ const generateMockSimulation = (
     date_naissance: "1990-01-01",
 
     // Legacy fields for compatibility if needed
-    nom: nom,
-    prenom: prenom,
+
     // date_naissance: "1990-01-01", // Already defined above
     montant_pret: produit === "emprunteur" ? 10000000 : undefined,
     duree_mois: produit === "emprunteur" ? 60 : undefined,
     taux_interet: produit === "emprunteur" ? 7.5 : undefined,
     // profession: "Employé", // Already defined above
-    adresse: "Abidjan, Cocody",
-    telephone: "+242 06 123 45 67",
+
     created_at: baseDate.toISOString(),
     updated_at: baseDate.toISOString(),
     created_by: 1,
