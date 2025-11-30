@@ -65,7 +65,7 @@ export function RecentActivity() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm text-gray-900 truncate">
-                          {simulation.prenom} {simulation.nom}
+                          {simulation.prenom_client} {simulation.nom_client}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5 truncate">
                           {PRODUIT_LABELS[simulation.produit]}

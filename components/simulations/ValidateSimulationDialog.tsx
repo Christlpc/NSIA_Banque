@@ -30,7 +30,7 @@ export function ValidateSimulationDialog({
   isLoading = false,
 }: ValidateSimulationDialogProps) {
   const simulationName = simulation
-    ? `${simulation.prenom} ${simulation.nom} - ${PRODUIT_LABELS[simulation.produit]}`
+    ? `${simulation.prenom_client} ${simulation.nom_client} - ${PRODUIT_LABELS[simulation.produit]}`
     : undefined;
 
   return (
