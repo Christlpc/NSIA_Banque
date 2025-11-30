@@ -48,7 +48,7 @@ export default function SimulationDetailPage() {
             Simulation {currentSimulation.reference}
           </h1>
           <p className="text-gray-600 mt-2">
-            {currentSimulation.prenom} {currentSimulation.nom}
+            {currentSimulation.prenom_client} {currentSimulation.nom_client}
           </p>
         </div>
       </div>
