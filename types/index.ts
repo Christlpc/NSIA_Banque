@@ -97,11 +97,14 @@ export interface Simulation {
   banque: number;
 
   // Backward compatibility (optional, for smooth transition if needed)
-  nom?: string;
-  prenom?: string;
-  email?: string;
-  telephone?: string;
-  adresse?: string;
+  // Additional fields for Etudes and other products
+  montant_rente_annuel?: number;
+  age_parent?: number;
+  age_enfant?: number;
+  duree_paiement?: number;
+  duree_service?: number;
+  debut_service?: number;
+  fin_service?: number;
 }
 
 export interface SimulationCreateData {
@@ -152,7 +155,7 @@ export interface SimulationFilters {
 
 // Types questionnaire médical
 export interface QuestionnaireMedical {
-  taille: number; // cm
+  taille_cm: number; // cm
   poids: number; // kg
   fumeur: boolean;
   nb_cigarettes_jour?: number;

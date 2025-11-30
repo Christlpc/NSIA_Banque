@@ -129,6 +129,50 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
                 <p className="font-medium">{simulation.taux_interet}%</p>
               </div>
             )}
+            {simulation.montant_rente_annuel && (
+              <div>
+                <p className="text-sm text-gray-500">Montant rente annuel</p>
+                <p className="font-medium">
+                  {simulation.montant_rente_annuel.toLocaleString("fr-FR")} FCFA
+                </p>
+              </div>
+            )}
+            {simulation.age_parent !== undefined && (
+              <div>
+                <p className="text-sm text-gray-500">Âge du parent</p>
+                <p className="font-medium">{simulation.age_parent} ans</p>
+              </div>
+            )}
+            {simulation.age_enfant !== undefined && (
+              <div>
+                <p className="text-sm text-gray-500">Âge de l'enfant</p>
+                <p className="font-medium">{simulation.age_enfant} ans</p>
+              </div>
+            )}
+            {simulation.duree_paiement !== undefined && (
+              <div>
+                <p className="text-sm text-gray-500">Durée de paiement</p>
+                <p className="font-medium">{simulation.duree_paiement} ans</p>
+              </div>
+            )}
+            {simulation.duree_service !== undefined && (
+              <div>
+                <p className="text-sm text-gray-500">Durée de service</p>
+                <p className="font-medium">{simulation.duree_service} ans</p>
+              </div>
+            )}
+            {simulation.debut_service !== undefined && (
+              <div>
+                <p className="text-sm text-gray-500">Début de service</p>
+                <p className="font-medium">À {simulation.debut_service} ans</p>
+              </div>
+            )}
+            {simulation.fin_service !== undefined && (
+              <div>
+                <p className="text-sm text-gray-500">Fin de service</p>
+                <p className="font-medium">À {simulation.fin_service} ans</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

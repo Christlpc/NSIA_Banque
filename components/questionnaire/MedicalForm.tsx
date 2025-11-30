@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 
 const questionnaireSchema = z.object({
-  taille: z.number().min(100).max(250),
+  taille_cm: z.number().min(100).max(250),
   poids: z.number().min(30).max(200),
   fumeur: z.boolean(),
   nb_cigarettes_jour: z.number().min(0).optional(),
@@ -84,7 +84,7 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
     },
   });
 
-  const taille = watch("taille");
+  const taille = watch("taille_cm");
   const poids = watch("poids");
   const fumeur = watch("fumeur");
   const nbCigarettes = watch("nb_cigarettes_jour");
@@ -116,7 +116,7 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
     setIsSubmitting(true);
     try {
       const questionnaireData: QuestionnaireMedical = {
-        taille: data.taille,
+        taille_cm: data.taille_cm,
         poids: data.poids,
         fumeur: data.fumeur,
         nb_cigarettes_jour: data.fumeur ? data.nb_cigarettes_jour : undefined,
@@ -173,15 +173,15 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="taille">Taille (cm) *</Label>
+              <Label htmlFor="taille_cm">Taille (cm) *</Label>
               <Input
-                id="taille"
+                id="taille_cm"
                 type="number"
-                {...register("taille", { valueAsNumber: true })}
+                {...register("taille_cm", { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
-              {errors.taille && (
-                <p className="text-sm text-red-600">{errors.taille.message}</p>
+              {errors.taille_cm && (
+                <p className="text-sm text-red-600">{errors.taille_cm.message}</p>
               )}
             </div>
             <div className="space-y-2">
