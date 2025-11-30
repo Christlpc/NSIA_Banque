@@ -61,7 +61,7 @@ describe("Calculations Utils", () => {
     it("should return 0 for no medical history", () => {
       const questionnaire: QuestionnaireMedical = {
         taille_cm: 175,
-        poids: 70,
+        poids_kg: 70,
         fumeur: false,
         alcool: false,
         sport: false,
@@ -87,7 +87,7 @@ describe("Calculations Utils", () => {
     it("should calculate score for medical conditions", () => {
       const questionnaire: QuestionnaireMedical = {
         taille_cm: 175,
-        poids: 70,
+        poids_kg: 70,
         fumeur: false,
         alcool: false,
         sport: false,

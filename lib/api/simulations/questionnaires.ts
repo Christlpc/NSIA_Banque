@@ -144,7 +144,7 @@ export const questionnairesApi = {
       // Pour le mock, on simule directement sans appeler getQuestionnaire pour éviter la récursion
       const defaultQuestionnaire: QuestionnaireMedical = {
         taille_cm: 170,
-        poids: 70,
+        poids_kg: 70,
         fumeur: false,
         alcool: false,
         sport: false,

@@ -19,7 +19,7 @@ import { Loader2 } from "lucide-react";
 
 const questionnaireSchema = z.object({
   taille_cm: z.number().min(100).max(250),
-  poids: z.number().min(30).max(200),
+  poids_kg: z.number().min(30).max(200),
   fumeur: z.boolean(),
   nb_cigarettes_jour: z.number().min(0).optional(),
   alcool: z.boolean(),
@@ -85,7 +85,7 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
   });
 
   const taille = watch("taille_cm");
-  const poids = watch("poids");
+  const poids = watch("poids_kg");
   const fumeur = watch("fumeur");
   const nbCigarettes = watch("nb_cigarettes_jour");
   const alcool = watch("alcool");
@@ -117,7 +117,7 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
     try {
       const questionnaireData: QuestionnaireMedical = {
         taille_cm: data.taille_cm,
-        poids: data.poids,
+        poids_kg: data.poids_kg,
         fumeur: data.fumeur,
         nb_cigarettes_jour: data.fumeur ? data.nb_cigarettes_jour : undefined,
         alcool: data.alcool,
@@ -185,16 +185,16 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="poids">Poids (kg) *</Label>
+              <Label htmlFor="poids_kg">Poids (kg) *</Label>
               <Input
-                id="poids"
+                id="poids_kg"
                 type="number"
                 step="0.1"
-                {...register("poids", { valueAsNumber: true })}
+                {...register("poids_kg", { valueAsNumber: true })}
                 disabled={isSubmitting}
               />
-              {errors.poids && (
-                <p className="text-sm text-red-600">{errors.poids.message}</p>
+              {errors.poids_kg && (
+                <p className="text-sm text-red-600">{errors.poids_kg.message}</p>
               )}
             </div>
           </div>

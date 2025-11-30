@@ -192,7 +192,7 @@ export interface SimulationFilters {
 // Types questionnaire médical
 export interface QuestionnaireMedical {
   taille_cm: number; // cm
-  poids: number; // kg
+  poids_kg: number; // kg
   fumeur: boolean;
   nb_cigarettes_jour?: number;
   alcool: boolean;

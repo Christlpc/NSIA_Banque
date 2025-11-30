@@ -123,7 +123,7 @@ describe("Simulations API", () => {
       const mockQuestionnaire = {
         id: "123",
         taille_cm: 175,
-        poids: 70,
+        poids_kg: 70,
         fumeur: false,
       };
 
@@ -131,7 +131,7 @@ describe("Simulations API", () => {
 
       const data = {
         taille_cm: 175,
-        poids: 70,
+        poids_kg: 70,
         fumeur: false,
         alcool: false,
         sport: false,
