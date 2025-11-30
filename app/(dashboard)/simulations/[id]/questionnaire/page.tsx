@@ -46,8 +46,8 @@ export default function QuestionnairePage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Questionnaire Médical</h1>
           <p className="text-gray-600 mt-2">
-            Simulation {currentSimulation.reference} - {currentSimulation.prenom}{" "}
-            {currentSimulation.nom}
+            Simulation {currentSimulation.reference} - {currentSimulation.prenom_client}{" "}
+            {currentSimulation.nom_client}
           </p>
         </div>
       </div>
