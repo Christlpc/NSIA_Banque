@@ -191,26 +191,31 @@ export interface SimulationFilters {
 
 // Types questionnaire médical
 export interface QuestionnaireMedical {
-  taille_cm: number; // cm
-  poids_kg: number; // kg
+  taille_cm: number;
+  poids_kg: number;
+  tension_arterielle?: string;
   fumeur: boolean;
   nb_cigarettes_jour?: number;
-  alcool: boolean;
-  sport: boolean;
+  consomme_alcool: boolean;
+  distractions?: string;
+  pratique_sport: boolean;
+  type_sport?: string;
   a_infirmite: boolean;
-  malade_6mois: boolean;
-  fatigue_frequente: boolean;
-  perte_poids: boolean;
-  douleur_poitrine: boolean;
+  malade_6_derniers_mois: boolean;
+  souvent_fatigue: boolean;
+  perte_poids_recente: boolean;
+  prise_poids_recente: boolean;
+  a_ganglions: boolean;
+  fievre_persistante: boolean;
+  plaies_buccales: boolean;
+  diarrhee_frequente: boolean;
+  ballonnement: boolean;
+  oedemes_membres_inferieurs: boolean;
   essoufflement: boolean;
-  hypertension: boolean;
-  diabete: boolean;
-  maladie_cardiaque: boolean;
-  maladie_respiratoire: boolean;
-  maladie_renale: boolean;
-  maladie_hepatique: boolean;
-  cancer: boolean;
-  autre_maladie: boolean;
+  a_eu_perfusion: boolean;
+  a_eu_transfusion: boolean;
+  infos_complementaires?: string;
+  commentaire_medical?: string;
 }
 
 export interface QuestionnaireResponse {

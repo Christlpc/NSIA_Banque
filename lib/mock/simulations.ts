@@ -136,13 +136,16 @@ export const mockSimulationApi = {
   },
 
   submitQuestionnaire: async (
-    id: string,
+    simulationId: string,
     questionnaire: QuestionnaireMedical
   ): Promise<QuestionnaireResponse> => {
-    await delay(600);
-    const simulation = mockSimulations.find((s) => s.id === id);
+    // Simuler un délai réseau
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Vérifier si la simulation existe
+    const simulation = mockSimulations.find((s) => s.id === simulationId);
     if (!simulation) {
-      throw new Error("Simulation introuvable");
+      throw new Error("Simulation non trouvée");
     }
 
     // Calculer le score (simplifié)
@@ -151,53 +154,70 @@ export const mockSimulationApi = {
     if (imc < 18.5) score += 3;
     else if (imc >= 25 && imc < 30) score += 2;
     else if (imc >= 30) score += 5;
-    if (questionnaire.fumeur) score += questionnaire.nb_cigarettes_jour ? 4 : 2;
-    if (questionnaire.alcool) score += 2;
+
+    if (questionnaire.fumeur) {
+      if (!questionnaire.nb_cigarettes_jour) score += 2;
+      else if (questionnaire.nb_cigarettes_jour <= 10) score += 2;
+      else if (questionnaire.nb_cigarettes_jour <= 20) score += 4;
+      else score += 6;
+    }
+
+    if (questionnaire.consomme_alcool) score += 2;
 
     const antecedents = [
       questionnaire.a_infirmite,
-      questionnaire.malade_6mois,
-      questionnaire.fatigue_frequente,
-      questionnaire.perte_poids,
-      questionnaire.douleur_poitrine,
+      questionnaire.malade_6_derniers_mois,
+      questionnaire.souvent_fatigue,
+      questionnaire.perte_poids_recente,
+      questionnaire.prise_poids_recente,
+      questionnaire.a_ganglions,
+      questionnaire.fievre_persistante,
+      questionnaire.plaies_buccales,
+      questionnaire.diarrhee_frequente,
+      questionnaire.ballonnement,
+      questionnaire.oedemes_membres_inferieurs,
       questionnaire.essoufflement,
-      questionnaire.hypertension,
-      questionnaire.diabete,
-      questionnaire.maladie_cardiaque,
-      questionnaire.maladie_respiratoire,
-      questionnaire.maladie_renale,
-      questionnaire.maladie_hepatique,
-      questionnaire.cancer,
-      questionnaire.autre_maladie,
-    ].filter(Boolean).length;
+      questionnaire.a_eu_perfusion,
+      questionnaire.a_eu_transfusion,
+    ];
 
-    score += antecedents;
+    antecedents.forEach((a) => {
+      if (a) score += 1;
+    });
 
+    // Déterminer le taux de surprime
     let tauxSurprime = 0;
-    if (score <= 5) tauxSurprime = 0;
-    else if (score <= 10) tauxSurprime = 5;
-    else if (score <= 15) tauxSurprime = 10;
-    else if (score <= 20) tauxSurprime = 15;
-    else tauxSurprime = 20;
+    let categorieRisque: "faible" | "moyen" | "eleve" | "tres_eleve" = "faible";
 
-    const categorie =
-      score <= 5 ? "faible" : score <= 10 ? "moyen" : score <= 15 ? "eleve" : "tres_eleve";
+    if (score <= 5) {
+      tauxSurprime = 0;
+      categorieRisque = "faible";
+    } else if (score <= 10) {
+      tauxSurprime = 5;
+      categorieRisque = "moyen";
+    } else if (score <= 15) {
+      tauxSurprime = 10;
+      categorieRisque = "eleve";
+    } else {
+      tauxSurprime = 20;
+      categorieRisque = "tres_eleve";
+    }
 
     // Mettre à jour la simulation
     simulation.taux_surprime = tauxSurprime;
-    simulation.categorie_risque = categorie;
+    simulation.categorie_risque = categorieRisque;
     simulation.score_total = score;
     simulation.updated_at = new Date().toISOString();
 
     return {
       taux_surprime: tauxSurprime,
-      categorie_risque: categorie as any,
+      categorie_risque: categorieRisque,
       score_total: score,
       details_scoring: {
-        imc_score: imc < 18.5 ? 3 : imc >= 25 && imc < 30 ? 2 : imc >= 30 ? 5 : 0,
-        tabac_score: questionnaire.fumeur ? (questionnaire.nb_cigarettes_jour ? 4 : 2) : 0,
-        alcool_score: questionnaire.alcool ? 2 : 0,
-        antecedents_score: antecedents,
+        imc_score: imc >= 30 ? 5 : imc >= 25 ? 2 : imc < 18.5 ? 3 : 0,
+        tabac_score: questionnaire.fumeur ? 2 : 0,
+        alcool_score: questionnaire.consomme_alcool ? 2 : 0,
+        antecedents_score: antecedents.filter(Boolean).length,
       },
     };
   },

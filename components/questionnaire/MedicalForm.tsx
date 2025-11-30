@@ -20,24 +20,29 @@ import { Loader2 } from "lucide-react";
 const questionnaireSchema = z.object({
   taille_cm: z.number().min(100).max(250),
   poids_kg: z.number().min(30).max(200),
+  tension_arterielle: z.string().optional(),
   fumeur: z.boolean(),
   nb_cigarettes_jour: z.number().min(0).optional(),
-  alcool: z.boolean(),
-  sport: z.boolean(),
+  consomme_alcool: z.boolean(),
+  distractions: z.string().optional(),
+  pratique_sport: z.boolean(),
+  type_sport: z.string().optional(),
   a_infirmite: z.boolean(),
-  malade_6mois: z.boolean(),
-  fatigue_frequente: z.boolean(),
-  perte_poids: z.boolean(),
-  douleur_poitrine: z.boolean(),
+  malade_6_derniers_mois: z.boolean(),
+  souvent_fatigue: z.boolean(),
+  perte_poids_recente: z.boolean(),
+  prise_poids_recente: z.boolean(),
+  a_ganglions: z.boolean(),
+  fievre_persistante: z.boolean(),
+  plaies_buccales: z.boolean(),
+  diarrhee_frequente: z.boolean(),
+  ballonnement: z.boolean(),
+  oedemes_membres_inferieurs: z.boolean(),
   essoufflement: z.boolean(),
-  hypertension: z.boolean(),
-  diabete: z.boolean(),
-  maladie_cardiaque: z.boolean(),
-  maladie_respiratoire: z.boolean(),
-  maladie_renale: z.boolean(),
-  maladie_hepatique: z.boolean(),
-  cancer: z.boolean(),
-  autre_maladie: z.boolean(),
+  a_eu_perfusion: z.boolean(),
+  a_eu_transfusion: z.boolean(),
+  infos_complementaires: z.string().optional(),
+  commentaire_medical: z.string().optional(),
 });
 
 type QuestionnaireFormData = z.infer<typeof questionnaireSchema>;
@@ -65,22 +70,22 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
     resolver: zodResolver(questionnaireSchema),
     defaultValues: {
       fumeur: false,
-      alcool: false,
-      sport: false,
+      consomme_alcool: false,
+      pratique_sport: false,
       a_infirmite: false,
-      malade_6mois: false,
-      fatigue_frequente: false,
-      perte_poids: false,
-      douleur_poitrine: false,
+      malade_6_derniers_mois: false,
+      souvent_fatigue: false,
+      perte_poids_recente: false,
+      prise_poids_recente: false,
+      a_ganglions: false,
+      fievre_persistante: false,
+      plaies_buccales: false,
+      diarrhee_frequente: false,
+      ballonnement: false,
+      oedemes_membres_inferieurs: false,
       essoufflement: false,
-      hypertension: false,
-      diabete: false,
-      maladie_cardiaque: false,
-      maladie_respiratoire: false,
-      maladie_renale: false,
-      maladie_hepatique: false,
-      cancer: false,
-      autre_maladie: false,
+      a_eu_perfusion: false,
+      a_eu_transfusion: false,
     },
   });
 
@@ -88,7 +93,7 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
   const poids = watch("poids_kg");
   const fumeur = watch("fumeur");
   const nbCigarettes = watch("nb_cigarettes_jour");
-  const alcool = watch("alcool");
+  const alcool = watch("consomme_alcool");
   const questionnaire = watch();
 
   // Calcul en temps réel du score
@@ -98,7 +103,9 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
       const imcScore = getIMCScore(imc);
       const tabacScore = getTabacScore(fumeur, nbCigarettes);
       const alcoolScore = getAlcoolScore(alcool);
-      const antecedentsScore = getAntecedentsScore(questionnaire);
+      // Note: getAntecedentsScore needs update to match new schema, temporarily using 0 or simplified logic
+      // For now, we'll just pass the questionnaire and let the utility handle it (we'll update utility next)
+      const antecedentsScore = getAntecedentsScore(questionnaire as any);
       const scoreTotal = imcScore + tabacScore + alcoolScore + antecedentsScore;
       const tauxSurprime = getTauxSurprime(scoreTotal);
       const categorieRisque = getCategorieRisque(scoreTotal);
@@ -116,26 +123,8 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
     setIsSubmitting(true);
     try {
       const questionnaireData: QuestionnaireMedical = {
-        taille_cm: data.taille_cm,
-        poids_kg: data.poids_kg,
-        fumeur: data.fumeur,
+        ...data,
         nb_cigarettes_jour: data.fumeur ? data.nb_cigarettes_jour : undefined,
-        alcool: data.alcool,
-        sport: data.sport,
-        a_infirmite: data.a_infirmite,
-        malade_6mois: data.malade_6mois,
-        fatigue_frequente: data.fatigue_frequente,
-        perte_poids: data.perte_poids,
-        douleur_poitrine: data.douleur_poitrine,
-        essoufflement: data.essoufflement,
-        hypertension: data.hypertension,
-        diabete: data.diabete,
-        maladie_cardiaque: data.maladie_cardiaque,
-        maladie_respiratoire: data.maladie_respiratoire,
-        maladie_renale: data.maladie_renale,
-        maladie_hepatique: data.maladie_hepatique,
-        cancer: data.cancer,
-        autre_maladie: data.autre_maladie,
       };
 
       // Utiliser la nouvelle API questionnaires
@@ -218,6 +207,15 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
                 <p className="text-sm text-red-600">{errors.poids_kg.message}</p>
               )}
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="tension_arterielle">Tension artérielle</Label>
+              <Input
+                id="tension_arterielle"
+                {...register("tension_arterielle")}
+                disabled={isSubmitting}
+                placeholder="Ex: 12/8"
+              />
+            </div>
           </div>
           {scoreData && (
             <div className="mt-4 p-4 bg-gray-50 rounded-lg">
@@ -262,26 +260,34 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                id="alcool"
-                {...register("alcool")}
+                id="consomme_alcool"
+                {...register("consomme_alcool")}
                 disabled={isSubmitting}
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <Label htmlFor="alcool" className="cursor-pointer">
+              <Label htmlFor="consomme_alcool" className="cursor-pointer">
                 Consommation d'alcool
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                id="sport"
-                {...register("sport")}
+                id="pratique_sport"
+                {...register("pratique_sport")}
                 disabled={isSubmitting}
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <Label htmlFor="sport" className="cursor-pointer">
+              <Label htmlFor="pratique_sport" className="cursor-pointer">
                 Pratique du sport régulièrement
               </Label>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="distractions">Distractions / Loisirs</Label>
+              <Input
+                id="distractions"
+                {...register("distractions")}
+                disabled={isSubmitting}
+              />
             </div>
           </div>
         </CardContent>
@@ -296,19 +302,19 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
           <div className="space-y-3">
             {[
               { id: "a_infirmite", label: "Avez-vous une infirmité ?" },
-              { id: "malade_6mois", label: "Avez-vous été malade au cours des 6 derniers mois ?" },
-              { id: "fatigue_frequente", label: "Souffrez-vous de fatigue fréquente ?" },
-              { id: "perte_poids", label: "Avez-vous subi une perte de poids importante ?" },
-              { id: "douleur_poitrine", label: "Avez-vous des douleurs à la poitrine ?" },
+              { id: "malade_6_derniers_mois", label: "Avez-vous été malade au cours des 6 derniers mois ?" },
+              { id: "souvent_fatigue", label: "Souffrez-vous de fatigue fréquente ?" },
+              { id: "perte_poids_recente", label: "Avez-vous subi une perte de poids récente ?" },
+              { id: "prise_poids_recente", label: "Avez-vous subi une prise de poids récente ?" },
+              { id: "a_ganglions", label: "Avez-vous des ganglions ?" },
+              { id: "fievre_persistante", label: "Avez-vous une fièvre persistante ?" },
+              { id: "plaies_buccales", label: "Avez-vous des plaies buccales ?" },
+              { id: "diarrhee_frequente", label: "Avez-vous des diarrhées fréquentes ?" },
+              { id: "ballonnement", label: "Souffrez-vous de ballonnements ?" },
+              { id: "oedemes_membres_inferieurs", label: "Avez-vous des œdèmes aux membres inférieurs ?" },
               { id: "essoufflement", label: "Souffrez-vous d'essoufflement ?" },
-              { id: "hypertension", label: "Avez-vous de l'hypertension ?" },
-              { id: "diabete", label: "Avez-vous du diabète ?" },
-              { id: "maladie_cardiaque", label: "Avez-vous une maladie cardiaque ?" },
-              { id: "maladie_respiratoire", label: "Avez-vous une maladie respiratoire ?" },
-              { id: "maladie_renale", label: "Avez-vous une maladie rénale ?" },
-              { id: "maladie_hepatique", label: "Avez-vous une maladie hépatique ?" },
-              { id: "cancer", label: "Avez-vous ou avez-vous eu un cancer ?" },
-              { id: "autre_maladie", label: "Avez-vous une autre maladie ?" },
+              { id: "a_eu_perfusion", label: "Avez-vous eu une perfusion ?" },
+              { id: "a_eu_transfusion", label: "Avez-vous eu une transfusion ?" },
             ].map((question) => (
               <div key={question.id} className="flex items-center space-x-2">
                 <input
@@ -323,6 +329,14 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
                 </Label>
               </div>
             ))}
+          </div>
+          <div className="mt-4 space-y-2">
+            <Label htmlFor="infos_complementaires">Informations complémentaires</Label>
+            <Input
+              id="infos_complementaires"
+              {...register("infos_complementaires")}
+              disabled={isSubmitting}
+            />
           </div>
         </CardContent>
       </Card>

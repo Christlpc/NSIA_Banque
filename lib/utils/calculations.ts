@@ -30,8 +30,8 @@ export function getTabacScore(fumeur: boolean, nbCigarettes?: number): number {
 /**
  * Calcule le score alcool
  */
-export function getAlcoolScore(alcool: boolean): number {
-  return alcool ? 2 : 0;
+export function getAlcoolScore(consomme_alcool: boolean): number {
+  return consomme_alcool ? 2 : 0;
 }
 
 /**
@@ -39,36 +39,36 @@ export function getAlcoolScore(alcool: boolean): number {
  */
 export function getAntecedentsScore(questionnaire: {
   a_infirmite: boolean;
-  malade_6mois: boolean;
-  fatigue_frequente: boolean;
-  perte_poids: boolean;
-  douleur_poitrine: boolean;
+  malade_6_derniers_mois: boolean;
+  souvent_fatigue: boolean;
+  perte_poids_recente: boolean;
+  prise_poids_recente: boolean;
+  a_ganglions: boolean;
+  fievre_persistante: boolean;
+  plaies_buccales: boolean;
+  diarrhee_frequente: boolean;
+  ballonnement: boolean;
+  oedemes_membres_inferieurs: boolean;
   essoufflement: boolean;
-  hypertension: boolean;
-  diabete: boolean;
-  maladie_cardiaque: boolean;
-  maladie_respiratoire: boolean;
-  maladie_renale: boolean;
-  maladie_hepatique: boolean;
-  cancer: boolean;
-  autre_maladie: boolean;
+  a_eu_perfusion: boolean;
+  a_eu_transfusion: boolean;
 }): number {
   let score = 0;
   const questions = [
     questionnaire.a_infirmite,
-    questionnaire.malade_6mois,
-    questionnaire.fatigue_frequente,
-    questionnaire.perte_poids,
-    questionnaire.douleur_poitrine,
+    questionnaire.malade_6_derniers_mois,
+    questionnaire.souvent_fatigue,
+    questionnaire.perte_poids_recente,
+    questionnaire.prise_poids_recente,
+    questionnaire.a_ganglions,
+    questionnaire.fievre_persistante,
+    questionnaire.plaies_buccales,
+    questionnaire.diarrhee_frequente,
+    questionnaire.ballonnement,
+    questionnaire.oedemes_membres_inferieurs,
     questionnaire.essoufflement,
-    questionnaire.hypertension,
-    questionnaire.diabete,
-    questionnaire.maladie_cardiaque,
-    questionnaire.maladie_respiratoire,
-    questionnaire.maladie_renale,
-    questionnaire.maladie_hepatique,
-    questionnaire.cancer,
-    questionnaire.autre_maladie,
+    questionnaire.a_eu_perfusion,
+    questionnaire.a_eu_transfusion,
   ];
 
   questions.forEach((q) => {
