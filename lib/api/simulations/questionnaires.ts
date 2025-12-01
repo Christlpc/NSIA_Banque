@@ -36,7 +36,7 @@ export const questionnairesApi = {
       return [];
     }
     const params = new URLSearchParams();
-    if (filters?.simulation) params.append("search", filters.simulation); // Use search for simulation ID
+    if (filters?.simulation) params.append("simulation", filters.simulation);
     if (filters?.page) params.append("page", filters.page.toString());
     if (filters?.page_size) params.append("page_size", filters.page_size.toString());
 
