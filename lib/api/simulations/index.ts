@@ -29,7 +29,6 @@ export type {
 export type { BIAInfo } from "./exports";
 
 export type {
-  QuestionnaireMedicalWithId,
   BaremeSurprime,
 } from "./questionnaires";
 
