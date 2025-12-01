@@ -166,8 +166,8 @@ export function SimulationForm() {
     }
 
     try {
-      // On s'assure que sauvegarder est à false pour éviter la création automatique du questionnaire
-      await createSimulation(selectedProduct, { ...data, sauvegarder: false });
+      // On s'assure que sauvegarder est à true
+      await createSimulation(selectedProduct, { ...data, sauvegarder: true });
       toast.success("Simulation créée avec succès");
       router.push("/simulations");
     } catch (error: any) {
