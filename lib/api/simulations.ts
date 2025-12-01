@@ -135,6 +135,6 @@ export const simulationApi = {
 
 // Export des APIs modulaires pour compatibilité
 export { historiqueApi, exportsApi, questionnairesApi, souscriptionsApi };
-export type { QuestionnaireMedicalWithId, BaremeSurprime } from "./simulations/index";
+export type { BaremeSurprime } from "./simulations/index";
 export type { Souscription, SouscriptionStatut, SouscriptionCreateData, SouscriptionUpdateData, SouscriptionFilters } from "./simulations/index";
 
