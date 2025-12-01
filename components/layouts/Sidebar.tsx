@@ -33,6 +33,12 @@ const menuItems = [
     roles: ["all"],
   },
   {
+    title: "Souscriptions",
+    icon: FileText,
+    href: "/souscriptions",
+    roles: ["all"],
+  },
+  {
     title: "Banques",
     icon: Building2,
     href: "/banques",
