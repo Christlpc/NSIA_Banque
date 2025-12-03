@@ -89,19 +89,13 @@ export function SimulationTable() {
         },
       }),
       columnHelper.accessor(
-        (row) => {
-          // Check multiple sources for date
-          const date = row.created_at || row.updated_at || row.date_creation || row.date_modification;
-          console.log("Date for simulation", row.reference, ":", date);
-          return date;
-        },
+        (row) => row.created_at || row.updated_at,
         {
           id: "date",
           header: "Date",
           cell: (info) => {
             const value = info.getValue();
             if (!value) {
-              console.log("No date value found");
               return "-";
             }
             try {
