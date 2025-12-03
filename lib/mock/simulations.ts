@@ -149,7 +149,9 @@ export const mockSimulationApi = {
     }
 
     // Calculer le score (simplifié)
-    const imc = questionnaire.poids_kg / Math.pow(questionnaire.taille_cm / 100, 2);
+    const poids = Number(questionnaire.poids_kg);
+    const taille = Number(questionnaire.taille_cm);
+    const imc = poids / Math.pow(taille / 100, 2);
     let score = 0;
     if (imc < 18.5) score += 3;
     else if (imc >= 25 && imc < 30) score += 2;

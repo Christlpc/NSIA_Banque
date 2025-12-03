@@ -144,6 +144,7 @@ export interface Simulation {
 }
 
 export interface SimulationCreateData {
+  produit?: ProduitType;
   nom: string;
   prenom: string;
   email?: string;
@@ -175,8 +176,13 @@ export interface SimulationCreateData {
   periodicite?: string;
 
   profession?: string;
+  employeur?: string;
   adresse?: string;
   telephone?: string;
+  numero_compte?: string;
+  situation_matrimoniale?: string;
+  date_octroi?: string;
+  date_premiere_echeance?: string;
   sauvegarder?: boolean;
 }
 
