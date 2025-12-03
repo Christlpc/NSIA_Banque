@@ -16,6 +16,7 @@ import {
 import { PRODUIT_LABELS, type Simulation } from "@/types";
 import { formatDateFull, formatDateTime } from "@/lib/utils/date";
 import { FileText, User as UserIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface SimulationDetailProps {
   simulation: Simulation;
