@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SimulationActions } from "@/components/simulations/SimulationActions";
-import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
+import { exportsApi } from "@/lib/api/simulations";
+import {
+  STATUT_LABELS,
+  STATUT_COLORS,
+  RISK_CATEGORY_LABELS,
+  RISK_CATEGORY_COLORS,
+  API_BASE_URL
+} from "@/lib/utils/constants";
 import { PRODUIT_LABELS, type Simulation } from "@/types";
 import { formatDateFull, formatDateTime } from "@/lib/utils/date";
 import { FileText, User as UserIcon } from "lucide-react";
@@ -26,6 +33,13 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
 
   // Use displaySimulation instead of simulation for the rest of the component
   const s = displaySimulation;
+
+  // Debug logging
+  console.log("📊 Original simulation:", simulation);
+  console.log("📊 donnees_entree:", simulation.donnees_entree);
+  console.log("📊 resultats_calcul:", simulation.resultats_calcul);
+  console.log("📊 Merged displaySimulation:", s);
+  console.log("📊 Profession:", s.profession, "Employeur:", s.employeur);
 
   return (
     <div className="space-y-6">
@@ -55,19 +69,21 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-gray-500">Nom complet</p>
               <p className="font-medium">
                 {s.prenom_client} {s.nom_client}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Date de naissance</p>
-              <p className="font-medium">
-                {formatDateFull(s.date_naissance)}
-              </p>
-            </div>
+            {s.date_naissance && (
+              <div>
+                <p className="text-sm text-gray-500">Date de naissance</p>
+                <p className="font-medium">
+                  {formatDateFull(s.date_naissance)}
+                </p>
+              </div>
+            )}
             {s.telephone_client && (
               <div>
                 <p className="text-sm text-gray-500">Téléphone</p>
@@ -80,28 +96,40 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
                 <p className="font-medium">{s.email_client}</p>
               </div>
             )}
-            {s.profession && (
+            {(s.profession || s.donnees_entree?.profession) && (
               <div>
                 <p className="text-sm text-gray-500">Profession</p>
-                <p className="font-medium">{s.profession}</p>
+                <p className="font-medium">{s.profession || s.donnees_entree?.profession}</p>
               </div>
             )}
-            {s.adresse_postale && (
-              <div className="md:col-span-2">
-                <p className="text-sm text-gray-500">Adresse postale</p>
-                <p className="font-medium">{s.adresse_postale}</p>
-              </div>
-            )}
-            {s.employeur && (
+            {(s.employeur || s.donnees_entree?.employeur) && (
               <div>
                 <p className="text-sm text-gray-500">Employeur</p>
-                <p className="font-medium">{s.employeur}</p>
+                <p className="font-medium">{s.employeur || s.donnees_entree?.employeur}</p>
               </div>
             )}
-            {s.situation_matrimoniale && (
+            {(s.numero_compte || s.donnees_entree?.numero_compte) && (
+              <div>
+                <p className="text-sm text-gray-500">Numéro de compte</p>
+                <p className="font-medium font-mono">{s.numero_compte || s.donnees_entree?.numero_compte}</p>
+              </div>
+            )}
+            {(s.situation_matrimoniale || s.donnees_entree?.situation_matrimoniale) && (
               <div>
                 <p className="text-sm text-gray-500">Situation matrimoniale</p>
-                <p className="font-medium">{s.situation_matrimoniale}</p>
+                <p className="font-medium capitalize">{s.situation_matrimoniale || s.donnees_entree?.situation_matrimoniale}</p>
+              </div>
+            )}
+            {(s.date_effet || s.donnees_entree?.date_effet) && (
+              <div>
+                <p className="text-sm text-gray-500">Date d'effet</p>
+                <p className="font-medium">{formatDateFull(s.date_effet || s.donnees_entree?.date_effet)}</p>
+              </div>
+            )}
+            {(s.adresse_postale || s.donnees_entree?.adresse) && (
+              <div className="md:col-span-2 lg:col-span-3">
+                <p className="text-sm text-gray-500">Adresse postale</p>
+                <p className="font-medium">{s.adresse_postale || s.donnees_entree?.adresse}</p>
               </div>
             )}
           </div>
@@ -114,10 +142,10 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
           <CardTitle>Détails du Produit & Résultats</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="md:col-span-2 lg:col-span-3 pb-2 border-b">
               <p className="text-sm text-gray-500">Produit</p>
-              <p className="font-medium">{PRODUIT_LABELS[s.produit]}</p>
+              <p className="font-semibold text-lg">{PRODUIT_LABELS[s.produit]}</p>
             </div>
 
             {/* CHAMPS COMMUNS */}
@@ -410,8 +438,8 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
                 </div>
               )}
             </div>
-            {s.statut === "calculee" && (
-              <div className="mt-4">
+            <div className="mt-4 flex gap-4">
+              {s.statut === "calculee" && (
                 <Button
                   className="w-full sm:w-auto"
                   onClick={() => router.push(`/simulations/${s.id}/questionnaire`)}
@@ -419,8 +447,23 @@ export function SimulationDetail({ simulation }: SimulationDetailProps) {
                   <FileText className="mr-2 h-4 w-4" />
                   Compléter le questionnaire médical
                 </Button>
-              </div>
-            )}
+              )}
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={async () => {
+                  try {
+                    const url = await exportsApi.previewBIA(s.id);
+                    window.open(url, '_blank');
+                  } catch (e) {
+                    toast.error("Erreur lors de l'ouverture du BIA");
+                  }
+                }}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Voir le BIA
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}

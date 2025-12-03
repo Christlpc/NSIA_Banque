@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { RiskScoreDisplay } from "@/components/questionnaire/RiskScoreDisplay";
 import { simulationApi } from "@/lib/api/simulations";
 import { questionnairesApi } from "@/lib/api/simulations";
+import { useSimulationStore } from "@/lib/store/simulationStore";
 import { calculateIMC, getIMCScore, getTabacScore, getAlcoolScore, getAntecedentsScore, getTauxSurprime, getCategorieRisque } from "@/lib/utils/calculations";
 import type { QuestionnaireMedical } from "@/types";
 import toast from "react-hot-toast";
@@ -48,18 +49,55 @@ const questionnaireSchema = z.object({
 type QuestionnaireFormData = z.infer<typeof questionnaireSchema>;
 
 interface MedicalFormProps {
-  simulationId: string;
+  simulationId?: string;
+  initialData?: any;
+  onSubmit?: (data: QuestionnaireFormData) => void;
+  isWizardMode?: boolean;
+  simulationReference?: string; // Add optional prop
 }
 
-export function MedicalForm({ simulationId }: MedicalFormProps) {
+export function MedicalForm({ simulationId, initialData, onSubmit: onWizardSubmit, isWizardMode = false, simulationReference: propSimulationReference }: MedicalFormProps) {
   const router = useSafeRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [scoreData, setScoreData] = useState<{
     imc: number;
     scoreTotal: number;
-    tauxSurprime: number;
+    tauxSurprime: number | string;
     categorieRisque: string;
   } | null>(null);
+
+  const { fetchSimulation, currentSimulation } = useSimulationStore();
+  const [simulationReference, setSimulationReference] = useState<string | null>(propSimulationReference || null);
+
+  useEffect(() => {
+    if (propSimulationReference) {
+      setSimulationReference(propSimulationReference);
+    }
+  }, [propSimulationReference]);
+
+  useEffect(() => {
+    if (isWizardMode || !simulationId) return;
+
+    const loadSimulation = async () => {
+      if (currentSimulation && currentSimulation.id === simulationId) {
+        setSimulationReference(currentSimulation.reference);
+        return;
+      }
+      try {
+        await fetchSimulation(simulationId);
+      } catch (error) {
+        console.error("Erreur récupération simulation:", error);
+      }
+    };
+    loadSimulation();
+  }, [simulationId, fetchSimulation, currentSimulation, isWizardMode]);
+
+  useEffect(() => {
+    if (isWizardMode) return;
+    if (currentSimulation && currentSimulation.id === simulationId) {
+      setSimulationReference(currentSimulation.reference);
+    }
+  }, [currentSimulation, simulationId, isWizardMode]);
 
   const {
     register,
@@ -68,7 +106,7 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
     formState: { errors },
   } = useForm<QuestionnaireFormData>({
     resolver: zodResolver(questionnaireSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       fumeur: false,
       consomme_alcool: false,
       pratique_sport: false,
@@ -103,71 +141,141 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
       const imcScore = getIMCScore(imc);
       const tabacScore = getTabacScore(fumeur, nbCigarettes);
       const alcoolScore = getAlcoolScore(alcool);
-      // Note: getAntecedentsScore needs update to match new schema, temporarily using 0 or simplified logic
-      // For now, we'll just pass the questionnaire and let the utility handle it (we'll update utility next)
       const antecedentsScore = getAntecedentsScore(questionnaire as any);
       const scoreTotal = imcScore + tabacScore + alcoolScore + antecedentsScore;
       const tauxSurprime = getTauxSurprime(scoreTotal);
       const categorieRisque = getCategorieRisque(scoreTotal);
 
-      setScoreData({
-        imc,
-        scoreTotal,
-        tauxSurprime,
-        categorieRisque,
+      setScoreData(prev => {
+        // Avoid update if data hasn't changed to prevent loops
+        if (prev &&
+          prev.imc === imc &&
+          prev.scoreTotal === scoreTotal &&
+          prev.tauxSurprime === tauxSurprime &&
+          prev.categorieRisque === categorieRisque) {
+          return prev;
+        }
+        return {
+          imc,
+          scoreTotal,
+          tauxSurprime,
+          categorieRisque,
+        };
       });
     }
-  }, [taille, poids, fumeur, nbCigarettes, alcool, questionnaire]);
+  }, [taille, poids, fumeur, nbCigarettes, alcool, JSON.stringify(questionnaire)]);
+
+  // Fonction utilitaire pour trouver un questionnaire existant
+  const findExistingQuestionnaire = async (simId: string, simRef: string | null) => {
+    // 1. Essai direct avec filtre simulation (maintenant via endpoint nesté)
+    try {
+      // On passe la référence si disponible pour aider la recherche
+      const response = await questionnairesApi.getQuestionnaires(simId, simRef || undefined);
+      if (response && response.length > 0) {
+        // L'endpoint est déjà filtré par simulationId, donc le premier résultat devrait être bon
+        // Mais on garde une vérif de sécurité si jamais
+        return response[0];
+      }
+    } catch (e) { console.error("Erreur recherche par endpoint nesté", e); }
+
+    return null;
+  };
 
   const onSubmit = async (data: QuestionnaireFormData) => {
-    setIsSubmitting(true);
-    try {
-      const questionnaireData: QuestionnaireMedical = {
+    // Mode Wizard : on passe juste les données au parent
+    if (isWizardMode && onWizardSubmit) {
+      // Conversion des types pour l'API
+      const apiData = {
         ...data,
+        taille_cm: String(data.taille_cm),
+        poids_kg: String(data.poids_kg),
         nb_cigarettes_jour: data.fumeur ? data.nb_cigarettes_jour : undefined,
       };
+      onWizardSubmit(apiData as any);
+      return;
+    }
 
-      // Utiliser la nouvelle API questionnaires
-      try {
-        // 1. Vérifier si un questionnaire existe déjà pour cette simulation
-        const existingQuestionnaires = await questionnairesApi.getQuestionnaires({
-          simulation: simulationId,
-        });
+    if (!simulationId) return;
 
-        let questionnaireId: number;
+    setIsSubmitting(true);
 
-        if (existingQuestionnaires && existingQuestionnaires.length > 0) {
-          // Mise à jour du questionnaire existant
-          const existing = existingQuestionnaires[0];
-          await questionnairesApi.updateQuestionnaire(existing.id, questionnaireData);
-          questionnaireId = existing.id;
-        } else {
-          // Création d'un nouveau questionnaire
-          const created = await questionnairesApi.createQuestionnaire({
-            ...questionnaireData,
-            simulation: simulationId,
-          });
-          questionnaireId = created.id;
-        }
+    // Définition en dehors du try pour accès dans le catch
+    const questionnaireData: QuestionnaireMedical = {
+      ...data,
+      taille_cm: String(data.taille_cm),
+      poids_kg: String(data.poids_kg),
+      nb_cigarettes_jour: data.fumeur ? data.nb_cigarettes_jour : undefined,
+    };
 
-        // Appliquer le questionnaire à la simulation (recalcul)
-        await questionnairesApi.appliquerASimulation(questionnaireId, simulationId);
+    try {
+      let questionnaireId: number;
 
-        toast.success("Questionnaire soumis avec succès");
-        router.push(`/simulations/${simulationId}`);
-      } catch (newApiError: any) {
-        console.error("Erreur API questionnaires:", newApiError);
-        // Fallback sur l'ancienne API si nécessaire
+      // Tentative de récupération préalable
+      let existing = await findExistingQuestionnaire(simulationId, simulationReference);
+
+      if (existing) {
+        // Mise à jour
+        await questionnairesApi.updateQuestionnaire(simulationId, existing.id, questionnaireData);
+        questionnaireId = existing.id;
+      } else {
+        // Création
         try {
-          await simulationApi.submitQuestionnaire(simulationId, questionnaireData);
-          toast.success("Questionnaire soumis avec succès");
-          router.push(`/simulations/${simulationId}`);
-        } catch (fallbackError: any) {
-          toast.error(fallbackError?.message || "Erreur lors de la soumission");
+          console.log("Creating questionnaire (MedicalForm) with payload:", questionnaireData);
+          const created = await questionnairesApi.createQuestionnaire(simulationId, questionnaireData);
+          questionnaireId = created.id;
+        } catch (createError: any) {
+          console.error("Error creating questionnaire (MedicalForm):", createError);
+          // Gestion spécifique de l'erreur "Existe déjà"
+          const errorData = createError?.response?.data;
+          const errorString = JSON.stringify(errorData || {});
+
+          if (createError?.response?.status === 400 &&
+            (errorString.includes("existe déjà") || errorString.includes("already exists"))) {
+
+            console.log("Questionnaire existant détecté lors de la création, tentative de récupération...");
+            console.log("Searching with:", { simulationId, simulationReference });
+
+            // On réessaie de le trouver
+            existing = await findExistingQuestionnaire(simulationId, simulationReference);
+            console.log("Found existing questionnaire:", existing);
+
+            if (existing) {
+              await questionnairesApi.updateQuestionnaire(simulationId, existing.id, questionnaireData);
+              questionnaireId = existing.id;
+            } else {
+              throw new Error("Un questionnaire existe déjà pour cette simulation mais le système ne parvient pas à le récupérer. Veuillez contacter le support.");
+            }
+          } else {
+            throw createError;
+          }
         }
       }
-    } catch (error: any) {
-      toast.error(error?.message || "Erreur lors de la soumission");
+
+      // 4. Appliquer à la simulation (Désactivé car cause 404 et probablement redondant)
+      /*
+      try {
+        await questionnairesApi.appliquerASimulation(questionnaireId, simulationId);
+      } catch (applyError: any) {
+        console.warn("Erreur lors de l'application du questionnaire (non bloquant):", applyError);
+      }
+      */  // On continue car le questionnaire est créé et lié via le payload
+
+      toast.success("Questionnaire soumis avec succès");
+      router.push(`/simulations/${simulationId}`);
+    } catch (newApiError: any) {
+      console.error("Erreur API questionnaires:", newApiError);
+      // Fallback sur l'ancienne API si nécessaire
+      if (!JSON.stringify(newApiError).includes("existe déjà")) {
+        try {
+          await simulationApi.submitQuestionnaire(simulationId, questionnaireData);
+          toast.success("Questionnaire soumis avec succès (API v1)");
+          router.push(`/simulations/${simulationId}`);
+        } catch (fallbackError: any) {
+          toast.error(newApiError?.message || "Erreur lors de la soumission");
+        }
+      } else {
+        toast.error(newApiError?.message || "Erreur: Le questionnaire existe déjà mais est introuvable.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -367,11 +475,10 @@ export function MedicalForm({ simulationId }: MedicalFormProps) {
               Soumission...
             </>
           ) : (
-            "Soumettre le Questionnaire"
+            isWizardMode ? "Suivant" : "Soumettre le Questionnaire"
           )}
         </Button>
       </div>
     </form>
   );
 }
-

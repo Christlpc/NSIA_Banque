@@ -191,8 +191,8 @@ export interface SimulationFilters {
 
 // Types questionnaire médical
 export interface QuestionnaireMedical {
-  taille_cm: number;
-  poids_kg: number;
+  taille_cm: number | string;
+  poids_kg: number | string;
   tension_arterielle?: string;
   fumeur: boolean;
   nb_cigarettes_jour?: number;
@@ -223,9 +223,10 @@ export interface QuestionnaireResponse extends QuestionnaireMedical {
   simulation: string;
   date_remplissage?: string;
   date_modification?: string;
-  taux_surprime: number; // 0-20%
-  categorie_risque: "faible" | "moyen" | "eleve" | "tres_eleve";
-  score_total: number;
+  taux_surprime: number | string; // API returns string "20.00"
+  categorie_risque: "faible" | "moyen" | "eleve" | "tres_eleve" | string; // API might return "TRES_ELEVE" (uppercase)
+  score_total?: number; // Optional in some responses
+  statut?: string;
   details_scoring?: {
     imc_score: number;
     tabac_score: number;

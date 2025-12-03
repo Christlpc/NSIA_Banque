@@ -6,7 +6,7 @@ import { RISK_CATEGORY_LABELS, RISK_CATEGORY_COLORS } from "@/lib/utils/constant
 
 interface RiskScoreDisplayProps {
   scoreTotal: number;
-  tauxSurprime: number;
+  tauxSurprime: number | string;
   categorieRisque: string;
 }
 

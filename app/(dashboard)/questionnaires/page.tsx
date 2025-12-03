@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { questionnairesApi } from "@/lib/api/simulations";
-import type { QuestionnaireMedicalWithId } from "@/lib/api/simulations";
+import type { QuestionnaireResponse } from "@/types";
 import { format } from "date-fns";
 import { FileText, Plus } from "lucide-react";
 import { useSafeRouter } from "@/lib/hooks/useSafeRouter";
@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 
 export default function QuestionnairesPage() {
   const router = useSafeRouter();
-  const [questionnaires, setQuestionnaires] = useState<QuestionnaireMedicalWithId[]>([]);
+  const [questionnaires, setQuestionnaires] = useState<QuestionnaireResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function QuestionnairesPage() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-500">ID</span>
-                    <span className="text-sm font-mono">{questionnaire.id.slice(0, 8)}</span>
+                    <span className="text-sm font-mono">{questionnaire.id}</span>
                   </div>
                   {questionnaire.simulation && (
                     <div className="flex items-center justify-between">
@@ -97,11 +97,11 @@ export default function QuestionnairesPage() {
                       <span className="text-sm capitalize">{questionnaire.categorie_risque}</span>
                     </div>
                   )}
-                  {questionnaire.created_at && (
+                  {questionnaire.date_remplissage && (
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-500">Créé le</span>
                       <span className="text-sm">
-                        {format(new Date(questionnaire.created_at), "dd MMM yyyy")}
+                        {format(new Date(questionnaire.date_remplissage), "dd MMM yyyy")}
                       </span>
                     </div>
                   )}

@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSimulationStore } from "@/lib/store/simulationStore";
 import { useAuthStore } from "@/lib/store/authStore";
-import { ROLES } from "@/lib/utils/constants";
+import { ROLES, API_BASE_URL } from "@/lib/utils/constants";
 import type { Simulation } from "@/types";
-import { FileText, CheckCircle, Download, MoreVertical, Trash2 } from "lucide-react";
+import { FileText, CheckCircle, Download, MoreVertical, Trash2, Pencil } from "lucide-react";
 import toast from "react-hot-toast";
 import { DeleteSimulationDialog } from "./DeleteSimulationDialog";
 import { ValidateSimulationDialog } from "./ValidateSimulationDialog";
@@ -24,12 +24,14 @@ interface SimulationActionsProps {
   simulation: Simulation;
 }
 
+import { questionnairesApi, exportsApi } from "@/lib/api/simulations";
+
 export function SimulationActions({ simulation }: SimulationActionsProps) {
   const router = useSafeRouter();
   const { user } = useAuthStore();
   const { deleteSimulation, validateSimulation, convertSimulation } =
     useSimulationStore();
-  
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [validateDialogOpen, setValidateDialogOpen] = useState(false);
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
@@ -58,10 +60,10 @@ export function SimulationActions({ simulation }: SimulationActionsProps) {
     setConvertDialogOpen(true);
   };
 
-  const handleConvertConfirm = async () => {
+  const handleConvertConfirm = async (data: any) => {
     setIsConverting(true);
     try {
-      await convertSimulation(simulation.id);
+      await convertSimulation(simulation.id, data);
       setConvertDialogOpen(false);
       toast.success("Simulation convertie en contrat");
     } catch (error: any) {
@@ -93,17 +95,17 @@ export function SimulationActions({ simulation }: SimulationActionsProps) {
     router.push(`/simulations/${simulation.id}/export`);
   };
 
-  const canEdit = simulation.statut === "brouillon";
+  const canEdit = simulation.statut === "brouillon" || simulation.statut === "calculee";
   // Note: Le calcul de prime se fait automatiquement lors de la création via produitsApi
   // Le bouton "Calculer" est supprimé car l'endpoint n'existe pas dans l'API réelle
   const canValidate =
-    simulation.statut === "calculee" &&
-    (user?.role === ROLES.RESPONSABLE_BANQUE ||
-      user?.role === ROLES.ADMIN_NSIA ||
-      user?.role === ROLES.SUPER_ADMIN_NSIA);
+    (simulation.statut === "calculee" || simulation.statut === "brouillon");
+  // (user?.role === ROLES.RESPONSABLE_BANQUE ||
+  //   user?.role === ROLES.ADMIN_NSIA ||
+  //   user?.role === ROLES.SUPER_ADMIN_NSIA);
   const canConvert = simulation.statut === "validee";
   const canExport = simulation.statut === "validee" || simulation.statut === "convertie";
-  const canDelete = simulation.statut === "brouillon";
+  const canDelete = simulation.statut === "brouillon" || simulation.statut === "calculee";
 
   return (
     <div className="flex items-center gap-2">
@@ -130,6 +132,33 @@ export function SimulationActions({ simulation }: SimulationActionsProps) {
         </Button>
       )}
 
+      {/* Boutons pour le statut "calculee" */}
+      {simulation.statut === "calculee" && (
+        <>
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/simulations/${simulation.id}/questionnaire`)}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Questionnaire
+          </Button>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                const url = await exportsApi.previewBIA(simulation.id);
+                window.open(url, '_blank');
+              } catch (e) {
+                toast.error("Erreur lors de l'ouverture du BIA");
+              }
+            }}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Voir BIA
+          </Button>
+        </>
+      )}
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -137,13 +166,13 @@ export function SimulationActions({ simulation }: SimulationActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {/* Édition : La page d'édition n'existe pas encore
           {canEdit && (
             <DropdownMenuItem onClick={() => router.push(`/simulations/${simulation.id}/edit`)}>
-              Éditer
+              <Pencil className="mr-2 h-4 w-4" />
+              Modifier
             </DropdownMenuItem>
           )}
-          */}
+          {/* Questionnaire déplacé en bouton principal
           {simulation.statut === "calculee" && (
             <DropdownMenuItem
               onClick={() => router.push(`/simulations/${simulation.id}/questionnaire`)}
@@ -151,6 +180,7 @@ export function SimulationActions({ simulation }: SimulationActionsProps) {
               Questionnaire médical
             </DropdownMenuItem>
           )}
+          */}
           <DropdownMenuSeparator />
           {canDelete && (
             <DropdownMenuItem onClick={handleDeleteClick} className="text-red-600">

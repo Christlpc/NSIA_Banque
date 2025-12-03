@@ -1,10 +1,7 @@
 import { apiClient } from "../client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockSimulationApi } from "@/lib/mock/simulations";
-import { cleanPayload } from "@/lib/utils/payload";
 import type { QuestionnaireMedical, QuestionnaireResponse, PaginatedResponse } from "@/types";
-
-// QuestionnaireMedicalWithId removed in favor of QuestionnaireResponse
 
 /**
  * Barème de surprime
@@ -17,6 +14,13 @@ export interface BaremeSurprime {
   };
 }
 
+export interface QuestionnaireFilters {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  ordering?: string;
+}
+
 /**
  * API pour la gestion des questionnaires médicaux
  * Endpoints: /api/v1/simulations/questionnaires-medicaux/
@@ -25,63 +29,50 @@ export const questionnairesApi = {
   /**
    * Récupère la liste des questionnaires médicaux
    * GET /api/v1/simulations/questionnaires-medicaux/
+   * @param simulationId ID de la simulation pour filtrer (via search)
    */
-  getQuestionnaires: async (filters?: {
-    simulation?: string;
-    page?: number;
-    page_size?: number;
-  }): Promise<QuestionnaireResponse[]> => {
+  getQuestionnaires: async (simulationId?: string, reference?: string): Promise<QuestionnaireResponse[]> => {
     if (USE_MOCK_DATA) {
-      // Mock implementation
-      return [];
+      // @ts-ignore - Mock returns compatible data
+      return mockSimulationApi.getQuestionnaires(simulationId);
     }
-    const params = new URLSearchParams();
-    if (filters?.simulation) params.append("simulation", filters.simulation);
-    if (filters?.page) params.append("page", filters.page.toString());
-    if (filters?.page_size) params.append("page_size", filters.page_size.toString());
+    const params: any = {};
+    if (simulationId) {
+      // On garde le filtre explicite sur l'ID
+      params.simulation = simulationId;
+    }
+    if (reference) {
+      // On utilise la référence pour la recherche textuelle (souvent plus fiable que l'UUID dans 'search')
+      params.search = reference;
+    } else if (simulationId) {
+      // Fallback sur l'ID si pas de référence
+      params.search = simulationId;
+    }
 
-    const response = await apiClient.get<PaginatedResponse<QuestionnaireResponse> | QuestionnaireResponse[]>(
-      `/api/v1/simulations/questionnaires-medicaux/?${params.toString()}`
+    const response = await apiClient.get<PaginatedResponse<QuestionnaireResponse>>(
+      '/api/v1/simulations/questionnaires-medicaux/',
+      { params }
     );
-
-    if ('results' in response.data && Array.isArray(response.data.results)) {
-      return response.data.results;
-    }
-
-    if (Array.isArray(response.data)) {
-      return response.data;
-    }
-
-    return [];
+    return response.data.results;
   },
 
   /**
    * Crée un nouveau questionnaire médical
    * POST /api/v1/simulations/questionnaires-medicaux/
    */
-  createQuestionnaire: async (
-    data: QuestionnaireMedical & { simulation?: string }
-  ): Promise<QuestionnaireResponse> => {
+  createQuestionnaire: async (simulationId: string, data: QuestionnaireMedical): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
-      // Utiliser le mock existant
-      const response = await mockSimulationApi.submitQuestionnaire(
-        data.simulation ? data.simulation : "1",
-        data
-      );
-      return {
-        ...data,
-        id: 123, // Mock ID as number
-        simulation: data.simulation || "mock-simulation-id",
-        taux_surprime: response.taux_surprime,
-        categorie_risque: response.categorie_risque,
-        score_total: response.score_total,
-      };
+      // @ts-ignore
+      return mockSimulationApi.createQuestionnaire(simulationId, data);
     }
-    // Nettoyer le payload pour enlever les valeurs undefined
-    const cleanedData = cleanPayload(data) as QuestionnaireMedical & { simulation?: string };
+    // L'API attend "simulation" dans le body
+    const payload = {
+      ...data,
+      simulation: simulationId,
+    };
     const response = await apiClient.post<QuestionnaireResponse>(
-      "/api/v1/simulations/questionnaires-medicaux/",
-      cleanedData
+      '/api/v1/simulations/questionnaires-medicaux/',
+      payload
     );
     return response.data;
   },
@@ -104,18 +95,19 @@ export const questionnairesApi = {
    * Met à jour un questionnaire médical
    * PATCH /api/v1/simulations/questionnaires-medicaux/{id}/
    */
-  updateQuestionnaire: async (
-    id: number,
-    data: Partial<QuestionnaireMedical>
-  ): Promise<QuestionnaireResponse> => {
+  updateQuestionnaire: async (simulationId: string, questionnaireId: number, data: Partial<QuestionnaireMedical>): Promise<QuestionnaireResponse> => {
     if (USE_MOCK_DATA) {
-      throw new Error("Mock non implémenté pour updateQuestionnaire");
+      // @ts-ignore
+      return mockSimulationApi.updateQuestionnaire(simulationId, questionnaireId, data);
     }
-    // Nettoyer le payload pour enlever les valeurs undefined
-    const cleanedData = cleanPayload(data) as Partial<QuestionnaireMedical>;
+    // On passe aussi simulationId au cas où, mais c'est surtout l'ID du questionnaire qui compte
+    const payload = {
+      ...data,
+      simulation: simulationId,
+    };
     const response = await apiClient.patch<QuestionnaireResponse>(
-      `/api/v1/simulations/questionnaires-medicaux/${id}/`,
-      cleanedData
+      `/api/v1/simulations/questionnaires-medicaux/${questionnaireId}/`,
+      payload
     );
     return response.data;
   },
@@ -135,41 +127,13 @@ export const questionnairesApi = {
    * Applique un questionnaire médical à une simulation
    * POST /api/v1/simulations/questionnaires-medicaux/{id}/appliquer-a-simulation/
    */
-  appliquerASimulation: async (
-    id: number,
-    simulationId: string
-  ): Promise<QuestionnaireResponse> => {
+  appliquerASimulation: async (questionnaireId: number, simulationId: string): Promise<any> => {
     if (USE_MOCK_DATA) {
-      // Pour le mock, on simule directement sans appeler getQuestionnaire pour éviter la récursion
-      const defaultQuestionnaire: QuestionnaireMedical = {
-        taille_cm: 170,
-        poids_kg: 70,
-        fumeur: false,
-        consomme_alcool: false,
-        pratique_sport: false,
-        a_infirmite: false,
-        malade_6_derniers_mois: false,
-        souvent_fatigue: false,
-        perte_poids_recente: false,
-        prise_poids_recente: false,
-        a_ganglions: false,
-        fievre_persistante: false,
-        plaies_buccales: false,
-        diarrhee_frequente: false,
-        ballonnement: false,
-        oedemes_membres_inferieurs: false,
-        essoufflement: false,
-        a_eu_perfusion: false,
-        a_eu_transfusion: false,
-      };
-      return await mockSimulationApi.submitQuestionnaire(
-        simulationId,
-        defaultQuestionnaire
-      );
+      return Promise.resolve({ success: true });
     }
-    const response = await apiClient.post<QuestionnaireResponse>(
-      `/api/v1/simulations/questionnaires-medicaux/${id}/appliquer-a-simulation/`,
-      { simulation_id: simulationId }
+    const response = await apiClient.post(
+      `/api/v1/simulations/questionnaires-medicaux/${questionnaireId}/appliquer-a-simulation/`,
+      { simulation: simulationId }
     );
     return response.data;
   },
@@ -178,11 +142,11 @@ export const questionnairesApi = {
    * Recalcule la surprime d'un questionnaire médical
    * POST /api/v1/simulations/questionnaires-medicaux/{id}/recalculer-surprime/
    */
-  recalculerSurprime: async (id: number): Promise<QuestionnaireResponse> => {
+  recalculerSurprime: async (id: number): Promise<QuestionnaireMedical> => {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour recalculerSurprime");
     }
-    const response = await apiClient.post<QuestionnaireResponse>(
+    const response = await apiClient.post<QuestionnaireMedical>(
       `/api/v1/simulations/questionnaires-medicaux/${id}/recalculer-surprime/`
     );
     return response.data;
@@ -214,4 +178,3 @@ export const questionnairesApi = {
     return response.data;
   },
 };
-

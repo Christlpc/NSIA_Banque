@@ -63,7 +63,37 @@ export const historiqueApi = {
     }
     // Nettoyer le payload pour enlever les valeurs undefined
     const cleanedData = cleanPayload(data) as SimulationCreateData;
-    const response = await apiClient.post<Simulation>("/api/v1/simulations/historique/", cleanedData);
+
+    // Mapper les données vers la structure attendue par l'API (imbriquée)
+    const apiPayload = {
+      nom_client: cleanedData.nom,
+      prenom_client: cleanedData.prenom,
+      email_client: cleanedData.email,
+      telephone_client: cleanedData.telephone,
+      adresse_postale: cleanedData.adresse,
+      profession: cleanedData.profession,
+      employeur: cleanedData.employeur,
+      numero_compte: cleanedData.numero_compte,
+      situation_matrimoniale: cleanedData.situation_matrimoniale,
+      date_naissance: cleanedData.date_naissance,
+      produit: cleanedData.produit || "emprunteur", // Fallback si manquant
+      donnees_entree: {
+        ...cleanedData,
+        // On retire les champs clients du donnees_entree pour éviter la duplication inutile
+        nom: undefined,
+        prenom: undefined,
+        email: undefined,
+        telephone: undefined,
+        adresse: undefined,
+        profession: undefined,
+        employeur: undefined,
+        numero_compte: undefined,
+        situation_matrimoniale: undefined,
+        date_naissance: undefined,
+      }
+    };
+
+    const response = await apiClient.post<Simulation>("/api/v1/simulations/historique/", cleanPayload(apiPayload));
     return response.data;
   },
 
@@ -80,9 +110,36 @@ export const historiqueApi = {
     }
     // Nettoyer le payload pour enlever les valeurs undefined
     const cleanedData = cleanPayload(data) as Partial<SimulationCreateData>;
+
+    // Mapper les données vers la structure attendue par l'API (imbriquée)
+    const apiPayload: any = {};
+
+    // Mapper les champs clients s'ils sont présents
+    if (cleanedData.nom) apiPayload.nom_client = cleanedData.nom;
+    if (cleanedData.prenom) apiPayload.prenom_client = cleanedData.prenom;
+    if (cleanedData.email) apiPayload.email_client = cleanedData.email;
+    if (cleanedData.telephone) apiPayload.telephone_client = cleanedData.telephone;
+    if (cleanedData.adresse) apiPayload.adresse_postale = cleanedData.adresse;
+    if (cleanedData.profession) apiPayload.profession = cleanedData.profession;
+    if (cleanedData.employeur) apiPayload.employeur = cleanedData.employeur;
+    if (cleanedData.numero_compte) apiPayload.numero_compte = cleanedData.numero_compte;
+    if (cleanedData.situation_matrimoniale) apiPayload.situation_matrimoniale = cleanedData.situation_matrimoniale;
+    if (cleanedData.date_naissance) apiPayload.date_naissance = cleanedData.date_naissance;
+
+    // Tout le reste va dans donnees_entree
+    // On exclut les champs mappés explicitement ci-dessus
+    const {
+      nom, prenom, email, telephone, adresse, profession, employeur, numero_compte, situation_matrimoniale, date_naissance,
+      ...rest
+    } = cleanedData;
+
+    if (Object.keys(rest).length > 0) {
+      apiPayload.donnees_entree = rest;
+    }
+
     const response = await apiClient.patch<Simulation>(
       `/api/v1/simulations/historique/${id}/`,
-      cleanedData
+      cleanPayload(apiPayload)
     );
     return response.data;
   },

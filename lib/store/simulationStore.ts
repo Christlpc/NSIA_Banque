@@ -3,6 +3,14 @@ import type { Simulation, SimulationFilters, SimulationCreateData } from "@/type
 import { simulationApi } from "@/lib/api/simulations";
 import { useNotificationStore } from "@/lib/store/notificationStore";
 
+interface WizardData {
+  step: number;
+  simulationData: any | null;
+  questionnaireData: any | null;
+  createdSimulationId?: string;
+  biaInfo?: any;
+}
+
 interface SimulationStore {
   simulations: Simulation[];
   currentSimulation: Simulation | null;
@@ -10,6 +18,9 @@ interface SimulationStore {
   totalCount: number;
   isLoading: boolean;
   error: string | null;
+  // Wizard State
+  wizardData: WizardData;
+
   fetchSimulations: (params?: SimulationFilters) => Promise<void>;
   fetchSimulation: (id: string) => Promise<void>;
   createSimulation: (product: string, data: SimulationCreateData) => Promise<Simulation>;
@@ -17,10 +28,15 @@ interface SimulationStore {
   deleteSimulation: (id: string) => Promise<void>;
   calculatePrime: (id: string) => Promise<void>; // @deprecated - Ne plus utiliser
   validateSimulation: (id: string) => Promise<void>;
-  convertSimulation: (id: string) => Promise<void>;
+  convertSimulation: (id: string, data?: any) => Promise<void>;
   setFilters: (filters: Partial<SimulationFilters>) => void;
   setCurrentSimulation: (simulation: Simulation | null) => void;
   reset: () => void;
+
+  // Wizard Actions
+  setWizardStep: (step: number) => void;
+  updateWizardData: (data: Partial<WizardData>) => void;
+  resetWizard: () => void;
 }
 
 const initialFilters: SimulationFilters = {
@@ -34,6 +50,15 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
   totalCount: 0,
   isLoading: false,
   error: null,
+
+  // Wizard Initial State
+  wizardData: {
+    step: 1,
+    simulationData: null,
+    questionnaireData: null,
+    createdSimulationId: undefined,
+    biaInfo: null,
+  },
 
   fetchSimulations: async (params?: SimulationFilters) => {
     set({ isLoading: true, error: null });
@@ -120,6 +145,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
           response = await produitsApi.simulateMobateli(data as any);
           break;
         case "confort_retraite":
+        case "epargne_plus":
           response = await produitsApi.simulateRetraite(data as any);
           break;
         default:
@@ -131,6 +157,18 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
       const simulation = response.simulation;
 
       if (!simulation) {
+        // Si c'est une simulation simple (sauvegarder: false), on retourne les résultats
+        // et on annule l'ajout optimiste dans la liste
+        if (data.sauvegarder === false && response.resultats) {
+          set((state) => ({
+            simulations: state.simulations.filter((s) => s.id !== tempId),
+            totalCount: state.totalCount - 1,
+            isLoading: false,
+            error: null,
+          }));
+          // On retourne les résultats comme si c'était une simulation (pour l'affichage)
+          return { ...data, ...response.resultats } as any;
+        }
         throw new Error("La simulation n'a pas été sauvegardée");
       }
 
@@ -362,6 +400,28 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
       filters: initialFilters,
       totalCount: 0,
       error: null,
+    });
+  },
+  // Wizard Actions
+  setWizardStep: (step: number) => {
+    set((state) => ({
+      wizardData: { ...state.wizardData, step },
+    }));
+  },
+
+  updateWizardData: (data: Partial<WizardData>) => {
+    set((state) => ({
+      wizardData: { ...state.wizardData, ...data },
+    }));
+  },
+
+  resetWizard: () => {
+    set({
+      wizardData: {
+        step: 1,
+        simulationData: null,
+        questionnaireData: null,
+      },
     });
   },
 }));

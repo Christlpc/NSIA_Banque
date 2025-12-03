@@ -97,9 +97,9 @@ export const simulationApi = {
       return mockSimulationApi.submitQuestionnaire(id, questionnaire);
     }
     // Créer le questionnaire et l'appliquer à la simulation
-    const created = await questionnairesApi.createQuestionnaire({
+    const created = await questionnairesApi.createQuestionnaire(id, {
       ...questionnaire,
-      simulation: id,
+      // simulation: id, // Plus besoin car passé en argument
     });
     return questionnairesApi.appliquerASimulation(created.id, id);
   },
@@ -114,8 +114,8 @@ export const simulationApi = {
   /**
    * @deprecated Utiliser historiqueApi.souscrireSimulation() à la place
    */
-  convertSimulation: async (id: string): Promise<Simulation> => {
-    return historiqueApi.souscrireSimulation(id);
+  convertSimulation: async (id: string, data?: any): Promise<Simulation> => {
+    return historiqueApi.souscrireSimulation(id, data);
   },
 
   /**
