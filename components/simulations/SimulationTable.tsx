@@ -72,7 +72,7 @@ export function SimulationTable() {
           cell: (info) => {
             const value = info.getValue();
             if (!value) return "-";
-            const numValue = typeof value === 'string' ? parseFloat(value) : value;
+            const numValue = typeof value === 'string' ? parseFloat(value) : Number(value);
             return isNaN(numValue) ? "-" : `${numValue.toLocaleString("fr-FR")} FCFA`;
           },
         }
