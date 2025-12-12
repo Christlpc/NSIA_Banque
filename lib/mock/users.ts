@@ -7,7 +7,7 @@ interface ExtendedUser extends User {
   is_active?: boolean;
 }
 
-let users: ExtendedUser[] = mockUsers.map((user, index) => ({
+const users: ExtendedUser[] = mockUsers.map((user, index) => ({
   ...user,
   is_active: index !== 5, // Le 6ème utilisateur (support@ecobank) est inactif pour la démo
 }));

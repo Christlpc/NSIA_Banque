@@ -103,7 +103,7 @@ export function calculateAgeAtJanuary1st(
   const year = referenceYear || new Date().getFullYear();
   const january1st = new Date(year, 0, 1); // 1er janvier de l'année de référence
 
-  let age = january1st.getFullYear() - birthDate.getFullYear();
+  const age = january1st.getFullYear() - birthDate.getFullYear();
 
   // Pas besoin de vérifier le mois/jour car on calcule toujours au 1er janvier
   // L'âge est simplement la différence des années

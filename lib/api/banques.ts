@@ -165,30 +165,24 @@ export const banqueApi = {
     if (data.police_principale) params.police_principale = data.police_principale;
     if (data.statut) params.statut = data.statut;
 
-    // Si un fichier logo est fourni, utiliser FormData
+    // Si un fichier logo est fourni, le convertir en base64 et stocker dans parametres_specifiques
+    // Le backend ne supporte pas l'upload de fichiers, on utilise base64 comme workaround
     if (data.logo instanceof File) {
-      const formData = new FormData();
-      formData.append("code_banque", data.code);
-      formData.append("nom_complet", data.nom);
-      formData.append("nom_court", data.nom_court || data.code);
-      formData.append("email_contact", data.email || "");
-      formData.append("telephone_contact", data.telephone || "+242 00 000 00 00");
-      formData.append("adresse", data.adresse || "À définir");
-      formData.append("couleur_primaire", data.couleur_primaire || "#003366");
-      formData.append("couleur_secondaire", data.couleur_secondaire || "#FFD700");
-      formData.append("police_principale", data.police_principale || "Arial");
-      formData.append("statut", data.statut || "ACTIF");
-      if (data.date_partenariat) formData.append("date_partenariat", data.date_partenariat);
-
-      // Send parameters as JSON string
-      formData.append("parametres_specifiques", JSON.stringify(params));
-
-      formData.append("logo", data.logo);
-
-      const response = await apiClient.post<ApiBanque>("/api/v1/banques/", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      return transformApiBanque(response.data);
+      try {
+        const base64Logo = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(data.logo as File);
+        });
+        params.logo_base64 = base64Logo;
+        console.log("[Banques API] Logo converted to base64, length:", base64Logo.length);
+      } catch (error) {
+        console.error("[Banques API] Failed to convert logo to base64:", error);
+      }
+    } else if (typeof data.logo === 'string' && data.logo) {
+      // Si c'est déjà une URL ou base64, le stocker directement
+      params.logo_base64 = data.logo;
     }
 
     // Sinon, utiliser JSON classique
@@ -206,8 +200,17 @@ export const banqueApi = {
       date_partenariat: data.date_partenariat || null,
       parametres_specifiques: params, // Inclut les produits
     };
-    const response = await apiClient.post<ApiBanque>("/api/v1/banques/", apiData);
-    return transformApiBanque(response.data);
+
+    console.log("[Banques API] Creating banque with payload:", JSON.stringify(apiData, null, 2));
+
+    try {
+      const response = await apiClient.post<ApiBanque>("/api/v1/banques/", apiData);
+      console.log("[Banques API] Banque created successfully:", response.data);
+      return transformApiBanque(response.data);
+    } catch (error: any) {
+      console.error("[Banques API] Error creating banque:", error.response?.data || error.message);
+      throw error;
+    }
   },
 
   updateBanque: async (id: number | string, data: BanqueUpdateData): Promise<Banque> => {

@@ -3,7 +3,7 @@ import type { Banque, PaginatedResponse } from "@/types";
 import type { BanqueCreateData, BanqueUpdateData } from "@/lib/api/banques";
 
 // Variable pour stocker les banques (incluant les nouvelles créées)
-let banquesList = [...mockBanques];
+const banquesList = [...mockBanques];
 
 export const mockBanqueApi = {
   getBanques: async (): Promise<PaginatedResponse<Banque>> => {
