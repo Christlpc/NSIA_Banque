@@ -102,4 +102,3 @@ export function DatePickerInput({
     </div>
   );
 }
-

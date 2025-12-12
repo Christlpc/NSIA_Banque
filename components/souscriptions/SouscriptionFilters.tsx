@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,10 +29,28 @@ const STATUT_OPTIONS = [
 
 export function SouscriptionFilters({ filters, onFiltersChange }: SouscriptionFiltersProps) {
   const [searchValue, setSearchValue] = useState(filters.search || "");
+  const debouncedSearch = useDebounce(searchValue, 500);
+  const lastAppliedSearch = useRef(filters.search || "");
+  const isInitialMount = useRef(true);
+
+  // Effet pour déclencher la recherche quand la valeur debouncée change
+  useEffect(() => {
+    // Skip on initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Only trigger if the value actually changed from last applied
+    if (debouncedSearch !== lastAppliedSearch.current) {
+      lastAppliedSearch.current = debouncedSearch;
+      onFiltersChange({ ...filters, search: debouncedSearch || undefined, page: 1 });
+    }
+  }, [debouncedSearch]); // Only depend on debouncedSearch
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    onFiltersChange({ ...filters, search: value || undefined, page: 1 });
+    // La recherche sera déclenchée par l'effet debouncedSearch
   };
 
   const handleFilterChange = (key: keyof SouscriptionFilters, value: string) => {

@@ -30,18 +30,37 @@ export function RejectSouscriptionDialog({
   onReject,
 }: RejectSouscriptionDialogProps) {
   const [raison, setRaison] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleReject = async () => {
-    if (!raison.trim()) {
+    const motifRejet = raison.trim();
+    if (!motifRejet) {
       return;
     }
-    await onReject(souscription.id, raison);
-    setRaison("");
-    onOpenChange(false);
+
+    setIsSubmitting(true);
+    try {
+      await onReject(souscription.id, motifRejet);
+      setRaison("");
+      onOpenChange(false);
+    } catch (error) {
+      // L'erreur est gérée dans le parent, on ne fait rien ici
+      console.error("Erreur rejet:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Reset raison when dialog opens
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setRaison("");
+    }
+    onOpenChange(isOpen);
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Rejeter la souscription</AlertDialogTitle>
@@ -66,17 +85,18 @@ export function RejectSouscriptionDialog({
               placeholder="Expliquez la raison du rejet..."
               className="mt-2"
               rows={4}
+              disabled={isSubmitting}
             />
           </div>
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setRaison("")}>Annuler</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setRaison("")} disabled={isSubmitting}>Annuler</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleReject}
-            disabled={!raison.trim()}
+            disabled={!raison.trim() || isSubmitting}
             className="bg-red-600 hover:bg-red-700"
           >
-            Rejeter
+            {isSubmitting ? "Rejet en cours..." : "Rejeter"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

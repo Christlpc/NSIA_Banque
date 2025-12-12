@@ -9,10 +9,11 @@ export function StatsCards() {
   const { simulations, fetchSimulations, isLoading } = useSimulationStore();
   const [stats, setStats] = useState({
     total: 0,
-    enCours: 0,
-    validees: 0,
-    converties: 0,
+    simulations: 0,
+    propositions: 0,
     evolution: 0,
+    evolutionSims: 0,
+    evolutionProps: 0,
   });
 
   useEffect(() => {
@@ -20,17 +21,57 @@ export function StatsCards() {
   }, [fetchSimulations]);
 
   useEffect(() => {
-    const total = simulations.length;
-    const enCours = simulations.filter((s) => s.statut === "brouillon" || s.statut === "calculee").length;
-    const validees = simulations.filter((s) => s.statut === "validee").length;
-    const converties = simulations.filter((s) => s.statut === "convertie").length;
+    if (!simulations.length) return;
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const previousMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonth = previousMonthDate.getMonth();
+    const previousYear = previousMonthDate.getFullYear();
+
+    // Helper counts
+    let currentTotal = 0;
+    let lastTotal = 0;
+
+    let currentSims = 0;
+    let lastSims = 0;
+
+    let currentProps = 0;
+    let lastProps = 0;
+
+    simulations.forEach(s => {
+      const d = new Date(s.created_at || s.updated_at || new Date());
+      const m = d.getMonth();
+      const y = d.getFullYear();
+
+      const isCurrent = m === currentMonth && y === currentYear;
+      const isPrevious = m === previousMonth && y === previousYear;
+
+      if (isCurrent) {
+        currentTotal++;
+        if (s.statut === "brouillon" || s.statut === "calculee") currentSims++;
+        if (s.statut === "validee") currentProps++;
+      } else if (isPrevious) {
+        lastTotal++;
+        if (s.statut === "brouillon" || s.statut === "calculee") lastSims++;
+        if (s.statut === "validee") lastProps++;
+      }
+    });
+
+    const calculateEvolution = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
 
     setStats({
-      total,
-      enCours,
-      validees,
-      converties,
-      evolution: 0, // TODO: Calculer l'évolution vs mois précédent
+      total: simulations.length,
+      simulations: simulations.filter((s) => s.statut === "brouillon" || s.statut === "calculee").length,
+      propositions: simulations.filter((s) => s.statut === "validee").length,
+      evolution: calculateEvolution(currentTotal, lastTotal),
+      evolutionSims: calculateEvolution(currentSims, lastSims),
+      evolutionProps: calculateEvolution(currentProps, lastProps),
     });
   }, [simulations]);
 
@@ -44,30 +85,25 @@ export function StatsCards() {
       evolution: stats.evolution,
     },
     {
-      title: "En Cours",
-      value: stats.enCours,
+      title: "Simulations en cours",
+      value: stats.simulations,
       icon: FileText,
       color: "text-yellow-600",
       bgColor: "bg-yellow-50",
+      evolution: stats.evolutionSims,
     },
     {
-      title: "Validées",
-      value: stats.validees,
+      title: "Propositions validées",
+      value: stats.propositions,
       icon: CheckCircle,
       color: "text-green-600",
       bgColor: "bg-green-50",
-    },
-    {
-      title: "Converties",
-      value: stats.converties,
-      icon: DollarSign,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      evolution: stats.evolutionProps,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {cards.map((card) => {
         const Icon = card.icon;
         return (

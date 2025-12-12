@@ -7,7 +7,7 @@ export const mockUsers: User[] = [
     email: "admin@nsia.cg",
     nom: "Admin",
     prenom: "NSIA",
-    role: "super_admin_nsia",
+    role: "SUPER_ADMIN",
     banque: {
       id: 1,
       code: "NSIA",
@@ -27,7 +27,7 @@ export const mockUsers: User[] = [
     email: "admin2@nsia.cg",
     nom: "Kouassi",
     prenom: "Pierre",
-    role: "admin_nsia",
+    role: "ADMIN",
     banque: {
       id: 1,
       code: "NSIA",
@@ -47,7 +47,7 @@ export const mockUsers: User[] = [
     email: "responsable@ecobank.cg",
     nom: "Dupont",
     prenom: "Jean",
-    role: "responsable_banque",
+    role: "RESPONSABLE_BANQUE",
     banque: {
       id: 2,
       code: "ECO",
@@ -60,7 +60,7 @@ export const mockUsers: User[] = [
     email: "gestionnaire1@ecobank.cg",
     nom: "Diallo",
     prenom: "Amadou",
-    role: "gestionnaire",
+    role: "GESTIONNAIRE",
     banque: {
       id: 2,
       code: "ECO",
@@ -73,7 +73,7 @@ export const mockUsers: User[] = [
     email: "gestionnaire2@ecobank.cg",
     nom: "Tshisekedi",
     prenom: "Sophie",
-    role: "gestionnaire",
+    role: "GESTIONNAIRE",
     banque: {
       id: 2,
       code: "ECO",
@@ -86,7 +86,7 @@ export const mockUsers: User[] = [
     email: "support@ecobank.cg",
     nom: "Mukendi",
     prenom: "Paul",
-    role: "support",
+    role: "SUPPORT",
     banque: {
       id: 2,
       code: "ECO",
@@ -99,7 +99,7 @@ export const mockUsers: User[] = [
     email: "responsable@bgfi.cg",
     nom: "Nkosi",
     prenom: "Marie",
-    role: "responsable_banque",
+    role: "RESPONSABLE_BANQUE",
     banque: {
       id: 4,
       code: "BGFI",
@@ -112,7 +112,7 @@ export const mockUsers: User[] = [
     email: "gestionnaire@bgfi.cg",
     nom: "Martin",
     prenom: "Marie",
-    role: "gestionnaire",
+    role: "GESTIONNAIRE",
     banque: {
       id: 4,
       code: "BGFI",
@@ -125,7 +125,7 @@ export const mockUsers: User[] = [
     email: "responsable@bci.cg",
     nom: "Bemba",
     prenom: "Claire",
-    role: "responsable_banque",
+    role: "RESPONSABLE_BANQUE",
     banque: {
       id: 5,
       code: "BCI",
@@ -144,7 +144,7 @@ export const mockUsers: User[] = [
     email: "gestionnaire@bci.cg",
     nom: "Kouassi",
     prenom: "Jean",
-    role: "gestionnaire",
+    role: "GESTIONNAIRE",
     banque: {
       id: 5,
       code: "BCI",
@@ -163,7 +163,7 @@ export const mockUsers: User[] = [
     email: "responsable@cdco.cg",
     nom: "Diallo",
     prenom: "Ibrahim",
-    role: "responsable_banque",
+    role: "RESPONSABLE_BANQUE",
     banque: {
       id: 3,
       code: "CDCO",

@@ -19,12 +19,58 @@ export function QuickStats({ theme }: QuickStatsProps) {
     fetchSimulations();
   }, [fetchSimulations]);
 
-  const stats = {
-    total: simulations.length,
-    enCours: simulations.filter((s) => s.statut === "brouillon" || s.statut === "calculee").length,
-    validees: simulations.filter((s) => s.statut === "validee").length,
-    converties: simulations.filter((s) => s.statut === "convertie").length,
-  };
+  // Calculs dynamiques des stats et évolutions
+  const stats = (() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const previousMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const previousMonth = previousMonthDate.getMonth();
+    const previousYear = previousMonthDate.getFullYear();
+
+    let currentTotal = 0;
+    let lastTotal = 0;
+
+    let currentSims = 0;
+    let lastSims = 0;
+
+    let currentProps = 0;
+    let lastProps = 0;
+
+    simulations.forEach(s => {
+      const d = new Date(s.created_at || s.updated_at || new Date());
+      const m = d.getMonth();
+      const y = d.getFullYear();
+
+      const isCurrent = m === currentMonth && y === currentYear;
+      const isPrevious = m === previousMonth && y === previousYear;
+
+      if (isCurrent) {
+        currentTotal++;
+        if (s.statut === "brouillon" || s.statut === "calculee") currentSims++;
+        if (s.statut === "validee") currentProps++;
+      } else if (isPrevious) {
+        lastTotal++;
+        if (s.statut === "brouillon" || s.statut === "calculee") lastSims++;
+        if (s.statut === "validee") lastProps++;
+      }
+    });
+
+    const calculateEvolution = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - previous) / previous) * 100);
+    };
+
+    return {
+      total: simulations.length,
+      simulations: simulations.filter((s) => s.statut === "brouillon" || s.statut === "calculee").length,
+      propositions: simulations.filter((s) => s.statut === "validee").length,
+      evolutionTotal: calculateEvolution(currentTotal, lastTotal),
+      evolutionSims: calculateEvolution(currentSims, lastSims),
+      evolutionProps: calculateEvolution(currentProps, lastProps),
+    };
+  })();
 
   // Générer des données de graphique pour chaque stat
   const generateChartData = (baseValue: number) => {
@@ -37,78 +83,77 @@ export function QuickStats({ theme }: QuickStatsProps) {
     {
       label: "Total Simulations",
       value: stats.total,
-      change: "+12%",
-      trend: "up" as const,
+      change: `${stats.evolutionTotal >= 0 ? "+" : ""}${stats.evolutionTotal}%`,
+      trend: stats.evolutionTotal >= 0 ? "up" : "down",
       icon: FileText,
-      color: "blue",
-      gradient: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
-      textColor: "text-blue-700",
-      chartColor: "#3b82f6",
+      color: "bank", // Special marker to use bank theme
+      chartColor: theme.primaryColor,
       amount: `${(stats.total * 12500).toLocaleString("fr-FR")} FCFA`,
     },
     {
-      label: "En Cours",
-      value: stats.enCours,
-      change: "+5%",
-      trend: "up" as const,
+      label: "Simulations",
+      value: stats.simulations,
+      change: `${stats.evolutionSims >= 0 ? "+" : ""}${stats.evolutionSims}%`,
+      trend: stats.evolutionSims >= 0 ? "up" : "down",
       icon: Clock,
       color: "yellow",
-      gradient: "from-yellow-500 to-yellow-600",
-      bgColor: "bg-yellow-50",
-      borderColor: "border-yellow-200",
-      textColor: "text-yellow-700",
       chartColor: "#eab308",
-      amount: `${stats.enCours} actives`,
+      amount: `${stats.simulations} actives`,
     },
     {
-      label: "Validées",
-      value: stats.validees,
-      change: "+8%",
-      trend: "up" as const,
+      label: "Propositions",
+      value: stats.propositions,
+      change: `${stats.evolutionProps >= 0 ? "+" : ""}${stats.evolutionProps}%`,
+      trend: stats.evolutionProps >= 0 ? "up" : "down",
       icon: CheckCircle,
       color: "green",
-      gradient: "from-green-500 to-green-600",
-      bgColor: "bg-green-50",
-      borderColor: "border-green-200",
-      textColor: "text-green-700",
       chartColor: "#10b981",
-      amount: `${stats.validees} prêtes`,
+      amount: `${stats.propositions} prêtes`,
     },
-    {
-      label: "Converties",
-      value: stats.converties,
-      change: "+15%",
-      trend: "up" as const,
-      icon: CheckCircle2,
-      color: "purple",
-      gradient: "from-purple-500 to-purple-600",
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200",
-      textColor: "text-purple-700",
-      chartColor: "#8b5cf6",
-      amount: `${stats.converties} contrats`,
-    },
-  ];
+  ] as const;
+
+  // Helper to get color styles based on stat.color
+  const getColorStyles = (color: string) => {
+    const colorMap: Record<string, { bgColor: string; borderColor: string; textColor: string; gradient: string }> = {
+      yellow: { bgColor: "bg-yellow-50", borderColor: "border-yellow-200", textColor: "text-yellow-700", gradient: "from-yellow-500 to-yellow-600" },
+      green: { bgColor: "bg-green-50", borderColor: "border-green-200", textColor: "text-green-700", gradient: "from-green-500 to-green-600" },
+    };
+    return colorMap[color] || { bgColor: "bg-gray-50", borderColor: "border-gray-200", textColor: "text-gray-700", gradient: "from-gray-500 to-gray-600" };
+  };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
       {statsCards.map((stat) => {
         const Icon = stat.icon;
         const chartData = generateChartData(stat.value);
-        
+        const isBankTheme = stat.color === "bank";
+        const colorStyles = isBankTheme ? null : getColorStyles(stat.color);
+
+        // Dynamic styles for bank-themed card
+        const cardStyle = isBankTheme ? {
+          borderColor: theme.primaryColor,
+          backgroundColor: `${theme.primaryColor}10`, // 10% opacity
+        } : {};
+
+        const iconStyle = isBankTheme ? {
+          color: theme.primaryColor,
+        } : {};
+
         return (
-          <Card 
-            key={stat.label} 
-            className={`border-2 ${stat.borderColor} ${stat.bgColor} hover:shadow-lg transition-all duration-300 group cursor-pointer overflow-hidden relative`}
+          <Card
+            key={stat.label}
+            className={`border-2 ${!isBankTheme ? `${colorStyles?.borderColor} ${colorStyles?.bgColor}` : ''} hover:shadow-lg transition-all duration-300 group cursor-pointer overflow-hidden relative`}
+            style={cardStyle}
           >
-            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.gradient} opacity-10 rounded-full -mr-16 -mt-16 group-hover:opacity-20 transition-opacity`} />
-            
+            <div
+              className={`absolute top-0 right-0 w-32 h-32 opacity-10 rounded-full -mr-16 -mt-16 group-hover:opacity-20 transition-opacity`}
+              style={{ background: isBankTheme ? `linear-gradient(to bottom right, ${theme.primaryColor}, ${theme.secondaryColor})` : undefined }}
+            />
+
             <CardContent className="p-6 relative z-10">
               <div className="flex items-start justify-between mb-4">
                 <div className={`p-3 rounded-xl bg-white/80 backdrop-blur-sm shadow-sm`}>
-                  <Icon className={`h-6 w-6 ${stat.textColor}`} />
+                  <Icon className={`h-6 w-6 ${!isBankTheme ? colorStyles?.textColor : ''}`} style={iconStyle} />
                 </div>
                 <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-white/80 backdrop-blur-sm ${stat.trend === "up" ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50"}`}>
                   {stat.trend === "up" ? (
@@ -130,10 +175,10 @@ export function QuickStats({ theme }: QuickStatsProps) {
               <div className="h-16 -mx-6 -mb-6">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke={stat.chartColor} 
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke={stat.chartColor}
                       strokeWidth={2}
                       dot={false}
                     />
@@ -142,7 +187,7 @@ export function QuickStats({ theme }: QuickStatsProps) {
               </div>
 
               <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <ArrowRight className={`h-4 w-4 ${stat.textColor}`} />
+                <ArrowRight className={`h-4 w-4 ${!isBankTheme ? colorStyles?.textColor : ''}`} style={iconStyle} />
               </div>
             </CardContent>
           </Card>

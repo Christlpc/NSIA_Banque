@@ -39,6 +39,12 @@ export const notificationApi = {
     // await apiClient.delete("/api/v1/notifications/delete-read/");
     return mockNotificationApi.deleteAllRead();
   },
+
+  sendNotification: async (data: Omit<SystemNotification, "id" | "created_at" | "read">): Promise<void> => {
+    // Désactivé : l'API n'est pas encore disponible
+    // await apiClient.post("/api/v1/notifications/", data);
+    return mockNotificationApi.sendNotification(data);
+  },
 };
 
 

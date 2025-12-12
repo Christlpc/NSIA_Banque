@@ -13,6 +13,36 @@ import type {
  * API pour la gestion de l'historique des simulations (CRUD)
  * Endpoints: /api/v1/simulations/historique/
  */
+
+// Transformer une simulation API vers le format frontend
+interface ApiSimulation {
+  id: string;
+  reference?: string;
+  produit?: string;
+  statut?: string;
+  date_creation?: string;
+  date_modification?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: any;
+}
+
+function transformApiSimulation(apiSim: ApiSimulation): Simulation {
+  return {
+    ...apiSim,
+    // Mapper les champs de date
+    created_at: apiSim.created_at || apiSim.date_creation || new Date().toISOString(),
+    updated_at: apiSim.updated_at || apiSim.date_modification || new Date().toISOString(),
+  } as Simulation;
+}
+
+function transformPaginatedSimulations(response: PaginatedResponse<ApiSimulation>): PaginatedResponse<Simulation> {
+  return {
+    ...response,
+    results: response.results.map(transformApiSimulation),
+  };
+}
+
 export const historiqueApi = {
   /**
    * Récupère la liste des simulations avec pagination et filtres
@@ -34,10 +64,10 @@ export const historiqueApi = {
     // page_size optionnel - non dans SimulationFilters mais peut être ajouté dynamiquement
     if ((filters as any)?.page_size) params.append("page_size", (filters as any).page_size.toString());
 
-    const response = await apiClient.get<PaginatedResponse<Simulation>>(
+    const response = await apiClient.get<PaginatedResponse<ApiSimulation>>(
       `/api/v1/simulations/historique/?${params.toString()}`
     );
-    return response.data;
+    return transformPaginatedSimulations(response.data);
   },
 
   /**
@@ -48,8 +78,8 @@ export const historiqueApi = {
     if (USE_MOCK_DATA) {
       return mockSimulationApi.getSimulation(id);
     }
-    const response = await apiClient.get<Simulation>(`/api/v1/simulations/historique/${id}/`);
-    return response.data;
+    const response = await apiClient.get<ApiSimulation>(`/api/v1/simulations/historique/${id}/`);
+    return transformApiSimulation(response.data);
   },
 
   /**
@@ -176,27 +206,45 @@ export const historiqueApi = {
    */
   souscrireSimulation: async (
     id: string,
-    data?: {
-      nom?: string;
-      prenom?: string;
-      date_naissance?: string;
-      email?: string;
-      telephone?: string;
-      adresse?: string;
-      profession?: string;
-      employeur?: string;
-      numero_compte?: string;
-      date_effet_contrat?: string;
-    }
+    data?: SouscriptionPayload
   ): Promise<Simulation> => {
     if (USE_MOCK_DATA) {
       return mockSimulationApi.convertSimulation(id);
     }
     const response = await apiClient.post<Simulation>(
       `/api/v1/simulations/historique/${id}/souscrire/`,
-      data || {}
+      cleanPayload(data || {})
     );
     return response.data;
   },
 };
+
+/**
+ * Interface pour le payload de souscription
+ * Envoyé lors de la conversion d'une simulation en souscription
+ */
+export interface SouscriptionPayload {
+  simulation?: string; // UUID de la simulation
+  banque?: string; // UUID de la banque
+  gestionnaire?: string; // UUID du gestionnaire
+  statut?: string; // Statut de la souscription
+  nom?: string;
+  prenom?: string;
+  date_naissance?: string; // Format: YYYY-MM-DD
+  lieu_naissance?: string;
+  email?: string;
+  telephone?: string;
+  adresse?: string;
+  profession?: string;
+  employeur?: string;
+  numero_compte?: string;
+  documents?: string; // Type de document: "passeport", "carte_identite", etc.
+  date_effet_contrat?: string; // Format: YYYY-MM-DD
+  date_echeance_contrat?: string; // Format: YYYY-MM-DD
+  montant_prime?: string;
+  donnees_produit?: Record<string, any> | null;
+  date_validation?: string; // Format: ISO 8601
+  notes?: string;
+  commentaires?: string;
+}
 

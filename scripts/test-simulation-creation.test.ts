@@ -47,16 +47,13 @@ describe('Simulation Creation Tests', () => {
 
     it('should accept valid elikia_scolaire payload structure', async () => {
         const payload = {
-            rente_annuelle: 1000000,
-            age_parent: 40,
+            rente_annuelle: 200000,
+            age_parent: 35,
             duree_rente: 5,
-            date_naissance: "1990-01-01",
-            date_effet: "2024-01-01",
-            taux_surprime: 0,
-            nom: "Test",
-            prenom: "User",
-            email: "test@example.com",
-            telephone: "123456789",
+            nom: "Dupont",
+            prenom: "Jean",
+            email: "jean.dupont@example.com",
+            telephone: "+242123456789",
             sauvegarder: true
         };
 

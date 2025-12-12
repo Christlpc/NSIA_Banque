@@ -1,21 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { banqueApi } from "@/lib/api/banques";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getBankTheme } from "@/lib/utils/theme";
 import { PRODUIT_LABELS } from "@/types";
 import type { Banque } from "@/types";
-import { Edit, TrendingUp, Users, FileText, DollarSign, ArrowRight } from "lucide-react";
+import { Edit, Trash2, Users, FileText, ArrowRight } from "lucide-react";
 import { useSafeRouter } from "@/lib/hooks/useSafeRouter";
 import { formatDateMonthYear } from "@/lib/utils/date";
+import { DeleteBanqueDialog } from "./DeleteBanqueDialog";
 
 interface BanqueCardProps {
   banque: Banque;
   stats?: {
     totalSimulations: number;
     totalUsers: number;
-    montantTotal: number;
     evolution: number;
   };
   onEdit?: (banque: Banque) => void;
@@ -24,105 +26,153 @@ interface BanqueCardProps {
 export function BanqueCard({ banque, stats, onEdit }: BanqueCardProps) {
   const router = useSafeRouter();
   const theme = getBankTheme(banque);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [products, setProducts] = useState<string[]>(banque.produits_disponibles || []);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      // Si la liste est vide, on tente de la récupérer
+      if (products.length === 0) {
+        try {
+          const fetchedProducts = await banqueApi.getBanqueProduits(banque.id);
+          if (Array.isArray(fetchedProducts) && fetchedProducts.length > 0) {
+            setProducts(fetchedProducts);
+          }
+        } catch (error) {
+          console.error("Erreur chargement produits carte:", error);
+        }
+      }
+    };
+    loadProducts();
+  }, [banque.id]);
 
   return (
-    <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
-      {/* Header avec gradient */}
-      <div className={`h-2 ${theme.gradient}`} />
-      
-      <CardHeader className="pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-1">{banque.nom}</h3>
-            <p className="text-sm text-gray-500">Code: {banque.code}</p>
-            {banque.email && (
-              <p className="text-xs text-gray-400 mt-1">{banque.email}</p>
-            )}
-            {banque.date_partenariat && (
-              <p className="text-xs text-gray-400 mt-1">
-                Partenaire depuis {formatDateMonthYear(banque.date_partenariat)}
-              </p>
+    <>
+      <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group bg-white flex flex-col h-full">
+        {/* Header avec gradient et Logo */}
+        <div className={`relative h-24 ${theme.gradient} p-4 flex items-start justify-between`}>
+          <div className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-sm mt-8 ml-2">
+            {banque.logo ? (
+              <img
+                src={banque.logo}
+                alt={banque.nom}
+                className="h-10 w-10 object-contain"
+              />
+            ) : (
+              <div className={`h-10 w-10 rounded-lg flex items-center justify-center font-bold text-lg ${theme.accent.replace('text-', 'bg-').replace('[', 'text-[')}`}>
+                {banque.nom.substring(0, 2).toUpperCase()}
+              </div>
             )}
           </div>
-          {onEdit && (
+
+          <div className="flex gap-1">
+            <Badge className={`${banque.est_active ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"} text-white border-0 shadow-sm`}>
+              {banque.est_active ? "Actif" : "Inactif"}
+            </Badge>
+          </div>
+        </div>
+
+        <CardHeader className="pt-10 pb-2 px-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 leading-tight group-hover:text-blue-700 transition-colors">
+                {banque.nom}
+              </h3>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="outline" className="text-xs font-mono">{banque.code}</Badge>
+                {banque.date_partenariat && (
+                  <span className="text-xs text-gray-400">
+                    Depuis {new Date(banque.date_partenariat).getFullYear()}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="px-6 pb-6 pt-2 flex-grow flex flex-col gap-6">
+          {/* Stats Row */}
+          {stats && (
+            <div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                  <FileText className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-900 leading-none">{stats.totalSimulations}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Simuls</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                  <Users className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-900 leading-none">{stats.totalUsers}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Utilisateurs</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Products Tags */}
+          <div className="space-y-2 flex-grow">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Produits disponibles</p>
+            <div className="flex flex-wrap gap-1.5">
+              {products.length > 0 ? (
+                products.slice(0, 3).map((produit) => (
+                  <Badge
+                    key={produit}
+                    variant="secondary"
+                    className="bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
+                  >
+                    {PRODUIT_LABELS[produit as keyof typeof PRODUIT_LABELS] || produit}
+                  </Badge>
+                ))
+              ) : (
+                <span className="text-sm text-gray-400 italic">Aucun produit configuré</span>
+              )}
+              {products.length > 3 && (
+                <Badge variant="outline" className="text-gray-400 text-xs">+{products.length - 3}</Badge>
+              )}
+            </div>
+          </div>
+
+          {/* Actions Footer */}
+          <div className="pt-2 border-t border-gray-100 mt-auto flex items-center gap-2">
+            <Button
+              className="flex-1 bg-gray-900 hover:bg-gray-800 text-white shadow-md group-hover:shadow-lg transition-all"
+              onClick={() => router.push(`/banques/${banque.id}`)}
+            >
+              Gérer
+              <ArrowRight className="ml-2 h-4 w-4 opacity-70 group-hover:translate-x-1 transition-transform" />
+            </Button>
+
+            {onEdit && (
+              <Button variant="outline" size="icon" onClick={() => onEdit(banque)} className="border-gray-200 hover:bg-gray-50 text-gray-500">
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
+
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onEdit(banque)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="text-gray-400 hover:text-red-600 hover:bg-red-50"
             >
-              <Edit className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" />
             </Button>
-          )}
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
-        {/* Statistiques */}
-        {stats && (
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="p-2 rounded-lg bg-blue-50">
-                  <FileText className="h-4 w-4 text-blue-600" />
-                </div>
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{stats.totalSimulations}</div>
-              <div className="text-xs text-gray-500">Simulations</div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="p-2 rounded-lg bg-green-50">
-                  <Users className="h-4 w-4 text-green-600" />
-                </div>
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{stats.totalUsers}</div>
-              <div className="text-xs text-gray-500">Utilisateurs</div>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="p-2 rounded-lg bg-purple-50">
-                  <DollarSign className="h-4 w-4 text-purple-600" />
-                </div>
-              </div>
-              <div className="text-lg font-bold text-gray-900">
-                {stats.montantTotal > 0
-                  ? `${(stats.montantTotal / 1000000).toFixed(1)}M`
-                  : "0"}
-              </div>
-              <div className="text-xs text-gray-500">FCFA</div>
-            </div>
           </div>
-        )}
 
-        {/* Produits disponibles */}
-        <div>
-          <p className="text-sm font-semibold text-gray-700 mb-3">
-            Produits disponibles ({banque.produits_disponibles.length})
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {banque.produits_disponibles.map((produit) => (
-              <Badge
-                key={produit}
-                className="bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-              >
-                {PRODUIT_LABELS[produit]}
-              </Badge>
-            ))}
-          </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Action */}
-        <Button
-          variant="outline"
-          className="w-full group/btn"
-          onClick={() => router.push(`/banques/${banque.id}`)}
-        >
-          Voir les détails
-          <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-        </Button>
-      </CardContent>
-    </Card>
+      {/* Delete Dialog */}
+      <DeleteBanqueDialog
+        banque={banque}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
+    </>
   );
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,26 @@ import { Search, X } from "lucide-react";
 export function UserFilters() {
   const { filters, setFilters, fetchUsers } = useUserStore();
   const [searchValue, setSearchValue] = useState(filters.search || "");
+  const debouncedSearch = useDebounce(searchValue, 500);
   const [banques, setBanques] = useState<Banque[]>([]);
+  const lastAppliedSearch = useRef(filters.search || "");
+  const isInitialMount = useRef(true);
+
+  useEffect(() => {
+    // Skip on initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Only trigger if the value actually changed from last applied
+    if (debouncedSearch !== lastAppliedSearch.current) {
+      lastAppliedSearch.current = debouncedSearch;
+      const newFilters = { ...filters, search: debouncedSearch || undefined, page: 1 };
+      setFilters(newFilters);
+      fetchUsers(newFilters);
+    }
+  }, [debouncedSearch]); // Only depend on debouncedSearch
 
   useEffect(() => {
     const loadBanques = async () => {
@@ -37,19 +57,17 @@ export function UserFilters() {
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    const newFilters = { ...filters, search: value || undefined, page: 1 };
-    setFilters(newFilters);
-    fetchUsers(newFilters);
+    // La recherche sera déclenchée par l'effet debouncedSearch
   };
 
   const handleFilterChange = (key: string, value: string) => {
     let filterValue: any = value === "all" ? undefined : value;
-    
+
     // Convertir banque en number si nécessaire
     if (key === "banque" && filterValue !== undefined) {
       filterValue = parseInt(filterValue, 10);
     }
-    
+
     const newFilters = { ...filters, [key]: filterValue, page: 1 };
     setFilters(newFilters);
     fetchUsers(newFilters);
@@ -112,11 +130,13 @@ export function UserFilters() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toutes les banques</SelectItem>
-              {banques.map((banque) => (
-                <SelectItem key={banque.id} value={String(banque.id)}>
-                  {banque.nom}
-                </SelectItem>
-              ))}
+              {banques
+                .filter((banque) => banque.id)
+                .map((banque, index) => (
+                  <SelectItem key={`banque-${banque.id}-${index}`} value={String(banque.id)}>
+                    {banque.nom || `Banque ${banque.id}`}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
 
@@ -125,8 +145,8 @@ export function UserFilters() {
               filters.is_active === undefined
                 ? "all"
                 : filters.is_active
-                ? "active"
-                : "inactive"
+                  ? "active"
+                  : "inactive"
             }
             onValueChange={(value) => {
               if (value === "all") {

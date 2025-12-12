@@ -17,7 +17,7 @@ export interface SystemNotification {
   metadata?: {
     simulation_id?: string;
     user_id?: number;
-    banque_id?: number;
+    banque_id?: number | string; // UUID ou number
     [key: string]: any;
   };
 }

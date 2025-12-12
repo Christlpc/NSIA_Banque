@@ -4,6 +4,7 @@ import { useAuthStore } from "@/lib/store/authStore";
 import { useUIStore } from "@/lib/store/uiStore";
 import { useSafeRouter } from "@/lib/hooks/useSafeRouter";
 import { getBankTheme, getRoleDisplayName, getRoleBadgeColor } from "@/lib/utils/theme";
+import { ROLES } from "@/lib/utils/constants";
 import { LogOut, User, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ export function Header() {
   const { user, logout } = useAuthStore();
   const router = useSafeRouter();
   const theme = getBankTheme(user?.banque);
+  const isAdmin = user?.role === ROLES.SUPER_ADMIN_NSIA || user?.role === ROLES.ADMIN_NSIA;
 
   const handleLogout = () => {
     logout();
@@ -47,7 +49,7 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           {/* Notifications */}
-          <NotificationCenter />
+          {isAdmin && <NotificationCenter />}
 
           {/* User Menu */}
           <DropdownMenu>

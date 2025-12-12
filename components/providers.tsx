@@ -7,6 +7,7 @@ import { MockDataIndicator } from "@/components/dev/MockDataIndicator";
 import { StoreHydration } from "@/components/providers/StoreHydration";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>

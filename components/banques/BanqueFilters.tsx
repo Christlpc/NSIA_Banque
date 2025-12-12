@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,8 +13,30 @@ interface BanqueFiltersProps {
   onReset: () => void;
 }
 
+// Note: onSearchChange prop is now called only after debounce
 export function BanqueFilters({ searchValue, onSearchChange, onReset }: BanqueFiltersProps) {
-  const hasActiveFilters = searchValue.length > 0;
+  const [localSearch, setLocalSearch] = useState(searchValue);
+  const debouncedSearch = useDebounce(localSearch, 300); // 300ms for client-side filtering feels snappier
+
+  // Sync prop -> local (e.g. reset button from parent)
+  useEffect(() => {
+    setLocalSearch(searchValue);
+  }, [searchValue]);
+
+  // Sync debounce -> prop
+  useEffect(() => {
+    if (debouncedSearch !== searchValue) {
+      onSearchChange(debouncedSearch);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
+  // Handle Input Change
+  const handleInputChange = (value: string) => {
+    setLocalSearch(value);
+  };
+
+  const hasActiveFilters = localSearch.length > 0;
 
   return (
     <Card className="border-0 shadow-md">
@@ -23,8 +46,8 @@ export function BanqueFilters({ searchValue, onSearchChange, onReset }: BanqueFi
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Rechercher une banque..."
-              value={searchValue}
-              onChange={(e) => onSearchChange(e.target.value)}
+              value={localSearch}
+              onChange={(e) => handleInputChange(e.target.value)}
               className="pl-10"
             />
           </div>

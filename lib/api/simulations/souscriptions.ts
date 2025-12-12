@@ -6,33 +6,72 @@ import type { PaginatedResponse } from "@/types";
 /**
  * Statut d'une souscription
  */
-export type SouscriptionStatut = "en_attente" | "validee" | "rejetee";
+export type SouscriptionStatut = "en_attente" | "en_cours" | "validee" | "rejetee";
 
 /**
  * Souscription complète
  */
 export interface Souscription {
   id: string; // UUID
+  reference?: string;
   simulation: string; // UUID de la simulation
+  simulation_reference?: string;
+  banque: string; // UUID
+  banque_nom?: string;
+  banque_code?: string;
+  gestionnaire?: string; // UUID
+  gestionnaire_nom?: string;
+  statut: SouscriptionStatut;
+  statut_display?: string;
   nom: string;
   prenom: string;
   date_naissance: string; // YYYY-MM-DD
+  age_souscripteur?: number;
+  lieu_naissance?: string;
   email: string;
   telephone: string;
   adresse?: string;
   profession?: string;
   employeur?: string;
   numero_compte?: string;
+  documents?: string;
+  numero_police?: string | null;
   date_effet_contrat?: string; // YYYY-MM-DD
-  statut: SouscriptionStatut;
+  date_echeance_contrat?: string | null;
+  montant_prime?: string;
+  donnees_produit?: {
+    banque?: string;
+    produit?: string;
+    age_parent?: number;
+    duree_rente?: number;
+    tranche_age?: string;
+    prime_totale?: number;
+    details_calcul?: {
+      formule_prime_totale?: string;
+      formule_prime_mensuelle?: string;
+      [key: string]: any;
+    };
+    rente_annuelle?: number;
+    capital_garanti?: number;
+    prime_mensuelle?: number;
+    prime_nette_annuelle?: number;
+    [key: string]: any;
+  };
   raison_rejet?: string;
-  created_at: string;
-  updated_at: string;
-  created_by: number;
+  motif_rejet?: string;
+  notes?: string;
+  commentaires?: string;
+  created_at?: string; // Fallback if regular dates aren't present? The JSON has date_souscription
+  date_souscription?: string;
+  updated_at?: string;
+  date_modification?: string;
+  created_by?: number;
   validated_by?: number;
   validated_at?: string;
+  date_validation?: string | null;
   rejected_by?: number;
   rejected_at?: string;
+  date_rejet?: string | null;
 }
 
 /**
@@ -196,15 +235,17 @@ export const souscriptionsApi = {
    * Rejette une souscription
    * POST /api/v1/simulations/souscriptions/{id}/rejeter/
    */
-  rejectSouscription: async (id: string, raison?: string): Promise<Souscription> => {
+  rejectSouscription: async (id: string, motif_rejet: string): Promise<Souscription> => {
     if (USE_MOCK_DATA) {
       throw new Error("Mock non implémenté pour rejectSouscription");
     }
+    console.log("📤 Reject payload:", { motif: motif_rejet, id });
     const response = await apiClient.post<Souscription>(
       `/api/v1/simulations/souscriptions/${id}/rejeter/`,
-      raison ? { raison } : {}
+      { motif: motif_rejet }
     );
     return response.data;
   },
 };
+
 

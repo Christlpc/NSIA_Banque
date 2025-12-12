@@ -13,19 +13,18 @@ const handleApiError = async <T>(
   if (USE_MOCK_DATA) {
     return mockCall();
   }
-  
+
   try {
     return await apiCall();
   } catch (error) {
     // Si l'endpoint n'existe pas (404), utiliser les mocks uniquement en développement
-    if (error instanceof AxiosError && error.response?.status === 404) {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn("Endpoint non disponible, utilisation des données mockées (développement uniquement)");
-        return mockCall();
-      }
-      // En production, propager l'erreur
-      throw new Error("Endpoint non disponible");
+    // Si l'endpoint n'existe pas (404), utiliser les mocks
+    // Cela permet un mode "Hybride" où certaines fonctionnalités restent locales si le backend ne les a pas encore implémentées
+    if (error instanceof AxiosError && (error.response?.status === 404 || error.response?.status === 405)) {
+      console.warn("Endpoint non disponible (404/405), utilisation du mock local pour cette fonctionnalité.");
+      return mockCall();
     }
+    throw error;
     throw error;
   }
 };
@@ -90,7 +89,7 @@ export const profileApi = {
     if (USE_MOCK_DATA) {
       return mockProfileApi.updateProfile(data);
     }
-    
+
     let id = userId;
     if (!id) {
       // Si pas d'ID, on récupère le profil actuel
@@ -100,7 +99,7 @@ export const profileApi = {
 
     // Nettoyer le payload pour enlever les valeurs undefined
     const cleanedData = cleanPayload(data) as ProfileUpdateData;
-    
+
     // Utilisation de l'endpoint correct /api/v1/utilisateurs/{id}/
     const response = await apiClient.patch<User>(`/api/v1/utilisateurs/${id}/`, cleanedData);
     return response.data;
@@ -115,7 +114,7 @@ export const profileApi = {
     // Pour l'instant, on utilise le mock ou on lève une erreur si pas de mock
     console.warn("Endpoint changePassword non disponible dans l'API actuelle");
     // await apiClient.post("/api/v1/profile/change-password/", data);
-    
+
     // Fallback temporaire : utiliser l'endpoint de reset password si disponible et si l'utilisateur a les droits
     // Sinon, erreur
     throw new Error("Changement de mot de passe non supporté par l'API actuelle");
@@ -125,7 +124,7 @@ export const profileApi = {
     return handleApiError(
       async () => {
         // Endpoint non confirmé dans le schéma
-        const response = await apiClient.get<NotificationPreferences>("/api/v1/profile/notifications/");
+        const response = await apiClient.get<NotificationPreferences>("/api/v1/profile/notifications/", { skipGlobalError: true } as any);
         return response.data;
       },
       () => mockProfileApi.getNotificationPreferences()
@@ -136,7 +135,7 @@ export const profileApi = {
     return handleApiError(
       async () => {
         // Endpoint non confirmé dans le schéma
-        const response = await apiClient.patch<NotificationPreferences>("/api/v1/profile/notifications/", data);
+        const response = await apiClient.patch<NotificationPreferences>("/api/v1/profile/notifications/", data, { skipGlobalError: true } as any);
         return response.data;
       },
       () => mockProfileApi.updateNotificationPreferences(data)
@@ -147,7 +146,7 @@ export const profileApi = {
     return handleApiError(
       async () => {
         // Endpoint non confirmé dans le schéma
-        const response = await apiClient.get<LoginHistory[]>("/api/v1/profile/login-history/");
+        const response = await apiClient.get<LoginHistory[]>("/api/v1/profile/login-history/", { skipGlobalError: true } as any);
         return response.data;
       },
       () => mockProfileApi.getLoginHistory()
@@ -158,7 +157,7 @@ export const profileApi = {
     return handleApiError(
       async () => {
         // Endpoint non confirmé dans le schéma
-        const response = await apiClient.get<ActiveSession[]>("/api/v1/profile/sessions/");
+        const response = await apiClient.get<ActiveSession[]>("/api/v1/profile/sessions/", { skipGlobalError: true } as any);
         return response.data;
       },
       () => mockProfileApi.getActiveSessions()
@@ -169,7 +168,7 @@ export const profileApi = {
     return handleApiError(
       async () => {
         // Endpoint non confirmé dans le schéma
-        await apiClient.delete(`/api/v1/profile/sessions/${sessionId}/`);
+        await apiClient.delete(`/api/v1/profile/sessions/${sessionId}/`, { skipGlobalError: true } as any);
       },
       () => mockProfileApi.revokeSession(sessionId)
     );

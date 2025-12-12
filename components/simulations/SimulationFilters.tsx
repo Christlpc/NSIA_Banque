@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +28,26 @@ interface FilterFormData {
 export function SimulationFilters() {
   const { filters, setFilters, fetchSimulations } = useSimulationStore();
   const [searchValue, setSearchValue] = useState(filters.search || "");
+  const debouncedSearch = useDebounce(searchValue, 500);
+  const lastAppliedSearch = useRef(filters.search || "");
+  const isInitialMount = useRef(true);
+
+  // Effet pour déclencher la recherche quand la valeur debouncée change
+  useEffect(() => {
+    // Skip on initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Only trigger if the value actually changed from last applied
+    if (debouncedSearch !== lastAppliedSearch.current) {
+      lastAppliedSearch.current = debouncedSearch;
+      const newFilters = { ...filters, search: debouncedSearch || undefined, page: 1 };
+      setFilters(newFilters);
+      fetchSimulations(newFilters);
+    }
+  }, [debouncedSearch]); // Only depend on debouncedSearch
 
   const handleFilterChange = (key: string, value: string) => {
     // "all" est utilisé pour réinitialiser le filtre
@@ -38,9 +59,7 @@ export function SimulationFilters() {
 
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    const newFilters = { ...filters, search: value || undefined, page: 1 };
-    setFilters(newFilters);
-    fetchSimulations(newFilters);
+    // La recherche sera déclenchée par l'effet debouncedSearch
   };
 
   const clearFilters = () => {

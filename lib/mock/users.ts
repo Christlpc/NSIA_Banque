@@ -38,7 +38,7 @@ export const mockUserApi = {
 
     // Filtre par banque
     if (filters?.banque) {
-      filteredUsers = filteredUsers.filter((user) => user.banque.id === filters.banque);
+      filteredUsers = filteredUsers.filter((user) => user.banque?.id === filters.banque);
     }
 
     // Filtre par statut actif
@@ -81,7 +81,7 @@ export const mockUserApi = {
     }
 
     const newUser: ExtendedUser = {
-      id: Math.max(...users.map((u) => u.id)) + 1,
+      id: Math.max(...users.map((u) => typeof u.id === 'string' ? parseInt(u.id) : u.id)) + 1,
       email: data.email,
       nom: data.nom,
       prenom: data.prenom,

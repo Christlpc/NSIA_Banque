@@ -10,7 +10,6 @@ import { STATUT_LABELS, STATUT_COLORS } from "@/lib/utils/constants";
 import { PRODUIT_LABELS } from "@/types";
 import type { BankTheme } from "@/lib/utils/theme";
 import { Car, Heart, Home, Plus, ArrowRight } from "lucide-react";
-import { format } from "date-fns";
 
 interface YourSimulationsProps {
   theme: BankTheme;
@@ -86,10 +85,10 @@ export function YourSimulations({ theme }: YourSimulationsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {productCards.map((card) => {
             const Icon = card.icon;
-            const progress = card.latestSim.prime_totale 
+            const progress = card.latestSim.prime_totale
               ? Math.min(100, (parseFloat(card.primeRestante) / parseFloat(card.latestSim.prime_totale)) * 100)
               : 0;
-            
+
             return (
               <div
                 key={card.produit}
@@ -98,7 +97,7 @@ export function YourSimulations({ theme }: YourSimulationsProps) {
               >
                 {/* Background gradient on hover */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${card.color.replace("bg-", "from-").replace("border-", "to-")} opacity-0 group-hover:opacity-5 transition-opacity`} />
-                
+
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-6">
                     <div className={`p-4 rounded-xl ${card.color.replace("border", "bg").replace("-200", "-100")} shadow-md group-hover:scale-110 transition-transform`}>
@@ -108,10 +107,10 @@ export function YourSimulations({ theme }: YourSimulationsProps) {
                       {STATUT_LABELS[card.latestSim.statut]}
                     </Badge>
                   </div>
-                  
+
                   <h3 className="font-bold text-xl mb-1 text-gray-900">{card.label}</h3>
                   <p className="text-sm text-gray-600 mb-4">{card.total} simulation{card.total > 1 ? "s" : ""}</p>
-                  
+
                   {card.latestSim.prime_totale && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -120,17 +119,17 @@ export function YourSimulations({ theme }: YourSimulationsProps) {
                           {parseFloat(card.primeRestante).toLocaleString("fr-FR")} FCFA
                         </span>
                       </div>
-                      
+
                       {/* Progress Bar */}
                       <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                        <div 
+                        <div
                           className={`h-full rounded-full transition-all duration-500 ${card.color.replace("bg-", "bg-").replace("border-", "").split(" ")[0]}`}
                           style={{ width: `${progress}%` }}
                         />
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="mt-4 flex items-center text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
                     <span>Voir détails</span>
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -145,7 +144,10 @@ export function YourSimulations({ theme }: YourSimulationsProps) {
             className="p-6 rounded-2xl border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 cursor-pointer hover:from-gray-100 hover:to-gray-200 hover:border-gray-400 transition-all duration-300 flex flex-col items-center justify-center min-h-[220px] group"
             onClick={() => router.push("/simulations/new")}
           >
-            <div className="p-5 rounded-full bg-gradient-to-br from-red-500 to-red-600 mb-4 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all">
+            <div
+              className="p-5 rounded-full mb-4 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all"
+              style={{ background: `linear-gradient(to bottom right, ${theme.primaryColor || '#ef4444'}, ${theme.secondaryColor || '#dc2626'})` }}
+            >
               <Plus className="h-8 w-8 text-white" />
             </div>
             <p className="font-semibold text-gray-800 text-lg mb-1">Nouvelle Simulation</p>
@@ -168,4 +170,3 @@ function getProductColor(produit: string): string {
   };
   return colors[produit] || "bg-gray-50 border-gray-200 text-gray-900";
 }
-

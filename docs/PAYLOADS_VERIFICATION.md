@@ -130,7 +130,7 @@
 ```
 **Statut** : ✅ Correct
 
-#### POST `/api/v1/simulations/elikia/` - Simulation Elikia
+#### POST `/api/v1/simulateur/elikia/` - Simulation Elikia
 ```typescript
 {
   rente_annuelle: number;

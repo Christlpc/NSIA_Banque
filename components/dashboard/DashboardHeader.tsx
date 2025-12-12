@@ -3,9 +3,7 @@
 import { useAuthStore } from "@/lib/store/authStore";
 import { getRoleDisplayName, getRoleBadgeColor } from "@/lib/utils/theme";
 import type { BankTheme } from "@/lib/utils/theme";
-import { Settings, Bell, Search, Calendar, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -48,50 +46,11 @@ export function DashboardHeader({ theme }: DashboardHeaderProps) {
             <span className="text-sm font-medium text-gray-700">{currentDate}</span>
           </div>
 
-          {/* Search */}
-          <div className="relative hidden lg:block">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Rechercher une simulation..."
-              className="pl-10 w-72 h-10 bg-white border-gray-200 focus:border-gray-300 focus:ring-2 focus:ring-gray-100"
-            />
-          </div>
 
-          {/* Filter */}
-          <Button variant="outline" size="icon" className="hidden md:flex border-gray-200">
-            <Filter className="h-4 w-4" />
-          </Button>
-
-          {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative hover:bg-gray-100">
-            <Bell className="h-5 w-5 text-gray-600" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
-          </Button>
-
-          {/* Settings */}
-          <Button variant="ghost" size="icon" className="hover:bg-gray-100">
-            <Settings className="h-5 w-5 text-gray-600" />
-          </Button>
         </div>
       </div>
 
-      {/* Quick Stats Bar */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-lg border border-orange-200">
-          <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-          <span className="text-sm font-medium text-orange-700">
-            Simulations en cours +{Math.floor(Math.random() * 20) + 10}
-          </span>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-purple-50 rounded-lg border border-purple-200">
-          <div className="w-2 h-2 bg-purple-500 rounded-full" />
-          <span className="text-sm font-medium text-purple-700">Nouvelles validations</span>
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-red-50 rounded-lg border border-red-200">
-          <div className="w-2 h-2 bg-red-500 rounded-full" />
-          <span className="text-sm font-medium text-red-700">Alertes importantes</span>
-        </div>
-      </div>
+
     </div>
   );
 }

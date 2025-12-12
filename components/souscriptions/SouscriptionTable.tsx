@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { souscriptionsApi, type Souscription, type SouscriptionFilters } from "@/lib/api/simulations";
 import { formatDateShort } from "@/lib/utils/date";
-import { ChevronLeft, ChevronRight, Eye, MoreVertical, Check, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, MoreVertical, Check, X, FileText, Calendar, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,12 +32,14 @@ const columnHelper = createColumnHelper<Souscription>();
 
 const STATUT_LABELS: Record<string, string> = {
   en_attente: "En attente",
+  en_cours: "En cours",
   validee: "Validée",
   rejetee: "Rejetée",
 };
 
 const STATUT_COLORS: Record<string, string> = {
   en_attente: "bg-yellow-100 text-yellow-800",
+  en_cours: "bg-blue-100 text-blue-800",
   validee: "bg-green-100 text-green-800",
   rejetee: "bg-red-100 text-red-800",
 };
@@ -89,7 +91,7 @@ export function SouscriptionTable() {
     }
   };
 
-  const columns = useMemo(
+  const tableColumns = useMemo(
     () => [
       columnHelper.accessor(
         (row) => `SUB-${row.id.slice(0, 8).toUpperCase()}`,
@@ -97,88 +99,114 @@ export function SouscriptionTable() {
           id: "reference",
           header: "Référence",
           cell: (info) => (
-            <span className="font-mono text-sm">{info.getValue()}</span>
+            <div className="flex flex-col">
+              <span className="font-mono text-sm font-medium text-blue-900">{info.getValue()}</span>
+              <span className="text-xs text-gray-400">Dossier</span>
+            </div>
           ),
         }
       ),
       columnHelper.accessor("nom", {
-        header: "Nom",
+        header: "Souscripteur",
         cell: (info) => (
-          <div>
-            <div className="font-medium">{info.row.original.prenom} {info.getValue()}</div>
-            <div className="text-sm text-gray-500">{info.row.original.email}</div>
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs ring-2 ring-white shadow-sm">
+              {info.row.original.prenom?.charAt(0)}{info.getValue()?.charAt(0)}
+            </div>
+            <div>
+              <div className="font-medium text-gray-900">{info.row.original.prenom} {info.getValue()}</div>
+              <div className="text-xs text-gray-500">{info.row.original.email}</div>
+            </div>
           </div>
         ),
       }),
       columnHelper.accessor("statut", {
-        header: "Statut",
+        header: "État du dossier",
         cell: (info) => {
           const statut = info.getValue();
           return (
-            <Badge className={STATUT_COLORS[statut] || "bg-gray-100 text-gray-800"}>
+            <Badge className={`${STATUT_COLORS[statut] || "bg-gray-100 text-gray-800"} px-2.5 py-0.5 shadow-sm border-0`}>
               {STATUT_LABELS[statut] || statut}
             </Badge>
           );
         },
       }),
+      columnHelper.accessor("montant_prime", {
+        header: "Montant Prime",
+        cell: (info) => {
+          const val = info.getValue();
+          if (!val) return <span className="text-gray-400 text-xs italic">Non défini</span>;
+          const num = parseFloat(val);
+          return <span className="font-semibold text-gray-900">{isNaN(num) ? val : `${num.toLocaleString('fr-FR')} FCFA`}</span>;
+        }
+      }),
       columnHelper.accessor("date_effet_contrat", {
-        header: "Date d'effet",
+        header: "Date d'Effet",
         cell: (info) => {
           const date = info.getValue();
-          return date ? formatDateShort(date) : "-";
+          return date ? (
+            <div className="flex items-center gap-1.5 text-gray-600">
+              <Calendar className="h-3.5 w-3.5 text-gray-400" />
+              <span>{formatDateShort(date)}</span>
+            </div>
+          ) : <span className="text-gray-400">-</span>;
         },
-      }),
-      columnHelper.accessor("created_at", {
-        header: "Créée le",
-        cell: (info) => formatDateShort(info.getValue()),
       }),
       columnHelper.display({
         id: "actions",
-        header: "Actions",
+        header: "",
         cell: (info) => {
           const souscription = info.row.original;
-          const canValidate = souscription.statut === "en_attente";
-          const canReject = souscription.statut === "en_attente";
+          const canValidate = souscription.statut === "en_attente" || souscription.statut === "en_cours";
+          const canReject = souscription.statut === "en_attente" || souscription.statut === "en_cours";
 
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => router.push(`/souscriptions/${souscription.id}`)}
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Voir les détails
-                </DropdownMenuItem>
-                {canValidate && (
+            <div className="flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[160px]">
                   <DropdownMenuItem
-                    onClick={() => {
-                      setSelectedSouscription(souscription);
-                      setValidateDialogOpen(true);
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/souscriptions/${souscription.id}`);
                     }}
                   >
-                    <Check className="mr-2 h-4 w-4" />
-                    Valider
+                    <Eye className="mr-2 h-4 w-4 text-gray-500" />
+                    Voir détails
                   </DropdownMenuItem>
-                )}
-                {canReject && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelectedSouscription(souscription);
-                      setRejectDialogOpen(true);
-                    }}
-                    className="text-red-600"
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Rejeter
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {canValidate && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSouscription(souscription);
+                        setValidateDialogOpen(true);
+                      }}
+                      className="text-green-600 focus:text-green-700"
+                    >
+                      <Check className="mr-2 h-4 w-4" />
+                      Valider
+                    </DropdownMenuItem>
+                  )}
+                  {canReject && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSouscription(souscription);
+                        setRejectDialogOpen(true);
+                      }}
+                      className="text-red-600 focus:text-red-700"
+                    >
+                      <X className="mr-2 h-4 w-4" />
+                      Rejeter
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           );
         },
       }),
@@ -188,7 +216,7 @@ export function SouscriptionTable() {
 
   const table = useReactTable({
     data: souscriptions,
-    columns,
+    columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -213,7 +241,11 @@ export function SouscriptionTable() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center py-12 text-gray-500">Chargement...</div>
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-16 bg-slate-100 rounded-lg animate-pulse" />
+            ))}
+          </div>
         </CardContent>
       </Card>
     );
@@ -221,77 +253,97 @@ export function SouscriptionTable() {
 
   return (
     <>
-      <Card>
-        <CardContent className="pt-6">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id} className="border-b">
-                    {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        className="text-left p-4 font-medium text-gray-700"
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </th>
+      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-slate-50 border-b text-slate-700 uppercase tracking-wider text-xs font-semibold">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-6 py-4"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td colSpan={tableColumns.length} className="text-center py-12 text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="bg-slate-50 p-3 rounded-full mb-3">
+                        <FileText className="h-6 w-6 text-slate-400" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900">Aucune souscription trouvée</p>
+                      <p className="text-sm">Modifiez vos filtres ou attendez de nouvelles demandes.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-slate-50/80 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/souscriptions/${row.original.id}`)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-6 py-4" onClick={(e) => {
+                        if (cell.column.id === 'actions') {
+                          e.stopPropagation();
+                        }
+                      }}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
                     ))}
                   </tr>
-                ))}
-              </thead>
-              <tbody>
-                {table.getRowModel().rows.length === 0 ? (
-                  <tr>
-                    <td colSpan={columns.length} className="text-center py-12 text-gray-500">
-                      Aucune souscription trouvée
-                    </td>
-                  </tr>
-                ) : (
-                  table.getRowModel().rows.map((row) => (
-                    <tr key={row.id} className="border-b hover:bg-gray-50">
-                      {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="p-4">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="text-sm text-gray-600">
-              {totalCount} souscription{totalCount > 1 ? "s" : ""} au total
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(table.getState().pagination.pageIndex - 1)}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-gray-600">
-                Page {table.getState().pagination.pageIndex + 1} sur {table.getPageCount()}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(table.getState().pagination.pageIndex + 1)}
-                disabled={!table.getCanNextPage()}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+        {/* Pagination */}
+        <div className="border-t px-6 py-4 flex items-center justify-between bg-slate-50/50">
+          <div className="text-sm text-gray-500">
+            {totalCount > 0 ? (
+              <>
+                Affichage de <span className="font-medium text-gray-900">{table.getState().pagination.pageIndex * 10 + 1}</span> à{" "}
+                <span className="font-medium text-gray-900">{Math.min((table.getState().pagination.pageIndex + 1) * 10, totalCount)}</span>{" "}
+                sur <span className="font-medium text-gray-900">{totalCount}</span> résultats
+              </>
+            ) : "0 résultat"}
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(table.getState().pagination.pageIndex - 1)}
+              disabled={!table.getCanPreviousPage()}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm font-medium min-w-[3rem] text-center">
+              {table.getState().pagination.pageIndex + 1} / {table.getPageCount() || 1}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(table.getState().pagination.pageIndex + 1)}
+              disabled={!table.getCanNextPage()}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Dialogs */}
       {selectedSouscription && (
@@ -313,4 +365,3 @@ export function SouscriptionTable() {
     </>
   );
 }
-

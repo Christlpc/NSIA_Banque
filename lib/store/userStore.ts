@@ -13,9 +13,10 @@ interface UserStore {
   filters: UserFilters;
   isLoading: boolean;
   error: string | null;
+  lastFetched: number | null; // Timestamp of last fetch
 
   // Actions
-  fetchUsers: (filters?: UserFilters) => Promise<void>;
+  fetchUsers: (filters?: UserFilters, force?: boolean) => Promise<void>;
   fetchUser: (id: number) => Promise<void>;
   createUser: (data: UserCreateData) => Promise<User>;
   updateUser: (id: number, data: UserUpdateData) => Promise<User>;
@@ -26,6 +27,8 @@ interface UserStore {
   reset: () => void;
 }
 
+const CACHE_DURATION = 30000; // 30 seconds cache
+
 export const useUserStore = create<UserStore>((set, get) => ({
   users: [],
   currentUser: null,
@@ -33,17 +36,39 @@ export const useUserStore = create<UserStore>((set, get) => ({
   filters: { page: 1, page_size: 10 },
   isLoading: false,
   error: null,
+  lastFetched: null,
 
-  fetchUsers: async (filters?: UserFilters) => {
+  fetchUsers: async (filters?: UserFilters, force = false) => {
+    const state = get();
+
+    // Skip if already loading
+    if (state.isLoading) {
+      console.log("[UserStore] Skip: already loading");
+      return;
+    }
+
+    // Check if filters changed
+    const currentFilters = filters || state.filters;
+    const filtersChanged = JSON.stringify(currentFilters) !== JSON.stringify(state.filters);
+
+    // Skip if recently fetched (within CACHE_DURATION), not forced, and filters haven't changed
+    if (!force && !filtersChanged && state.lastFetched && state.users.length > 0) {
+      const timeSinceLastFetch = Date.now() - state.lastFetched;
+      if (timeSinceLastFetch < CACHE_DURATION) {
+        console.log(`[UserStore] Skip: cached (${Math.round(timeSinceLastFetch / 1000)}s ago)`);
+        return;
+      }
+    }
+
     set({ isLoading: true, error: null });
     try {
-      const currentFilters = filters || get().filters;
       const response: PaginatedResponse<User> = await userApi.getUsers(currentFilters);
       set({
         users: response.results,
         totalCount: response.count,
         filters: currentFilters,
         isLoading: false,
+        lastFetched: Date.now(),
       });
     } catch (error: any) {
       set({
@@ -78,12 +103,12 @@ export const useUserStore = create<UserStore>((set, get) => ({
         nom: data.nom,
         prenom: data.prenom,
         role: data.role,
-        banque: {
+        banque: data.banque ? {
           id: data.banque,
           code: "",
           nom: "",
           produits_disponibles: [],
-        },
+        } : null,
       };
       set((state) => ({
         users: [tempUser, ...state.users],
@@ -91,7 +116,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       }));
 
       const newUser = await userApi.createUser(data);
-      
+
       // Remplacer par les vraies données
       set((state) => ({
         users: state.users.map((u) => (u.id === tempUser.id ? newUser : u)),
@@ -99,7 +124,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
       }));
 
       toast.success("Utilisateur créé avec succès");
-      
+
       // Notification
       useNotificationStore.getState().addNotification({
         type: "user",
@@ -108,9 +133,9 @@ export const useUserStore = create<UserStore>((set, get) => ({
         message: `L'utilisateur ${newUser.prenom} ${newUser.nom} a été créé avec succès`,
         action_url: "/users",
         action_label: "Voir les utilisateurs",
-        metadata: { user_id: newUser.id },
+        metadata: { user_id: typeof newUser.id === 'string' ? parseInt(newUser.id) : newUser.id },
       });
-      
+
       return newUser;
     } catch (error: any) {
       // Rollback
@@ -135,24 +160,24 @@ export const useUserStore = create<UserStore>((set, get) => ({
           users: state.users.map((u) =>
             u.id === id
               ? {
-                  ...u,
-                  ...data,
-                  banque: data.banque
-                    ? {
-                        id: data.banque,
-                        code: "",
-                        nom: "",
-                        produits_disponibles: [],
-                      }
-                    : u.banque,
-                }
+                ...u,
+                ...data,
+                banque: data.banque
+                  ? {
+                    id: data.banque,
+                    code: "",
+                    nom: "",
+                    produits_disponibles: [],
+                  }
+                  : u.banque,
+              }
               : u
           ),
         }));
       }
 
       const updatedUser = await userApi.updateUser(id, data);
-      
+
       // Remplacer par les vraies données
       set((state) => ({
         users: state.users.map((u) => (u.id === id ? updatedUser : u)),
@@ -196,7 +221,11 @@ export const useUserStore = create<UserStore>((set, get) => ({
       // Rollback
       if (deletedUser) {
         set((state) => ({
-          users: [...state.users, deletedUser].sort((a, b) => a.id - b.id),
+          users: [...state.users, deletedUser].sort((a, b) => {
+            const idA = typeof a.id === 'string' ? parseInt(a.id) : a.id;
+            const idB = typeof b.id === 'string' ? parseInt(b.id) : b.id;
+            return idA - idB;
+          }),
           totalCount: state.totalCount + 1,
         }));
       }

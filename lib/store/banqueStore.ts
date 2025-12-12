@@ -9,30 +9,55 @@ interface BanqueStore {
   currentBanque: Banque | null;
   isLoading: boolean;
   error: string | null;
+  lastFetched: number | null; // Timestamp of last fetch
 
   // Actions
-  fetchBanques: () => Promise<void>;
-  fetchBanque: (id: number) => Promise<void>;
+  fetchBanques: (force?: boolean) => Promise<void>;
+  fetchBanque: (id: number | string) => Promise<void>;
   createBanque: (data: BanqueCreateData) => Promise<Banque>;
-  updateBanque: (id: number, data: BanqueUpdateData) => Promise<Banque>;
+  updateBanque: (id: number | string, data: BanqueUpdateData) => Promise<Banque>;
+  deleteBanque: (id: number | string) => Promise<void>;
   reset: () => void;
 }
+
+const CACHE_DURATION = 30000; // 30 seconds cache
 
 export const useBanqueStore = create<BanqueStore>((set, get) => ({
   banques: [],
   currentBanque: null,
   isLoading: false,
   error: null,
+  lastFetched: null,
 
-  fetchBanques: async () => {
+  fetchBanques: async (force = false) => {
+    const { isLoading, lastFetched, banques } = get();
+
+    // Skip if already loading
+    if (isLoading) {
+      console.log("[BanqueStore] Skip: already loading");
+      return;
+    }
+
+    // Skip if recently fetched (within CACHE_DURATION) and not forced
+    if (!force && lastFetched && banques.length > 0) {
+      const timeSinceLastFetch = Date.now() - lastFetched;
+      if (timeSinceLastFetch < CACHE_DURATION) {
+        console.log(`[BanqueStore] Skip: cached (${Math.round(timeSinceLastFetch / 1000)}s ago)`);
+        return;
+      }
+    }
+
     set({ isLoading: true, error: null });
     try {
       const response = await banqueApi.getBanques();
+      console.log("[BanqueStore] Banques loaded:", response.results?.length || 0);
       set({
         banques: response.results,
         isLoading: false,
+        lastFetched: Date.now(),
       });
     } catch (error: any) {
+      console.error("[BanqueStore] Error:", error);
       set({
         error: error?.message || "Erreur lors du chargement des banques",
         isLoading: false,
@@ -41,7 +66,7 @@ export const useBanqueStore = create<BanqueStore>((set, get) => ({
     }
   },
 
-  fetchBanque: async (id: number) => {
+  fetchBanque: async (id: number | string) => {
     set({ isLoading: true, error: null });
     try {
       const banque = await banqueApi.getBanque(id);
@@ -57,11 +82,10 @@ export const useBanqueStore = create<BanqueStore>((set, get) => ({
 
   createBanque: async (data: BanqueCreateData) => {
     set({ isLoading: true, error: null });
-    let tempId: number | null = null;
+    let tempId: string | number | null = null;
     try {
-      // Optimistic update
-      const existingIds = get().banques.map((b) => b.id);
-      tempId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+      // Optimistic update avec un ID temporaire
+      tempId = `temp-${Date.now()}`;
       const tempBanque: Banque = {
         id: tempId,
         nom: data.nom,
@@ -87,20 +111,20 @@ export const useBanqueStore = create<BanqueStore>((set, get) => ({
         isLoading: false,
       }));
 
-        toast.success("Banque créée avec succès");
-        
-        // Notification
-        useNotificationStore.getState().addNotification({
-          type: "banque",
-          priority: "medium",
-          title: "Nouvelle banque créée",
-          message: `La banque ${newBanque.nom} a été créée avec succès`,
-          action_url: `/banques/${newBanque.id}`,
-          action_label: "Voir la banque",
-          metadata: { banque_id: newBanque.id },
-        });
-        
-        return newBanque;
+      toast.success("Banque créée avec succès");
+
+      // Notification
+      useNotificationStore.getState().addNotification({
+        type: "banque",
+        priority: "medium",
+        title: "Nouvelle banque créée",
+        message: `La banque ${newBanque.nom} a été créée avec succès`,
+        action_url: `/banques/${newBanque.id}`,
+        action_label: "Voir la banque",
+        metadata: { banque_id: newBanque.id },
+      });
+
+      return newBanque;
     } catch (error: any) {
       // Rollback
       if (tempId !== null) {
@@ -117,25 +141,25 @@ export const useBanqueStore = create<BanqueStore>((set, get) => ({
     }
   },
 
-  updateBanque: async (id: number, data: BanqueUpdateData) => {
+  updateBanque: async (id: number | string, data: BanqueUpdateData) => {
     set({ isLoading: true, error: null });
     try {
       // Optimistic update
-      const oldBanque = get().banques.find((b) => b.id === id);
+      const oldBanque = get().banques.find((b) => String(b.id) === String(id));
       if (oldBanque) {
         set((state) => ({
           banques: state.banques.map((b) =>
-            b.id === id
+            String(b.id) === String(id)
               ? {
-                  ...b,
-                  nom: data.nom ?? b.nom,
-                  code: data.code ? data.code.toUpperCase() : b.code,
-                  email: data.email !== undefined ? data.email : b.email,
-                  telephone: data.telephone !== undefined ? data.telephone : b.telephone,
-                  adresse: data.adresse !== undefined ? data.adresse : b.adresse,
-                  produits_disponibles: (data.produits_disponibles as any) ?? b.produits_disponibles,
-                  date_partenariat: data.date_partenariat !== undefined ? data.date_partenariat : b.date_partenariat,
-                }
+                ...b,
+                nom: data.nom ?? b.nom,
+                code: data.code ? data.code.toUpperCase() : b.code,
+                email: data.email !== undefined ? data.email : b.email,
+                telephone: data.telephone !== undefined ? data.telephone : b.telephone,
+                adresse: data.adresse !== undefined ? data.adresse : b.adresse,
+                produits_disponibles: (data.produits_disponibles as any) ?? b.produits_disponibles,
+                date_partenariat: data.date_partenariat !== undefined ? data.date_partenariat : b.date_partenariat,
+              }
               : b
           ),
         }));
@@ -150,20 +174,20 @@ export const useBanqueStore = create<BanqueStore>((set, get) => ({
         isLoading: false,
       }));
 
-        toast.success("Banque modifiée avec succès");
-        
-        // Notification
-        useNotificationStore.getState().addNotification({
-          type: "banque",
-          priority: "low",
-          title: "Banque mise à jour",
-          message: `Les informations de la banque ${updatedBanque.nom} ont été modifiées`,
-          action_url: `/banques/${id}`,
-          action_label: "Voir la banque",
-          metadata: { banque_id: id },
-        });
-        
-        return updatedBanque;
+      toast.success("Banque modifiée avec succès");
+
+      // Notification
+      useNotificationStore.getState().addNotification({
+        type: "banque",
+        priority: "low",
+        title: "Banque mise à jour",
+        message: `Les informations de la banque ${updatedBanque.nom} ont été modifiées`,
+        action_url: `/banques/${id}`,
+        action_label: "Voir la banque",
+        metadata: { banque_id: id },
+      });
+
+      return updatedBanque;
     } catch (error: any) {
       // Rollback
       const oldBanque = get().banques.find((b) => b.id === id);
@@ -181,6 +205,45 @@ export const useBanqueStore = create<BanqueStore>((set, get) => ({
     }
   },
 
+  deleteBanque: async (id: number | string) => {
+    set({ isLoading: true, error: null });
+    // Sauvegarde pour rollback
+    const deletedBanque = get().banques.find((b) => String(b.id) === String(id));
+    try {
+      // Optimistic update
+      set((state) => ({
+        banques: state.banques.filter((b) => String(b.id) !== String(id)),
+      }));
+
+      await banqueApi.deleteBanque(id);
+      set({ isLoading: false });
+      toast.success("Banque supprimée avec succès");
+
+      // Notification
+      useNotificationStore.getState().addNotification({
+        type: "banque",
+        priority: "high",
+        title: "Banque supprimée",
+        message: `La banque ${deletedBanque?.nom || ''} a été supprimée`,
+        action_url: "/banques",
+        action_label: "Voir les banques",
+      });
+    } catch (error: any) {
+      // Rollback
+      if (deletedBanque) {
+        set((state) => ({
+          banques: [...state.banques, deletedBanque],
+        }));
+      }
+      set({
+        error: error?.message || "Erreur lors de la suppression",
+        isLoading: false,
+      });
+      toast.error(error?.message || "Erreur lors de la suppression");
+      throw error;
+    }
+  },
+
   reset: () => {
     set({
       banques: [],
@@ -190,4 +253,3 @@ export const useBanqueStore = create<BanqueStore>((set, get) => ({
     });
   },
 }));
-

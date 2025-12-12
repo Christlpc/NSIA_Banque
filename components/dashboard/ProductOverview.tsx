@@ -52,4 +52,3 @@ export function ProductOverview({ theme }: ProductOverviewProps) {
     </Card>
   );
 }
-

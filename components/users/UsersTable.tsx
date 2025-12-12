@@ -60,8 +60,8 @@ export function UsersTable() {
             const fullName = `${user.prenom} ${user.nom}`;
             return (
               <div className="flex items-center gap-3">
-                <Avatar 
-                  name={fullName} 
+                <Avatar
+                  name={fullName}
                   email={user.email}
                   size="md"
                   showStatus
@@ -91,10 +91,17 @@ export function UsersTable() {
         header: "Banque",
         cell: (info) => {
           const banque = info.getValue();
+          if (!banque) {
+            return (
+              <div>
+                <div className="font-medium text-gray-400">Non assignée</div>
+              </div>
+            );
+          }
           return (
             <div>
-              <div className="font-medium text-gray-900">{banque.nom}</div>
-              <div className="text-xs text-gray-500">Code: {banque.code}</div>
+              <div className="font-medium text-gray-900">{banque.nom || "N/A"}</div>
+              <div className="text-xs text-gray-500">Code: {banque.code || "N/A"}</div>
             </div>
           );
         },
@@ -176,7 +183,7 @@ export function UsersTable() {
     pageCount: Math.ceil(totalCount / (filters.page_size || 10)),
   });
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string | number) => {
     // Sera géré par le composant parent via CustomEvent
     if (typeof window !== "undefined" && window.dispatchEvent) {
       window.dispatchEvent(new CustomEvent("editUser", { detail: { id } }));
@@ -192,7 +199,8 @@ export function UsersTable() {
     if (!selectedUser) return;
     setActionLoading(true);
     try {
-      await deleteUser(selectedUser.id);
+      const userId = typeof selectedUser.id === 'string' ? parseInt(selectedUser.id) : selectedUser.id;
+      await deleteUser(userId);
       setDeleteDialogOpen(false);
       setSelectedUser(null);
       fetchUsers(filters);
@@ -203,9 +211,9 @@ export function UsersTable() {
     }
   };
 
-  const handleActivate = async (id: number) => {
+  const handleActivate = async (id: string | number) => {
     try {
-      await activateUser(id);
+      await activateUser(typeof id === 'string' ? parseInt(id) : id);
       fetchUsers(filters);
     } catch (error) {
       // Erreur gérée par le store
@@ -221,7 +229,8 @@ export function UsersTable() {
     if (!selectedUser) return;
     setActionLoading(true);
     try {
-      await deactivateUser(selectedUser.id);
+      const userId = typeof selectedUser.id === 'string' ? parseInt(selectedUser.id) : selectedUser.id;
+      await deactivateUser(userId);
       setDeactivateDialogOpen(false);
       setSelectedUser(null);
       fetchUsers(filters);
@@ -236,7 +245,7 @@ export function UsersTable() {
     if (newPage < 1) return;
     const maxPage = Math.ceil(totalCount / (filters.page_size || 10));
     if (newPage > maxPage) return;
-    
+
     const newFilters = { ...filters, page: newPage };
     setFilters(newFilters);
     fetchUsers(newFilters);

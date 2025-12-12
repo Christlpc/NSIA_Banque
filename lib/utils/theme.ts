@@ -7,6 +7,9 @@ export interface BankTheme {
   gradient: string;
   logo?: string;
   name: string;
+  // Raw color values for inline styles (hex)
+  primaryColor: string;
+  secondaryColor: string;
 }
 
 // Thèmes par banque
@@ -17,6 +20,8 @@ export const bankThemes: Record<string, BankTheme> = {
     accent: "text-blue-600",
     gradient: "bg-gradient-to-br from-blue-600 to-indigo-700",
     name: "NSIA Vie Assurances",
+    primaryColor: "#2563eb",
+    secondaryColor: "#4338ca",
   },
   ECO: {
     primary: "from-green-600 to-emerald-700",
@@ -24,6 +29,8 @@ export const bankThemes: Record<string, BankTheme> = {
     accent: "text-green-600",
     gradient: "bg-gradient-to-br from-green-600 to-emerald-700",
     name: "Ecobank Congo",
+    primaryColor: "#16a34a",
+    secondaryColor: "#047857",
   },
   CDCO: {
     primary: "from-purple-600 to-pink-700",
@@ -31,6 +38,8 @@ export const bankThemes: Record<string, BankTheme> = {
     accent: "text-purple-600",
     gradient: "bg-gradient-to-br from-purple-600 to-pink-700",
     name: "Crédit du Congo",
+    primaryColor: "#9333ea",
+    secondaryColor: "#be185d",
   },
   BGFI: {
     primary: "from-orange-600 to-red-700",
@@ -38,6 +47,8 @@ export const bankThemes: Record<string, BankTheme> = {
     accent: "text-orange-600",
     gradient: "bg-gradient-to-br from-orange-600 to-red-700",
     name: "BGFI Bank",
+    primaryColor: "#ea580c",
+    secondaryColor: "#b91c1c",
   },
   BCI: {
     primary: "from-cyan-600 to-blue-700",
@@ -45,6 +56,8 @@ export const bankThemes: Record<string, BankTheme> = {
     accent: "text-cyan-600",
     gradient: "bg-gradient-to-br from-cyan-600 to-blue-700",
     name: "BCI",
+    primaryColor: "#0891b2",
+    secondaryColor: "#1d4ed8",
   },
   CHF: {
     primary: "from-teal-600 to-green-700",
@@ -52,6 +65,8 @@ export const bankThemes: Record<string, BankTheme> = {
     accent: "text-teal-600",
     gradient: "bg-gradient-to-br from-teal-600 to-green-700",
     name: "Charden Farell",
+    primaryColor: "#0d9488",
+    secondaryColor: "#15803d",
   },
   HOPE: {
     primary: "from-rose-600 to-pink-700",
@@ -59,6 +74,8 @@ export const bankThemes: Record<string, BankTheme> = {
     accent: "text-rose-600",
     gradient: "bg-gradient-to-br from-rose-600 to-pink-700",
     name: "Hope Congo",
+    primaryColor: "#e11d48",
+    secondaryColor: "#be185d",
   },
 };
 
@@ -66,31 +83,44 @@ export function getBankTheme(banque: Banque | null | undefined): BankTheme {
   if (!banque) {
     return bankThemes.NSIA;
   }
+
+  // Si la banque a des couleurs personnalisées
+  if (banque.couleur_primaire) {
+    const primary = banque.couleur_primaire;
+    const secondary = banque.couleur_secondaire || primary;
+
+    return {
+      primary: `from-[${primary}] to-[${secondary}]`,
+      secondary: `bg-[${primary}]/10`, // 10% opacity for backgrounds
+      accent: `text-[${primary}]`,
+      gradient: `bg-gradient-to-br from-[${primary}] to-[${secondary}]`,
+      name: banque.nom || banque.code,
+      primaryColor: primary,
+      secondaryColor: secondary,
+    };
+  }
+
   return bankThemes[banque.code] || bankThemes.NSIA;
 }
 
 export function getRoleDisplayName(role: string): string {
   const roleNames: Record<string, string> = {
-    super_admin_nsia: "Super Administrateur NSIA",
-    admin_nsia: "Administrateur NSIA",
-    responsable_banque: "Responsable Banque",
-    gestionnaire: "Gestionnaire",
-    support: "Support",
+    SUPER_ADMIN: "Super Administrateur",
+    ADMIN: "Administrateur",
+    RESPONSABLE_BANQUE: "Responsable Banque",
+    GESTIONNAIRE: "Gestionnaire",
+    SUPPORT: "Support",
   };
   return roleNames[role] || role;
 }
 
 export function getRoleBadgeColor(role: string): string {
   const colors: Record<string, string> = {
-    super_admin_nsia: "bg-purple-100 text-purple-800",
-    admin_nsia: "bg-blue-100 text-blue-800",
-    responsable_banque: "bg-green-100 text-green-800",
-    gestionnaire: "bg-yellow-100 text-yellow-800",
-    support: "bg-gray-100 text-gray-800",
+    SUPER_ADMIN: "bg-purple-100 text-purple-800",
+    ADMIN: "bg-blue-100 text-blue-800",
+    RESPONSABLE_BANQUE: "bg-green-100 text-green-800",
+    GESTIONNAIRE: "bg-yellow-100 text-yellow-800",
+    SUPPORT: "bg-gray-100 text-gray-800",
   };
   return colors[role] || "bg-gray-100 text-gray-800";
 }
-
-
-
-

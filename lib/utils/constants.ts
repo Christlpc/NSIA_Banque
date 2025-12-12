@@ -3,11 +3,11 @@ import type { ProduitType } from "@/types";
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://nsia-bancassurance.onrender.com";
 
 export const ROLES = {
-  SUPER_ADMIN_NSIA: "super_admin_nsia",
-  ADMIN_NSIA: "admin_nsia",
-  RESPONSABLE_BANQUE: "responsable_banque",
-  GESTIONNAIRE: "gestionnaire",
-  SUPPORT: "support",
+  SUPER_ADMIN_NSIA: "SUPER_ADMIN",
+  ADMIN_NSIA: "ADMIN",
+  RESPONSABLE_BANQUE: "RESPONSABLE_BANQUE",
+  GESTIONNAIRE: "GESTIONNAIRE",
+  SUPPORT: "SUPPORT",
 } as const;
 
 export const STATUTS = {
@@ -18,10 +18,10 @@ export const STATUTS = {
 } as const;
 
 export const STATUT_LABELS: Record<string, string> = {
-  brouillon: "Brouillon",
-  calculee: "Calculée",
-  validee: "Validée",
-  convertie: "Convertie",
+  brouillon: "Simulation",
+  calculee: "Simulation",
+  validee: "Proposition",
+  convertie: "Contrat",
 };
 
 export const STATUT_COLORS: Record<string, string> = {

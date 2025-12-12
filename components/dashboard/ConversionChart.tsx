@@ -24,19 +24,19 @@ export function ConversionChart() {
     const data = Array.from({ length: 12 }, (_, i) => {
       const date = new Date(now.getFullYear(), now.getMonth() - (11 - i), 1);
       const moisLabel = formatDateMonthShort(date);
-      
+
       const validées = simulations.filter((s) => {
         const simDate = new Date(s.created_at);
-        return simDate.getMonth() === date.getMonth() && 
-               simDate.getFullYear() === date.getFullYear() && 
-               s.statut === "validee";
+        return simDate.getMonth() === date.getMonth() &&
+          simDate.getFullYear() === date.getFullYear() &&
+          s.statut === "validee";
       }).length;
-      
+
       const converties = simulations.filter((s) => {
         const simDate = new Date(s.created_at);
-        return simDate.getMonth() === date.getMonth() && 
-               simDate.getFullYear() === date.getFullYear() && 
-               s.statut === "convertie";
+        return simDate.getMonth() === date.getMonth() &&
+          simDate.getFullYear() === date.getFullYear() &&
+          s.statut === "convertie";
       }).length;
 
       return { mois: moisLabel, validées, converties };
@@ -45,13 +45,13 @@ export function ConversionChart() {
     setChartData(data);
   }, [simulations]);
 
-  const primaryColor = theme.primary.includes("blue") ? "#3b82f6" : 
-                       theme.primary.includes("green") ? "#10b981" :
-                       theme.primary.includes("orange") ? "#f97316" :
-                       theme.primary.includes("purple") ? "#8b5cf6" :
-                       theme.primary.includes("cyan") ? "#06b6d4" :
-                       theme.primary.includes("teal") ? "#14b8a6" :
-                       theme.primary.includes("rose") ? "#f43f5e" : "#3b82f6";
+  const primaryColor = theme.primary.includes("blue") ? "#3b82f6" :
+    theme.primary.includes("green") ? "#10b981" :
+      theme.primary.includes("orange") ? "#f97316" :
+        theme.primary.includes("purple") ? "#8b5cf6" :
+          theme.primary.includes("cyan") ? "#06b6d4" :
+            theme.primary.includes("teal") ? "#14b8a6" :
+              theme.primary.includes("rose") ? "#f43f5e" : "#3b82f6";
 
   return (
     <Card className="border-0 shadow-lg">
@@ -77,16 +77,16 @@ export function ConversionChart() {
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis 
-              dataKey="mois" 
+            <XAxis
+              dataKey="mois"
               tick={{ fill: "#6b7280", fontSize: 12 }}
               axisLine={{ stroke: "#e5e7eb" }}
             />
-            <YAxis 
+            <YAxis
               tick={{ fill: "#6b7280", fontSize: 12 }}
               axisLine={{ stroke: "#e5e7eb" }}
             />
-            <Tooltip 
+            <Tooltip
               contentStyle={{
                 backgroundColor: "white",
                 border: "1px solid #e5e7eb",
@@ -94,19 +94,19 @@ export function ConversionChart() {
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
             />
-            <Legend 
+            <Legend
               wrapperStyle={{ paddingTop: "20px" }}
               iconType="circle"
             />
-            <Bar 
-              dataKey="validées" 
-              fill="#10b981" 
+            <Bar
+              dataKey="validées"
+              fill="#10b981"
               name="Validées"
               radius={[8, 8, 0, 0]}
             />
-            <Bar 
-              dataKey="converties" 
-              fill="#3b82f6" 
+            <Bar
+              dataKey="converties"
+              fill="#3b82f6"
               name="Converties"
               radius={[8, 8, 0, 0]}
             />
@@ -116,4 +116,3 @@ export function ConversionChart() {
     </Card>
   );
 }
-

@@ -63,11 +63,17 @@ export function SimulationActions({ simulation }: SimulationActionsProps) {
   const handleConvertConfirm = async (data: any) => {
     setIsConverting(true);
     try {
+      // Le dialogue de conversion collecte maintenant toutes les données nécessaires
+      // et les passe directement via le paramètre data
       await convertSimulation(simulation.id, data);
       setConvertDialogOpen(false);
-      toast.success("Simulation convertie en contrat");
+      toast.success("Simulation convertie en souscription");
     } catch (error: any) {
-      toast.error(error?.message || "Erreur lors de la conversion");
+      const errorMsg = error?.response?.data?.error?.message
+        || error?.response?.data?.message
+        || error?.message
+        || "Erreur lors de la conversion";
+      toast.error(errorMsg);
     } finally {
       setIsConverting(false);
     }

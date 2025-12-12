@@ -71,7 +71,8 @@ apiClient.interceptors.response.use(
     }
 
     // Gestion des erreurs
-    if (error.response) {
+    const skipGlobalError = (originalRequest as any).skipGlobalError;
+    if (error.response && !skipGlobalError) {
       const status = error.response.status;
       const data = error.response.data as any;
 
@@ -80,7 +81,7 @@ apiClient.interceptors.response.use(
           if (data) {
             // Gérer différents formats de réponse d'erreur
             let errorMessage = "Erreur de validation";
-            
+
             if (data.detail) {
               errorMessage = data.detail;
             } else if (data.message) {
@@ -94,7 +95,7 @@ apiClient.interceptors.response.use(
                 errorMessage = errors[0];
               }
             }
-            
+
             // Logger les détails pour le débogage
             console.error("Erreur 400:", {
               url: originalRequest.url,
@@ -102,7 +103,7 @@ apiClient.interceptors.response.use(
               data: originalRequest.data,
               response: data,
             });
-            
+
             toast.error(errorMessage);
           } else {
             toast.error("Erreur de validation");
@@ -120,7 +121,7 @@ apiClient.interceptors.response.use(
         default:
           toast.error(data?.detail || "Une erreur est survenue");
       }
-    } else if (error.request) {
+    } else if (error.request && !skipGlobalError) {
       toast.error("Erreur de connexion. Vérifiez votre connexion internet.");
     }
 

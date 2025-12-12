@@ -1,7 +1,45 @@
 import { create } from "zustand";
-import type { Simulation, SimulationFilters, SimulationCreateData } from "@/types";
+import type { Simulation, SimulationFilters, SimulationCreateData, ProduitType } from "@/types";
+import { PRODUIT_LABELS } from "@/types";
 import { simulationApi } from "@/lib/api/simulations";
 import { useNotificationStore } from "@/lib/store/notificationStore";
+import { notificationApi } from "@/lib/api/notifications";
+import toast from "react-hot-toast";
+
+// Créer un mapping inverse label -> clé
+const PRODUIT_KEYS: Record<string, ProduitType> = Object.entries(PRODUIT_LABELS).reduce(
+  (acc, [key, label]) => {
+    acc[label.toLowerCase()] = key as ProduitType;
+    return acc;
+  },
+  {} as Record<string, ProduitType>
+);
+
+// Ajouter des mappings supplémentaires pour les variations courantes
+PRODUIT_KEYS["mobateli (dtc/iad)"] = "mobateli";
+PRODUIT_KEYS["emprunteur (adi)"] = "emprunteur";
+PRODUIT_KEYS["confort études"] = "confort_etudes";
+PRODUIT_KEYS["épargne plus"] = "epargne_plus";
+
+/**
+ * Normalise le nom du produit (label ou clé) vers la clé standard
+ */
+function normalizeProductKey(product: string): ProduitType {
+  const normalized = product.toLowerCase().trim();
+
+  // Si c'est déjà une clé valide
+  if (PRODUIT_LABELS[normalized as ProduitType]) {
+    return normalized as ProduitType;
+  }
+
+  // Chercher dans le mapping inverse
+  if (PRODUIT_KEYS[normalized]) {
+    return PRODUIT_KEYS[normalized];
+  }
+
+  // Fallback: retourner tel quel (le switch gérera l'erreur)
+  return product as ProduitType;
+}
 
 interface WizardData {
   step: number;
@@ -18,10 +56,11 @@ interface SimulationStore {
   totalCount: number;
   isLoading: boolean;
   error: string | null;
+  lastFetched: number | null; // Timestamp of last fetch
   // Wizard State
   wizardData: WizardData;
 
-  fetchSimulations: (params?: SimulationFilters) => Promise<void>;
+  fetchSimulations: (params?: SimulationFilters, force?: boolean) => Promise<void>;
   fetchSimulation: (id: string) => Promise<void>;
   createSimulation: (product: string, data: SimulationCreateData) => Promise<Simulation>;
   updateSimulation: (id: string, data: Partial<SimulationCreateData>) => Promise<void>;
@@ -43,6 +82,8 @@ const initialFilters: SimulationFilters = {
   page: 1,
 };
 
+const CACHE_DURATION = 30000; // 30 seconds cache
+
 export const useSimulationStore = create<SimulationStore>((set, get) => ({
   simulations: [],
   currentSimulation: null,
@@ -50,6 +91,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
   totalCount: 0,
   isLoading: false,
   error: null,
+  lastFetched: null,
 
   // Wizard Initial State
   wizardData: {
@@ -60,10 +102,30 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     biaInfo: null,
   },
 
-  fetchSimulations: async (params?: SimulationFilters) => {
+  fetchSimulations: async (params?: SimulationFilters, force = false) => {
+    const state = get();
+
+    // Skip if already loading
+    if (state.isLoading) {
+      console.log("[SimulationStore] Skip: already loading");
+      return;
+    }
+
+    // Check if filters changed
+    const filters = { ...state.filters, ...params };
+    const filtersChanged = JSON.stringify(filters) !== JSON.stringify(state.filters);
+
+    // Skip if recently fetched (within CACHE_DURATION), not forced, and filters haven't changed
+    if (!force && !filtersChanged && state.lastFetched && state.simulations.length > 0) {
+      const timeSinceLastFetch = Date.now() - state.lastFetched;
+      if (timeSinceLastFetch < CACHE_DURATION) {
+        console.log(`[SimulationStore] Skip: cached (${Math.round(timeSinceLastFetch / 1000)}s ago)`);
+        return;
+      }
+    }
+
     set({ isLoading: true, error: null });
     try {
-      const filters = { ...get().filters, ...params };
       const response = await simulationApi.getSimulations(filters);
       set({
         simulations: response.results,
@@ -71,6 +133,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         filters,
         isLoading: false,
         error: null,
+        lastFetched: Date.now(),
       });
     } catch (error: any) {
       set({
@@ -130,13 +193,27 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
       let response;
       const { produitsApi } = await import("@/lib/api/simulations/produits");
 
+      // Normaliser le produit (peut être un label ou une clé)
+      const normalizedProduct = normalizeProductKey(product);
+
       // Appel de l'API spécifique selon le produit
-      switch (product) {
+      switch (normalizedProduct) {
         case "emprunteur":
           response = await produitsApi.simulateEmprunteur(data as any);
           break;
         case "elikia_scolaire":
-          response = await produitsApi.simulateElikia(data as any);
+          // Elikia n'accepte que des champs spécifiques
+          const elikiaPayload = {
+            rente_annuelle: data.rente_annuelle || 200000,
+            age_parent: data.age_parent || 35,
+            duree_rente: data.duree_rente || 5,
+            nom: data.nom,
+            prenom: data.prenom,
+            email: data.email || "",
+            telephone: data.telephone || "",
+            sauvegarder: data.sauvegarder ?? false,
+          };
+          response = await produitsApi.simulateElikia(elikiaPayload);
           break;
         case "confort_etudes":
           response = await produitsApi.simulateEtudes(data as any);
@@ -149,7 +226,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
           response = await produitsApi.simulateRetraite(data as any);
           break;
         default:
-          throw new Error(`Produit non supporté: ${product}`);
+          throw new Error(`Produit non supporté: ${normalizedProduct} (original: ${product})`);
       }
 
       // La réponse contient { simulation, resultats, message }
@@ -328,6 +405,18 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
           metadata: { simulation_id: id },
         });
       }
+      toast.success("Simulation validée avec succès");
+
+      // Notification Admin
+      notificationApi.sendNotification({
+        type: "simulation",
+        priority: "medium",
+        title: "Simulation validée",
+        message: `La simulation ${id.toString().substring(0, 8)}... a été validée`,
+        action_url: `/simulations/${id}`,
+        action_label: "Voir le dossier",
+        metadata: { simulation_id: id }
+      });
     } catch (error: any) {
       // Rollback on error
       set({
@@ -339,7 +428,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }
   },
 
-  convertSimulation: async (id: string) => {
+  convertSimulation: async (id: string, data?: any) => {
     // Optimistic update
     const previousSimulation = get().currentSimulation;
 
@@ -355,23 +444,22 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }));
 
     try {
-      await simulationApi.convertSimulation(id);
+      const response = await simulationApi.convertSimulation(id, data);
       await get().fetchSimulation(id);
       set({ isLoading: false, error: null });
 
-      // Notification
-      const sim = get().currentSimulation;
-      if (sim) {
-        useNotificationStore.getState().addNotification({
-          type: "simulation",
-          priority: "high",
-          title: "Simulation convertie",
-          message: `La simulation ${sim.reference} a été convertie en contrat`,
-          action_url: `/simulations/${id}`,
-          action_label: "Voir la simulation",
-          metadata: { simulation_id: id },
-        });
-      }
+      toast.success(`Simulation convertie en souscription #${response.id}`);
+
+      // Notification Admin (Souscription)
+      notificationApi.sendNotification({
+        type: "user",
+        priority: "high",
+        title: "Nouvelle Souscription",
+        message: `Contrat généré (Ref: ${response.id})`,
+        action_url: `/souscriptions/${response.id}`,
+        action_label: "Voir le contrat",
+        metadata: { souscription_id: response.id, simulation_id: id }
+      });
     } catch (error: any) {
       // Rollback on error
       set({

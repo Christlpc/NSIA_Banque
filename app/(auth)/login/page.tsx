@@ -9,7 +9,7 @@ import { useAuthStore } from "@/lib/store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
 const loginSchema = z.object({
@@ -24,6 +24,7 @@ export default function LoginPage() {
   const { login, isLoading } = useAuthStore();
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const {
     register,
@@ -34,12 +35,34 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    setLoginError(null); // Réinitialiser l'erreur
     try {
       await login(data);
       toast.success("Connexion réussie");
       router.push("/");
     } catch (error: any) {
-      toast.error(error?.message || "Erreur de connexion");
+      // Extraire le message d'erreur de la réponse API
+      let errorMessage = "Identifiants incorrects. Veuillez vérifier votre nom d'utilisateur et mot de passe.";
+
+      if (error?.response?.data) {
+        const data = error.response.data;
+        if (data.detail) {
+          errorMessage = data.detail;
+        } else if (data.non_field_errors) {
+          errorMessage = Array.isArray(data.non_field_errors)
+            ? data.non_field_errors.join(", ")
+            : data.non_field_errors;
+        } else if (data.username) {
+          errorMessage = `Nom d'utilisateur: ${Array.isArray(data.username) ? data.username.join(", ") : data.username}`;
+        } else if (data.password) {
+          errorMessage = `Mot de passe: ${Array.isArray(data.password) ? data.password.join(", ") : data.password}`;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      setLoginError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -54,6 +77,17 @@ export default function LoginPage() {
           Entrez vos identifiants pour accéder à la plateforme
         </p>
       </div>
+
+      {/* Error Alert */}
+      {loginError && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-red-800">Erreur de connexion</p>
+            <p className="text-sm text-red-700 mt-1">{loginError}</p>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

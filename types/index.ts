@@ -1,20 +1,25 @@
-// Types utilisateur et authentification
+// Types utilisateur et authentification - correspond à la table core_utilisateur
 export interface User {
-  id: number;
+  id: number | string; // UUID
+  username?: string; // Nom d'utilisateur pour la connexion
   email: string;
-  nom: string;
-  prenom: string;
+  nom: string; // last_name
+  prenom: string; // first_name
   role: UserRole;
-  banque: Banque;
-  is_active?: boolean; // Statut actif/inactif de l'utilisateur
+  banque: Banque | null; // banque_id (peut être null)
+  matricule?: string; // Matricule employé
+  telephone?: string; // Téléphone de contact
+  is_active?: boolean; // is_active
+  est_actif?: boolean; // est_actif
+  date_creation?: string; // date_creation
 }
 
 export type UserRole =
-  | "super_admin_nsia"
-  | "admin_nsia"
-  | "responsable_banque"
-  | "gestionnaire"
-  | "support";
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "RESPONSABLE_BANQUE"
+  | "GESTIONNAIRE"
+  | "SUPPORT";
 
 export interface LoginCredentials {
   username: string;
@@ -27,17 +32,25 @@ export interface AuthResponse {
   user: User;
 }
 
-// Types banque
+// Types banque - correspond à la table core_banque
 export interface Banque {
-  id: number;
-  code: string; // ECO, CDCO, BGFI, BCI, etc.
-  nom: string;
-  email?: string;
-  telephone?: string;
-  adresse?: string;
+  id: number | string; // UUID
+  code: string; // code_banque
+  nom: string; // nom_complet
+  nom_court?: string; // nom_court
+  email?: string; // email_contact
+  telephone?: string; // telephone_contact
+  adresse?: string; // adresse
+  logo?: string; // URL du logo
+  couleur_primaire?: string; // couleur_primaire (#RRGGBB)
+  couleur_secondaire?: string; // couleur_secondaire (#RRGGBB)
+  police_principale?: string; // police_principale
+  statut?: string; // statut (ACTIF, INACTIF, etc.)
+  est_active?: boolean; // Computed field
   produits_disponibles: ProduitType[];
-  nombre_simulations?: number; // Statistique calculée côté serveur
+  nombre_simulations?: number;
   date_partenariat?: string; // Format: "YYYY-MM-DD"
+  parametres_specifiques?: Record<string, any>;
 }
 
 // Types produits
@@ -94,7 +107,7 @@ export interface Simulation {
   created_at: string; // Maps to date_creation
   updated_at: string; // Maps to date_modification
   created_by: number;
-  banque: number;
+  banque: number | string; // UUID ou number
 
   // API Response fields (Nested structure)
   donnees_entree?: Record<string, any>;
@@ -193,6 +206,7 @@ export interface SimulationFilters {
   date_debut?: string;
   date_fin?: string;
   page?: number;
+  page_size?: number;
 }
 
 // Types questionnaire médical
@@ -220,6 +234,8 @@ export interface QuestionnaireMedical {
   essoufflement: boolean;
   a_eu_perfusion: boolean;
   a_eu_transfusion: boolean;
+  est_hypertendu?: boolean;
+  est_diabetique?: boolean;
   infos_complementaires?: string;
   commentaire_medical?: string;
 }

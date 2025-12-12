@@ -2,24 +2,30 @@ import { apiClient } from "./client";
 import { USE_MOCK_DATA } from "@/lib/utils/config";
 import { mockUserApi } from "@/lib/mock/users";
 import { cleanPayload } from "@/lib/utils/payload";
-import type { User, UserRole, PaginatedResponse } from "@/types";
+import type { User, UserRole, PaginatedResponse, Banque } from "@/types";
 
 export interface UserCreateData {
+  username: string; // Nom d'utilisateur pour la connexion
   email: string;
   password: string;
-  nom: string;
-  prenom: string;
+  nom: string; // last_name
+  prenom: string; // first_name
   role: UserRole;
-  banque: number;
+  banque?: number | string; // banque_id (UUID) - peut être null
+  matricule?: string; // Matricule employé
+  telephone?: string; // Téléphone de contact
   is_active?: boolean;
 }
 
 export interface UserUpdateData {
+  username?: string;
   email?: string;
   nom?: string;
   prenom?: string;
   role?: UserRole;
-  banque?: number;
+  banque?: number | string; // banque_id (UUID)
+  matricule?: string;
+  telephone?: string;
   is_active?: boolean;
 }
 
@@ -32,41 +38,152 @@ export interface UserFilters {
   page_size?: number;
 }
 
+// Interface pour la réponse brute de l'API
+interface ApiUser {
+  id: string | number;
+  username?: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  nom?: string;
+  prenom?: string;
+  nom_complet?: string;
+  role: string;
+  banque?: string | number | {
+    id: string | number;
+    code_banque?: string;
+    code?: string;
+    nom_complet?: string;
+    nom_court?: string;
+    nom?: string;
+  };
+  banque_details?: {
+    id: string | number;
+    code_banque: string;
+    nom_complet: string;
+    nom_court: string;
+  };
+  est_actif?: boolean;
+  is_active?: boolean;
+}
+
+// Transformer un utilisateur API vers le format frontend
+function transformApiUser(apiUser: ApiUser): User {
+  // Déterminer nom/prénom
+  let prenom = apiUser.prenom || apiUser.first_name || "";
+  let nom = apiUser.nom || apiUser.last_name || "";
+
+  // Si nom_complet existe mais pas prenom/nom
+  if (!prenom && !nom && apiUser.nom_complet) {
+    const parts = apiUser.nom_complet.split(" ");
+    prenom = parts[0] || "";
+    nom = parts.slice(1).join(" ") || "";
+  }
+
+  // Déterminer la banque
+  let banque: Banque | null = null;
+
+  if (apiUser.banque_details) {
+    banque = {
+      id: typeof apiUser.banque_details.id === "string"
+        ? parseInt(apiUser.banque_details.id) || 0
+        : apiUser.banque_details.id,
+      code: apiUser.banque_details.code_banque || "",
+      nom: apiUser.banque_details.nom_complet || apiUser.banque_details.nom_court || "",
+      produits_disponibles: [],
+    };
+  } else if (typeof apiUser.banque === "object" && apiUser.banque !== null) {
+    const b = apiUser.banque;
+    banque = {
+      id: typeof b.id === "string" ? parseInt(b.id) || 0 : (b.id as number),
+      code: b.code_banque || b.code || "",
+      nom: b.nom_complet || b.nom_court || b.nom || "",
+      produits_disponibles: [],
+    };
+  }
+
+  return {
+    id: typeof apiUser.id === "string" ? parseInt(apiUser.id) || 0 : apiUser.id,
+    username: apiUser.username,
+    email: apiUser.email || "",
+    nom: nom || "Utilisateur",
+    prenom: prenom || "",
+    role: apiUser.role as UserRole,
+    banque: banque as Banque,
+    is_active: apiUser.est_actif ?? apiUser.is_active ?? true,
+  };
+}
+
+// Transformer une liste paginée d'utilisateurs
+function transformPaginatedUsers(response: PaginatedResponse<ApiUser>): PaginatedResponse<User> {
+  return {
+    ...response,
+    results: response.results.map(transformApiUser),
+  };
+}
+
 export const userApi = {
   getUsers: async (filters?: UserFilters): Promise<PaginatedResponse<User>> => {
     if (USE_MOCK_DATA) {
       return mockUserApi.getUsers(filters);
     }
-    const response = await apiClient.get<PaginatedResponse<User>>("/api/v1/utilisateurs/", {
+    const response = await apiClient.get<PaginatedResponse<ApiUser>>("/api/v1/utilisateurs/", {
       params: filters,
     });
-    return response.data;
+    return transformPaginatedUsers(response.data);
   },
 
   getUser: async (id: number): Promise<User> => {
     if (USE_MOCK_DATA) {
       return mockUserApi.getUser(id);
     }
-    const response = await apiClient.get<User>(`/api/v1/utilisateurs/${id}/`);
-    return response.data;
+    const response = await apiClient.get<ApiUser>(`/api/v1/utilisateurs/${id}/`);
+    return transformApiUser(response.data);
   },
 
   createUser: async (data: UserCreateData): Promise<User> => {
     if (USE_MOCK_DATA) {
       return mockUserApi.createUser(data);
     }
-    const response = await apiClient.post<User>("/api/v1/utilisateurs/", data);
-    return response.data;
+    // Adapter les données pour l'API - utiliser les noms de colonnes exact de la base
+    const apiData = {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      password_confirm: data.password,
+      first_name: data.prenom,
+      last_name: data.nom,
+      role: data.role,
+      banque: data.banque ? (typeof data.banque === 'string' && !isNaN(Number(data.banque)) ? Number(data.banque) : data.banque) : null,
+      matricule: data.matricule || null,
+      telephone: data.telephone || null,
+      est_actif: data.is_active !== false,
+    };
+    const response = await apiClient.post<ApiUser>("/api/v1/utilisateurs/", apiData);
+    return transformApiUser(response.data);
   },
 
-  updateUser: async (id: number, data: UserUpdateData): Promise<User> => {
+  updateUser: async (id: number | string, data: UserUpdateData): Promise<User> => {
     if (USE_MOCK_DATA) {
-      return mockUserApi.updateUser(id, data);
+      return mockUserApi.updateUser(typeof id === 'string' ? parseInt(id) : id, data);
     }
-    // Nettoyer le payload pour enlever les valeurs undefined
-    const cleanedData = cleanPayload(data) as UserUpdateData;
-    const response = await apiClient.patch<User>(`/api/v1/utilisateurs/${id}/`, cleanedData);
-    return response.data;
+    // Adapter les données pour l'API
+    const apiData: Record<string, any> = {};
+    if (data.username !== undefined) apiData.username = data.username;
+    if (data.email !== undefined) apiData.email = data.email;
+    if (data.prenom !== undefined) apiData.first_name = data.prenom;
+    if (data.nom !== undefined) apiData.last_name = data.nom;
+    if (data.role !== undefined) apiData.role = data.role;
+    if (data.banque !== undefined) {
+      apiData.banque = data.banque ? (typeof data.banque === 'string' && !isNaN(Number(data.banque)) ? Number(data.banque) : data.banque) : null;
+    }
+    if (data.matricule !== undefined) apiData.matricule = data.matricule;
+    if (data.telephone !== undefined) apiData.telephone = data.telephone;
+    if (data.is_active !== undefined) apiData.est_actif = data.is_active;
+
+    const cleanedData = cleanPayload(apiData);
+    const response = await apiClient.patch<ApiUser>(`/api/v1/utilisateurs/${id}/`, cleanedData);
+    return transformApiUser(response.data);
   },
 
   deleteUser: async (id: number): Promise<void> => {
@@ -78,16 +195,12 @@ export const userApi = {
 
   /**
    * Active un utilisateur
-   * @deprecated Utiliser toggleStatus() à la place
-   * POST /api/v1/utilisateurs/{id}/toggle_status/ (via toggleStatus)
+   * POST /api/v1/utilisateurs/{id}/toggle_status/
    */
   activateUser: async (id: number): Promise<User> => {
     if (USE_MOCK_DATA) {
       return mockUserApi.activateUser(id);
     }
-    // Utiliser toggle_status qui bascule l'état
-    // Note: Si l'utilisateur est déjà actif, toggle_status le désactivera
-    // Pour garantir l'activation, on vérifie d'abord l'état
     const user = await userApi.getUser(id);
     if (user.is_active === false) {
       return userApi.toggleStatus(id);
@@ -97,16 +210,12 @@ export const userApi = {
 
   /**
    * Désactive un utilisateur
-   * @deprecated Utiliser toggleStatus() à la place
-   * POST /api/v1/utilisateurs/{id}/toggle_status/ (via toggleStatus)
+   * POST /api/v1/utilisateurs/{id}/toggle_status/
    */
   deactivateUser: async (id: number): Promise<User> => {
     if (USE_MOCK_DATA) {
       return mockUserApi.deactivateUser(id);
     }
-    // Utiliser toggle_status qui bascule l'état
-    // Note: Si l'utilisateur est déjà inactif, toggle_status l'activera
-    // Pour garantir la désactivation, on vérifie d'abord l'état
     const user = await userApi.getUser(id);
     if (user.is_active !== false) {
       return userApi.toggleStatus(id);
@@ -120,7 +229,6 @@ export const userApi = {
    */
   resetPassword: async (id: number | string): Promise<void> => {
     if (USE_MOCK_DATA) {
-      // Mock implementation
       return Promise.resolve();
     }
     await apiClient.post(`/api/v1/utilisateurs/${id}/reset_password/`);
@@ -132,7 +240,6 @@ export const userApi = {
    */
   toggleStatus: async (id: number | string): Promise<User> => {
     if (USE_MOCK_DATA) {
-      // Utiliser activate/deactivate selon l'état actuel
       const user = await userApi.getUser(typeof id === "string" ? Number(id) : id);
       if (user.is_active !== false) {
         return mockUserApi.deactivateUser(typeof id === "string" ? Number(id) : id);
@@ -140,10 +247,7 @@ export const userApi = {
         return mockUserApi.activateUser(typeof id === "string" ? Number(id) : id);
       }
     }
-    const response = await apiClient.post<User>(`/api/v1/utilisateurs/${id}/toggle_status/`);
-    return response.data;
+    const response = await apiClient.post<ApiUser>(`/api/v1/utilisateurs/${id}/toggle_status/`);
+    return transformApiUser(response.data);
   },
 };
-
-
-

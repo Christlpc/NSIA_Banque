@@ -85,6 +85,32 @@ export function formatDateMonthShort(date: string | Date | null | undefined): st
   return format(dateObj, "MMM", { locale: fr });
 }
 
+/**
+ * Calcule l'âge au 1er janvier de l'année en cours (règle bancassurance)
+ * L'âge est calculé au 1er janvier et non pas au jour de l'anniversaire
+ * @param dateNaissance - Date de naissance au format string (YYYY-MM-DD) ou Date
+ * @param referenceYear - Année de référence (par défaut: année en cours)
+ * @returns L'âge calculé au 1er janvier
+ */
+export function calculateAgeAtJanuary1st(
+  dateNaissance: string | Date | null | undefined,
+  referenceYear?: number
+): number {
+  if (!dateNaissance) return 0;
+  const birthDate = typeof dateNaissance === "string" ? parseISO(dateNaissance) : dateNaissance;
+  if (!isValidDate(birthDate)) return 0;
+
+  const year = referenceYear || new Date().getFullYear();
+  const january1st = new Date(year, 0, 1); // 1er janvier de l'année de référence
+
+  let age = january1st.getFullYear() - birthDate.getFullYear();
+
+  // Pas besoin de vérifier le mois/jour car on calcule toujours au 1er janvier
+  // L'âge est simplement la différence des années
+
+  return age;
+}
+
 
 
 

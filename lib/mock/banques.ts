@@ -16,9 +16,9 @@ export const mockBanqueApi = {
     };
   },
 
-  getBanque: async (id: number): Promise<Banque> => {
+  getBanque: async (id: number | string): Promise<Banque> => {
     await delay(300);
-    const banque = banquesList.find((b) => b.id === id);
+    const banque = banquesList.find((b) => String(b.id) === String(id));
     if (!banque) {
       throw new Error("Banque introuvable");
     }
@@ -27,15 +27,15 @@ export const mockBanqueApi = {
 
   createBanque: async (data: BanqueCreateData): Promise<Banque> => {
     await delay(500);
-    
+
     // Vérifier si le code existe déjà
     const codeExists = banquesList.some((b) => b.code.toLowerCase() === data.code.toLowerCase());
     if (codeExists) {
       throw new Error("Une banque avec ce code existe déjà");
     }
 
-    // Générer un nouvel ID
-    const newId = Math.max(...banquesList.map((b) => b.id), 0) + 1;
+    // Générer un nouvel ID (UUID simulé)
+    const newId = `mock-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     const newBanque: Banque = {
       id: newId,
@@ -46,17 +46,17 @@ export const mockBanqueApi = {
       adresse: data.adresse,
       produits_disponibles: data.produits_disponibles as any,
       date_partenariat: data.date_partenariat,
-      nombre_simulations: 0, // Nouvelle banque, pas encore de simulations
+      nombre_simulations: 0,
     };
 
     banquesList.push(newBanque);
     return newBanque;
   },
 
-  updateBanque: async (id: number, data: BanqueUpdateData): Promise<Banque> => {
+  updateBanque: async (id: number | string, data: BanqueUpdateData): Promise<Banque> => {
     await delay(500);
-    
-    const banqueIndex = banquesList.findIndex((b) => b.id === id);
+
+    const banqueIndex = banquesList.findIndex((b) => String(b.id) === String(id));
     if (banqueIndex === -1) {
       throw new Error("Banque introuvable");
     }
@@ -66,7 +66,7 @@ export const mockBanqueApi = {
     // Vérifier si le code existe déjà (si modifié)
     if (data.code && data.code !== existingBanque.code) {
       const codeExists = banquesList.some(
-        (b) => b.id !== id && b.code.toLowerCase() === data.code!.toLowerCase()
+        (b) => String(b.id) !== String(id) && b.code.toLowerCase() === data.code!.toLowerCase()
       );
       if (codeExists) {
         throw new Error("Une banque avec ce code existe déjà");
@@ -87,5 +87,13 @@ export const mockBanqueApi = {
     banquesList[banqueIndex] = updatedBanque;
     return updatedBanque;
   },
-};
 
+  deleteBanque: async (id: number | string): Promise<void> => {
+    await delay(400);
+    const banqueIndex = banquesList.findIndex((b) => String(b.id) === String(id));
+    if (banqueIndex === -1) {
+      throw new Error("Banque introuvable");
+    }
+    banquesList.splice(banqueIndex, 1);
+  },
+};
